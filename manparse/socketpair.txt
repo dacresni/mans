@@ -1,0 +1,70 @@
+SOCKETPAIR(2)		    BSD System Calls Manual		 SOCKETPAIR(2)
+
+NNAAMMEE
+     ssoocckkeettppaaiirr -- create a pair of connected sockets
+
+SSYYNNOOPPSSIISS
+     ##iinncclluuddee <<ssyyss//ssoocckkeett..hh>>
+
+     _i_n_t
+     ssoocckkeettppaaiirr(_i_n_t _d_o_m_a_i_n, _i_n_t _t_y_p_e, _i_n_t _p_r_o_t_o_c_o_l, _i_n_t _s_o_c_k_e_t___v_e_c_t_o_r_[_2_]);
+
+DDEESSCCRRIIPPTTIIOONN
+     The ssoocckkeettppaaiirr() call creates an unnamed pair of connected sockets in the
+     specified domain _d_o_m_a_i_n, of the specified _t_y_p_e, and using the optionally
+     specified _p_r_o_t_o_c_o_l.  The descriptors used in referencing the new sockets
+     are returned in _s_o_c_k_e_t___v_e_c_t_o_r[0] and _s_o_c_k_e_t___v_e_c_t_o_r[1].  The two sockets
+     are indistinguishable.
+
+RREETTUURRNN VVAALLUUEESS
+     The ssoocckkeettppaaiirr() function returns the value 0 if successful; otherwise
+     the value -1 is returned and the global variable _e_r_r_n_o is set to indicate
+     the error.
+
+EERRRROORRSS
+     The call succeeds unless:
+
+     [EAFNOSUPPORT]	The specified address family is not supported on this
+			machine.
+
+     [EFAULT]		The address _s_o_c_k_e_t___v_e_c_t_o_r does not specify a valid
+			part of the process address space.
+
+     [EMFILE]		No more file descriptors are available for this
+			process.
+
+     [ENFILE]		No more file descriptors are available for the system.
+
+     [ENOBUFS]		Insufficient resources were available in the system to
+			perform the operation.
+
+     [ENOMEM]		Insufficient memory was available to fulfill the
+			request.
+
+     [EOPNOTSUPP]	The specified protocol does not support creation of
+			socket pairs.
+
+     [EPROTONOSUPPORT]	The specified protocol is not supported on this
+			machine.
+
+     [EPROTOTYPE]	The socket type is not supported by the protocol.
+
+     [EACCES]		The process does not have appropriate privileges to
+			create a socket of the specified type and/or protocol.
+
+LLEEGGAACCYY SSYYNNOOPPSSIISS
+     ##iinncclluuddee <<ssyyss//ttyyppeess..hh>>
+     ##iinncclluuddee <<ssyyss//ssoocckkeett..hh>>
+
+     The include file <_s_y_s_/_t_y_p_e_s_._h> is necessary.
+
+SSEEEE AALLSSOO
+     socket(2), read(2), write(2), compat(5)
+
+BBUUGGSS
+     This call is currently implemented only for the UNIX domain.
+
+HHIISSTTOORRYY
+     The ssoocckkeettppaaiirr() function call appeared in 4.2BSD.
+
+4.2 Berkeley Distribution	 June 4, 1993	     4.2 Berkeley Distribution

@@ -1,0 +1,57 @@
+GETSOCKNAME(2)		    BSD System Calls Manual		GETSOCKNAME(2)
+
+NNAAMMEE
+     ggeettssoocckknnaammee -- get socket name
+
+SSYYNNOOPPSSIISS
+     ##iinncclluuddee <<ssyyss//ssoocckkeett..hh>>
+
+     _i_n_t
+     ggeettssoocckknnaammee(_i_n_t _s_o_c_k_e_t, _s_t_r_u_c_t _s_o_c_k_a_d_d_r _*_r_e_s_t_r_i_c_t _a_d_d_r_e_s_s,
+	 _s_o_c_k_l_e_n___t _*_r_e_s_t_r_i_c_t _a_d_d_r_e_s_s___l_e_n);
+
+DDEESSCCRRIIPPTTIIOONN
+     The ggeettssoocckknnaammee() fynction returns the current _a_d_d_r_e_s_s for the specified
+     socket.
+
+     The _a_d_d_r_e_s_s___l_e_n parameter should be initialized to indicate the amount of
+     space pointed to by _a_d_d_r_e_s_s.  On return it contains the actual size of
+     the address returned (in bytes).
+
+     The address is truncated if the buffer provided is too small.
+
+RREETTUURRNN VVAALLUUEESS
+     The ggeettssoocckknnaammee() function returns the value 0 if successful; otherwise
+     the value -1 is returned and the global variable _e_r_r_n_o is set to indicate
+     the error.
+
+EERRRROORRSS
+     The ggeettssoocckknnaammee() system call will succeed unless:
+
+     [EBADF]		The argument _s_o_c_k_e_t is not a valid file descriptor.
+
+     [EFAULT]		The _a_d_d_r_e_s_s parameter points to memory not in a valid
+			part of the process address space.
+
+     [EINVAL]		_s_o_c_k_e_t has been shut down.
+
+     [ENOBUFS]		Insufficient resources were available in the system to
+			perform the operation.
+
+     [ENOTSOCK] 	The argument _s_o_c_k_e_t is not a socket (e.g., a plain
+			file).
+
+     [EOPNOTSUPP]	ggeettssoocckknnaammee() is not supported for the protocol in use
+			by _s_o_c_k_e_t.
+
+SSEEEE AALLSSOO
+     bind(2), socket(2)
+
+BBUUGGSS
+     Names bound to sockets in the UNIX domain are inaccessible; ggeettssoocckknnaammee()
+     returns a zero-length address.
+
+HHIISSTTOORRYY
+     The ggeettssoocckknnaammee() call appeared in 4.2BSD.
+
+4.2 Berkeley Distribution	 June 4, 1993	     4.2 Berkeley Distribution

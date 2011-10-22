@@ -1,0 +1,102 @@
+UTIMES(2)		    BSD System Calls Manual		     UTIMES(2)
+
+NNAAMMEE
+     ffuuttiimmeess, uuttiimmeess -- set file access and modification times
+
+LLIIBBRRAARRYY
+     Standard C Library (libc, -lc)
+
+SSYYNNOOPPSSIISS
+     ##iinncclluuddee <<ssyyss//ttiimmee..hh>>
+
+     _i_n_t
+     ffuuttiimmeess(_i_n_t _f_i_l_d_e_s, _c_o_n_s_t _s_t_r_u_c_t _t_i_m_e_v_a_l _t_i_m_e_s_[_2_]);
+
+     _i_n_t
+     uuttiimmeess(_c_o_n_s_t _c_h_a_r _*_p_a_t_h, _c_o_n_s_t _s_t_r_u_c_t _t_i_m_e_v_a_l _t_i_m_e_s_[_2_]);
+
+DDEESSCCRRIIPPTTIIOONN
+     The access and modification times of the file named by _p_a_t_h or referenced
+     by _f_i_l_d_e_s are changed as specified by the argument _t_i_m_e_s.
+
+     If _t_i_m_e_s is NULL, the access and modification times are set to the cur-
+     rent time.  The caller must be the owner of the file, have permission to
+     write the file, or be the super-user.
+
+     If _t_i_m_e_s is non-NULL, it is assumed to point to an array of two timeval
+     structures.  The access time is set to the value of the first element,
+     and the modification time is set to the value of the second element.  The
+     caller must be the owner of the file or be the super-user.
+
+     In either case, the inode-change-time of the file is set to the current
+     time.
+
+RREETTUURRNN VVAALLUUEESS
+     Upon successful completion, the value 0 is returned; otherwise the
+     value -1 is returned and the global variable _e_r_r_n_o is set to indicate the
+     error.
+
+EERRRROORRSS
+     The uuttiimmeess() system call will fail if:
+
+     [EACCES]		Search permission is denied for a component of the
+			path prefix; or the _t_i_m_e_s argument is NULL and the
+			effective user ID of the process does not match the
+			owner of the file, and is not the super-user, and
+			write access is denied.
+
+     [EFAULT]		_p_a_t_h or _t_i_m_e_s points outside the process's allocated
+			address space.
+
+     [EIO]		An I/O error occurs while reading or writing the
+			affected inode.
+
+     [ELOOP]		Too many symbolic links are encountered in translating
+			the pathname.  This is taken to be indicative of a
+			looping symbolic link.
+
+     [ENAMETOOLONG]	A component of a pathname exceeds NAME_MAX characters,
+			or an entire path name exceeded PATH_MAX characters.
+
+     [ENOENT]		The named file does not exist.
+
+     [ENOTDIR]		A component of the path prefix is not a directory.
+
+     [EPERM]		The _t_i_m_e_s argument is not NULL and the calling
+			process's effective user ID does not match the owner
+			of the file and is not the super-user.
+
+     [EROFS]		The file system containing the file is mounted read-
+			only.
+
+     The ffuuttiimmeess() system call will fail if:
+
+     [EBADF]		_f_i_l_d_e_s does not refer to a valid descriptor.
+
+     All of the functions will fail if:
+
+     [EACCES]		The _t_i_m_e_s argument is NULL and the effective user ID
+			of the process does not match the owner of the file,
+			and is not the super-user, and write access is denied.
+
+     [EFAULT]		_t_i_m_e_s points outside the process's allocated address
+			space.
+
+     [EIO]		An I/O error occurred while reading or writing the
+			affected inode.
+
+     [EPERM]		The _t_i_m_e_s argument is not NULL and the calling
+			process's effective user ID does not match the owner
+			of the file and is not the super-user.
+
+     [EROFS]		The file system containing the file is mounted read-
+			only.
+
+SSEEEE AALLSSOO
+     stat(2), utime(3)
+
+HHIISSTTOORRYY
+     The uuttiimmeess() function call appeared in 4.2BSD.  The ffuuttiimmeess() function
+     call first appeared in FreeBSD 3.0.
+
+BSD				 June 4, 1993				   BSD

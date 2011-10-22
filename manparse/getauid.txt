@@ -1,0 +1,47 @@
+GETAUID(2)		    BSD System Calls Manual		    GETAUID(2)
+
+NNAAMMEE
+     ggeettaauuiidd -- retrieve audit session ID
+
+SSYYNNOOPPSSIISS
+     ##iinncclluuddee <<bbssmm//aauuddiitt..hh>>
+
+     _i_n_t
+     ggeettaauuiidd(_a_u___i_d___t _*_a_u_i_d);
+
+DDEESSCCRRIIPPTTIIOONN
+     The ggeettaauuiidd() system call retrieves the active audit session ID for the
+     current process via the _a_u___i_d___t pointed to by _a_u_i_d.
+
+RREETTUURRNN VVAALLUUEESS
+     Upon successful completion, the value 0 is returned; otherwise the
+     value -1 is returned and the global variable _e_r_r_n_o is set to indicate the
+     error.
+
+EERRRROORRSS
+     The ggeettaauuiidd() function will fail if:
+
+     [EFAULT]		A failure occurred while data transferred from the
+			kernel failed.
+
+SSEEEE AALLSSOO
+     audit(2), auditon(2), getaudit(2), getaudit_addr(2), setaudit(2),
+     setaudit_addr(2), setauid(2), libbsm(3)
+
+HHIISSTTOORRYY
+     The OpenBSM implementation was created by McAfee Research, the security
+     division of McAfee Inc., under contract to Apple Computer Inc. in 2004.
+     It was subsequently adopted by the TrustedBSD Project as the foundation
+     for the OpenBSM distribution.
+
+AAUUTTHHOORRSS
+     This software was created by McAfee Research, the security research divi-
+     sion of McAfee, Inc., under contract to Apple Computer Inc.  Additional
+     authors include Wayne Salamon, Robert Watson, and SPARTA Inc.
+
+     The Basic Security Module (BSM) interface to audit records and audit
+     event stream format were defined by Sun Microsystems.
+
+     This manual page was written by Robert Watson <rwatson@FreeBSD.org>.
+
+BSD				 March 5, 2009				   BSD

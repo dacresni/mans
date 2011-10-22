@@ -1,0 +1,57 @@
+KILLPG(2)		    BSD System Calls Manual		     KILLPG(2)
+
+NNAAMMEE
+     kkiillllppgg -- send signal to a process group
+
+LLIIBBRRAARRYY
+     Standard C Library (libc, -lc)
+
+SSYYNNOOPPSSIISS
+     ##iinncclluuddee <<ssiiggnnaall..hh>>
+
+     _i_n_t
+     kkiillllppgg(_p_i_d___t _p_g_r_p, _i_n_t _s_i_g);
+
+DDEESSCCRRIIPPTTIIOONN
+     The kkiillllppgg() function sends the signal _s_i_g to the process group _p_g_r_p.
+     See sigaction(2) for a list of signals.  If _p_g_r_p is 0, kkiillllppgg() sends the
+     signal to the sending process's process group.
+
+     The sending process and members of the process group must have the same
+     effective user ID, or the sender must be the super-user.  As a single
+     special case the continue signal SIGCONT may be sent to any process that
+     is a descendant of the current process.
+
+RREETTUURRNN VVAALLUUEESS
+     The kkiillllppgg() function returns the value 0 if successful; otherwise the
+     value -1 is returned and the global variable _e_r_r_n_o is set to indicate the
+     error.
+
+EERRRROORRSS
+     The kkiillllppgg() function will fail and no signal will be sent if:
+
+     [EINVAL]		The _s_i_g argument is not a valid signal number.
+
+     [EPERM]		The sending process is not the super-user and one or
+			more of the target processes has an effective user ID
+			different from that of the sending process.
+
+     [ESRCH]		No process can be found in the process group specified
+			by _p_g_r_p.
+
+     [ESRCH]		The process group was given as 0 but the sending
+			process does not have a process group.
+
+LLEEGGAACCYY SSYYNNOOPPSSIISS
+     ##iinncclluuddee <<ssyyss//ttyyppeess..hh>>
+     ##iinncclluuddee <<ssiiggnnaall..hh>>
+
+     The include file <_s_y_s_/_t_y_p_e_s_._h> is necessary.
+
+SSEEEE AALLSSOO
+     getpgrp(2), kill(2), sigaction(2), compat(5)
+
+HHIISSTTOORRYY
+     The kkiillllppgg() function appeared in 4.0BSD.
+
+BSD				 June 2, 1993				   BSD

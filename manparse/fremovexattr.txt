@@ -1,0 +1,78 @@
+REMOVEXATTR(2)		    BSD System Calls Manual		REMOVEXATTR(2)
+
+NNAAMMEE
+     rreemmoovveexxaattttrr,, ffrreemmoovveexxaattttrr -- remove an extended attribute value
+
+SSYYNNOOPPSSIISS
+     ##iinncclluuddee <<ssyyss//xxaattttrr..hh>>
+
+     _i_n_t
+     rreemmoovveexxaattttrr(_c_o_n_s_t _c_h_a_r _*_p_a_t_h, _c_o_n_s_t _c_h_a_r _*_n_a_m_e, _i_n_t _o_p_t_i_o_n_s);
+
+     _i_n_t
+     ffrreemmoovveexxaattttrr(_i_n_t _f_d, _c_o_n_s_t _c_h_a_r _*_n_a_m_e, _i_n_t _o_p_t_i_o_n_s);
+
+DDEESSCCRRIIPPTTIIOONN
+     Extended attributes extend the basic attributes associated with files and
+     directories in the file system.  They are stored as name:data pairs asso-
+     ciated with file system objects (files, directories, symlinks, etc).
+
+     RReemmoovveexxaattttrr() deletes the extended attribute _n_a_m_e associated with _p_a_t_h.
+
+     An extended attribute's _n_a_m_e is a simple NULL-terminated UTF-8 string.
+     _O_p_t_i_o_n_s is a bit mask specifying various options:
+
+     XATTR_NOFOLLOW  do not follow symbolic links.  Normally, rreemmoovveexxaattttrr()
+		     acts on the target of _p_a_t_h if it is a symbolic link.
+		     With this option, rreemmoovveexxaattttrr() will act on the link
+		     itself.
+
+     XATTR_SHOWCOMPRESSION
+		     rreemmoovveexxaattttrr() and ffrreemmoovveexxaattttrr() will remove HFS Plus
+		     Compression extended attribute _n_a_m_e (if present) for the
+		     file referred to by _p_a_t_h or _f_d.
+
+     ffrreemmoovveexxaattttrr() is identical to rreemmoovveexxaattttrr(), except that it removes an
+     extended attribute from an open file referenced by file descriptor _f_d.
+
+RREETTUURRNN VVAALLUUEESS
+     On success, 0 is returned.  On failure, -1 is returned and the global
+     variable _e_r_r_n_o is set as follows.
+
+EERRRROORRSS
+     [ENOATTR]		The specified extended attribute does not exist.
+
+     [ENOTSUP]		The file system does not support extended attributes
+			or has the feature disabled.
+
+     [EROFS]		The file system is mounted read-only.
+
+     [EPERM]		This type of object does not support extended
+			attributes.
+
+     [EINVAL]		_n_a_m_e or _o_p_t_i_o_n_s is invalid.  _n_a_m_e must be valid UTF-8
+			_o_p_t_i_o_n_s must make sense.
+
+     [ENOTDIR]		A component of the _p_a_t_h _'_s prefix is not a directory.
+
+     [ENAMETOOLONG]	_N_a_m_e exceeded XATTR_MAXNAMELEN UTF-8 bytes, or a com-
+			ponent of _p_a_t_h exceeded NAME_MAX characters, or the
+			entire _p_a_t_h exceeded PATH_MAX characters.
+
+     [EACCES]		Search permission is denied for a component _p_a_t_h or
+			permission to remove the attribute is denied.
+
+     [ELOOP]		Too many symbolic links were encountered in _p_a_t_h.
+
+     [EFAULT]		_p_a_t_h or _n_a_m_e points to an invalid address.
+
+     [EIO]		An I/O error occurred while reading from or writing to
+			the file system.
+
+SSEEEE AALLSSOO
+     getxattr(2), listxattr(2), setxattr(2)
+
+HHIISSTTOORRYY
+     rreemmoovveexxaattttrr() and ffrreemmoovveexxaattttrr() first appeared in Mac OS X 10.4.
+
+Mac OS X			 Oct 19, 2004			      Mac OS X

@@ -1,0 +1,189 @@
+STATFS(2)		    BSD System Calls Manual		     STATFS(2)
+
+NNAAMMEE
+     ssttaattffss,, ssttaattffss6644,, ffssttaattffss,, ffssttaattffss6644 -- get file system statistics
+
+SSYYNNOOPPSSIISS
+     ##iinncclluuddee <<ssyyss//ppaarraamm..hh>>
+     ##iinncclluuddee <<ssyyss//mmoouunntt..hh>>
+
+     _i_n_t
+     ssttaattffss(_c_o_n_s_t _c_h_a_r _*_p_a_t_h, _s_t_r_u_c_t _s_t_a_t_f_s _*_b_u_f);
+
+     _i_n_t
+     ffssttaattffss(_i_n_t _f_d, _s_t_r_u_c_t _s_t_a_t_f_s _*_b_u_f);
+
+TTRRAANNSSIITTIIIIOONNAALL SSYYNNOOPPSSIISS ((NNOOWW DDEEPPRREECCAATTEEDD))
+     _i_n_t
+     ssttaattffss6644(_c_o_n_s_t _c_h_a_r _*_p_a_t_h, _s_t_r_u_c_t _s_t_a_t_f_s_6_4 _*_b_u_f);
+
+     _i_n_t
+     ffssttaattffss6644(_i_n_t _f_d, _s_t_r_u_c_t _s_t_a_t_f_s_6_4 _*_b_u_f);
+
+DDEESSCCRRIIPPTTIIOONN
+     The ssttaattffss() routine returns information about a mounted file system.
+     The _p_a_t_h argument is the path name of any file or directory within the
+     mounted file system.  The _b_u_f argument is a pointer to a _s_t_a_t_f_s struc-
+     ture.  When the macro _DARWIN_FEATURE_64_BIT_INODE is not defined (the
+     _i_n_o___t type is 32-bits), that structure is defined as:
+
+     typedef struct { int32_t val[2]; } fsid_t;
+
+     #define MFSNAMELEN      15 /* length of fs type name, not inc. nul */
+     #define MNAMELEN	     90 /* length of buffer for returned name */
+
+     struct statfs { /* when _DARWIN_FEATURE_64_BIT_INODE is NOT defined */
+	 short	 f_otype;    /* type of file system (reserved: zero) */
+	 short	 f_oflags;   /* copy of mount flags (reserved: zero) */
+	 long	 f_bsize;    /* fundamental file system block size */
+	 long	 f_iosize;   /* optimal transfer block size */
+	 long	 f_blocks;   /* total data blocks in file system */
+	 long	 f_bfree;    /* free blocks in fs */
+	 long	 f_bavail;   /* free blocks avail to non-superuser */
+	 long	 f_files;    /* total file nodes in file system */
+	 long	 f_ffree;    /* free file nodes in fs */
+	 fsid_t  f_fsid;     /* file system id */
+	 uid_t	 f_owner;    /* user that mounted the file system */
+	 short	 f_reserved1;	     /* reserved for future use */
+	 short	 f_type;     /* type of file system (reserved) */
+	 long	 f_flags;    /* copy of mount flags (reserved) */
+	 long	 f_reserved2[2];     /* reserved for future use */
+	 char	 f_fstypename[MFSNAMELEN]; /* fs type name */
+	 char	 f_mntonname[MNAMELEN];    /* directory on which mounted */
+	 char	 f_mntfromname[MNAMELEN];  /* mounted file system */
+	 char	 f_reserved3;	     /* reserved for future use */
+	 long	 f_reserved4[4];     /* reserved for future use */
+     };
+
+     However, when the macro _DARWIN_FEATURE_64_BIT_INODE is defined, the
+     _i_n_o___t type will be 64-bits (force 64-bit inode mode by defining the
+     _DARWIN_USE_64_BIT_INODE macro before including header files).  This will
+     cause symbol variants of the _s_t_a_t_f_s family, with the _$_I_N_O_D_E_6_4 suffixes,
+     to be automatically linked in.  In addition, the _s_t_a_t_f_s structure will
+     now be defined as:
+
+     #define MFSTYPENAMELEN  16 /* length of fs type name including null */
+     #define MAXPATHLEN      1024
+     #define MNAMELEN	     MAXPATHLEN
+
+     struct statfs { /* when _DARWIN_FEATURE_64_BIT_INODE is defined */
+	 uint32_t    f_bsize;	     /* fundamental file system block size */
+	 int32_t     f_iosize;	     /* optimal transfer block size */
+	 uint64_t    f_blocks;	     /* total data blocks in file system */
+	 uint64_t    f_bfree;	     /* free blocks in fs */
+	 uint64_t    f_bavail;	     /* free blocks avail to non-superuser */
+	 uint64_t    f_files;	     /* total file nodes in file system */
+	 uint64_t    f_ffree;	     /* free file nodes in fs */
+	 fsid_t      f_fsid;	     /* file system id */
+	 uid_t	     f_owner;	     /* user that mounted the filesystem */
+	 uint32_t    f_type;	     /* type of filesystem */
+	 uint32_t    f_flags;	     /* copy of mount exported flags */
+	 uint32_t    f_fssubtype;    /* fs sub-type (flavor) */
+	 char	     f_fstypename[MFSTYPENAMELEN];   /* fs type name */
+	 char	     f_mntonname[MAXPATHLEN];	     /* directory on which mounted */
+	 char	     f_mntfromname[MAXPATHLEN];      /* mounted filesystem */
+	 uint32_t    f_reserved[8];  /* For future use */
+     };
+
+     Fields that are undefined for a particular file system are set to -1.
+     The ffssttaattffss() routine returns the same information about an open file
+     referenced by descriptor _f_d.
+
+FFLLAAGGSS
+     These are some of the flags that may be present in the f_flags field.
+
+     MNT_RDONLY 	    A read-only filesystem
+
+     MNT_SYNCHRONOUS	    File system is written to synchronously
+
+     MNT_NOEXEC 	    Can't exec from filesystem
+
+     MNT_NOSUID 	    Setuid bits are not honored on this filesystem
+
+     MNT_NODEV		    Don't interpret special files
+
+     MNT_UNION		    Union with underlying filesysten
+
+     MNT_ASYNC		    File system written to asynchronously
+
+     MNT_EXPORTED	    File system is exported
+
+     MNT_LOCAL		    File system is stored locally
+
+     MNT_QUOTA		    Quotas are enabled on this file system
+
+     MNT_ROOTFS 	    This file system is the root of the file system
+
+     MNT_DOVOLFS	    File system supports volfs
+
+     MNT_DONTBROWSE	    File system is not appropriate path to user data
+
+     MNT_UNKNOWNPERMISSIONS
+			    VFS will ignore ownership information on filesys-
+			    tem objects
+
+     MNT_AUTOMOUNTED	    File system was mounted by automounter
+
+     MNT_JOURNALED	    File system is journaled
+
+     MNT_DEFWRITE	    File system should defer writes
+
+     MNT_MULTILABEL	    MAC support for individual labels
+
+CCAAVVEEAATTSS
+     In Mac OS X versions before 10.4, f_iosize is 4096. On these older sys-
+     tems, use MAXBSIZE instead.
+
+RREETTUURRNN VVAALLUUEESS
+     Upon successful completion, a value of 0 is returned.  Otherwise, -1 is
+     returned and the global variable _e_r_r_n_o is set to indicate the error.
+
+EERRRROORRSS
+     The ssttaattffss() routine fails if one or more of the following are true:
+
+     [ENOTDIR]		A component of the path prefix of _P_a_t_h is not a direc-
+			tory.
+
+     [ENAMETOOLONG]	The length of a component of _p_a_t_h exceeds {NAME_MAX}
+			characters, or the length of _p_a_t_h exceeds {PATH_MAX}
+			characters.
+
+     [ENOENT]		The file or directory referred to by _p_a_t_h does not
+			exist.
+
+     [EACCES]		Search permission is denied for a component of the
+			path prefix of _p_a_t_h.
+
+     [ELOOP]		Too many symbolic links were encountered in translat-
+			ing _p_a_t_h.
+
+     [EFAULT]		_B_u_f or _p_a_t_h points to an invalid address.
+
+     [EIO]		An I/O error occurred while reading from or writing to
+			the file system.
+
+     The ffssttaattffss() routine fails if one or more of the following are true:
+
+     [EBADF]		_f_d is not a valid open file descriptor.
+
+     [EFAULT]		_B_u_f points to an invalid address.
+
+     [EIO]		An I/O error occurred while reading from or writing to
+			the file system.
+
+TTRRAANNSSIITTIIOONNAALL DDEESSCCRRIIPPTTIIOONN ((NNOOWW DDEEPPRREECCAATTEEDD))
+     The _s_t_a_t_f_s_6_4 and _f_s_t_a_t_f_s_6_4 routines are equivalent to their corresponding
+     non-64-suffixed routine, when 64-bit inodes are in effect.  They were
+     added before there was support for the symbol variants, and so are now
+     deprecated.  Instead of using these, set the _DARWIN_USE_64_BIT_INODE
+     macro before including header files to force 64-bit inode support.
+
+     The _s_t_a_t_f_s_6_4 structure used by these deprecated routines is the same as
+     the _s_t_a_t_f_s structure when 64-bit inodes are in effect (see above).
+
+HHIISSTTOORRYY
+     The ssttaattffss() function first appeared in 4.4BSD. The ssttaattffss6644() and
+     ffssttaattffss6644() first appeared in Max OS X 10.5 (Leopard) and are now depre-
+     cated in favor of the corresponding symbol variants.
+
+BSD				August 14, 2008 			   BSD

@@ -1,0 +1,51 @@
+GETGROUPS(2)		    BSD System Calls Manual		  GETGROUPS(2)
+
+NNAAMMEE
+     ggeettggrroouuppss -- get group access list
+
+SSYYNNOOPPSSIISS
+     ##iinncclluuddee <<uunniissttdd..hh>>
+
+     _i_n_t
+     ggeettggrroouuppss(_i_n_t _g_i_d_s_e_t_s_i_z_e, _g_i_d___t _g_r_o_u_p_l_i_s_t_[_]);
+
+DDEESSCCRRIIPPTTIIOONN
+     ggeettggrroouuppss() gets the current group access list of the current user
+     process and stores it in the array _g_r_o_u_p_l_i_s_t_[_].  The parameter _g_i_d_s_e_t_s_i_z_e
+     indicates the number of entries that may be placed in _g_r_o_u_p_l_i_s_t_[_].
+     ggeettggrroouuppss() returns the actual number of groups returned in _g_r_o_u_p_l_i_s_t_[_].
+     However, no more than {NGROUPS_MAX} will be returned. If _g_i_d_s_e_t_s_i_z_e is 0,
+     ggeettggrroouuppss() returns the number of groups without modifying the
+     _g_r_o_u_p_l_i_s_t_[_] array.
+
+RREETTUURRNN VVAALLUUEESS
+     A successful call returns the number of groups in the group set.  Other-
+     wise, a value of -1 is returned and the global integer variable _e_r_r_n_o is
+     set to indicate the error.
+
+EERRRROORRSS
+     The possible errors for ggeettggrroouuppss() are:
+
+     [EFAULT]		The argument _g_r_o_u_p_l_i_s_t specifies an invalid address.
+
+     [EINVAL]		The argument _g_i_d_s_e_t_s_i_z_e, although non-zero, is smaller
+			than the number of groups in the group set.
+
+LLEEGGAACCYY DDEESSCCRRIIPPTTIIOONN
+     If _DARWIN_C_SOURCE is defined, ggeettggrroouuppss() can return more than
+     {NGROUPS_MAX} groups.
+
+LLEEGGAACCYY SSYYNNOOPPSSIISS
+     ##iinncclluuddee <<ssyyss//ppaarraamm..hh>>
+     ##iinncclluuddee <<ssyyss//ttyyppeess..hh>>
+     ##iinncclluuddee <<uunniissttdd..hh>>
+
+     The include files <_s_y_s_/_p_a_r_a_m_._h> and <_s_y_s_/_t_y_p_e_s_._h> are necessary.
+
+SSEEEE AALLSSOO
+     setgroups(2), initgroups(3), compat(5)
+
+HHIISSTTOORRYY
+     The ggeettggrroouuppss() function call appeared in 4.2BSD.
+
+4.2 Berkeley Distribution	October 2, 2008      4.2 Berkeley Distribution

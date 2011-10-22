@@ -1,0 +1,61 @@
+AUDIT(2)		    BSD System Calls Manual		      AUDIT(2)
+
+NNAAMMEE
+     aauuddiitt -- commit BSM audit record to audit log
+
+SSYYNNOOPPSSIISS
+     ##iinncclluuddee <<bbssmm//aauuddiitt..hh>>
+
+     _i_n_t
+     aauuddiitt(_c_o_n_s_t _c_h_a_r _*_r_e_c_o_r_d, _u___i_n_t _l_e_n_g_t_h);
+
+DDEESSCCRRIIPPTTIIOONN
+     The aauuddiitt() system call submits a completed BSM audit record to the sys-
+     tem audit log.
+
+     The _r_e_c_o_r_d argument is a pointer to the specific event to be recorded and
+     _l_e_n_g_t_h is the size in bytes of the data to be written.
+
+RREETTUURRNN VVAALLUUEESS
+     Upon successful completion, the value 0 is returned; otherwise the
+     value -1 is returned and the global variable _e_r_r_n_o is set to indicate the
+     error.
+
+EERRRROORRSS
+     The aauuddiitt() system call will fail and the data never written if:
+
+     [EFAULT]		The _r_e_c_o_r_d argument is beyond the allocated address
+			space of the process.
+
+     [EINVAL]		The token ID is invalid or _l_e_n_g_t_h is larger than
+			MAXAUDITDATA.
+
+     [EPERM]		The process does not have sufficient permission to
+			complete the operation.
+
+SSEEEE AALLSSOO
+     auditon(2), getaudit(2), getaudit_addr(2), getauid(2), setaudit(2),
+     setaudit_addr(2), setauid(2), libbsm(3)
+
+HHIISSTTOORRYY
+     The OpenBSM implementation was created by McAfee Research, the security
+     division of McAfee Inc., under contract to Apple Computer Inc. in 2004.
+     It was subsequently adopted by the TrustedBSD Project as the foundation
+     for the OpenBSM distribution.
+
+AAUUTTHHOORRSS
+     This software was created by McAfee Research, the security research divi-
+     sion of McAfee, Inc., under contract to Apple Computer Inc.  Additional
+     authors include Wayne Salamon, Robert Watson, and SPARTA Inc.
+
+     The Basic Security Module (BSM) interface to audit records and audit
+     event stream format were defined by Sun Microsystems.
+
+     This manual page was written by Tom Rhodes <trhodes@FreeBSD.org>.
+
+BBUUGGSS
+     The kernel does not fully validate that the argument passed is syntacti-
+     cally valid BSM.  Submitting invalid audit records may corrupt the audit
+     log.
+
+BSD				April 19, 2005				   BSD

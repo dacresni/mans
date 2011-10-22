@@ -1,0 +1,1262 @@
+
+gzip: stdout: Broken pipe
+GETATTRLIST(2)		    BSD System Calls Manual		GETATTRLIST(2)
+
+NNAAMMEE
+     ggeettaattttrrlliisstt, ffggeettaattttrrlliisstt -- get file system attributes
+
+SSYYNNOOPPSSIISS
+     ##iinncclluuddee <<ssyyss//aattttrr..hh>>
+     ##iinncclluuddee <<uunniissttdd..hh>>
+
+     _i_n_t
+     ggeettaattttrrlliisstt(_c_o_n_s_t _c_h_a_r_* _p_a_t_h, _s_t_r_u_c_t _a_t_t_r_l_i_s_t _* _a_t_t_r_L_i_s_t, _v_o_i_d _* _a_t_t_r_B_u_f,
+	 _s_i_z_e___t _a_t_t_r_B_u_f_S_i_z_e, _u_n_s_i_g_n_e_d _l_o_n_g _o_p_t_i_o_n_s);
+
+     _i_n_t
+     ffggeettaattttrrlliisstt(_i_n_t _f_d, _s_t_r_u_c_t _a_t_t_r_l_i_s_t _* _a_t_t_r_L_i_s_t, _v_o_i_d _* _a_t_t_r_B_u_f,
+	 _s_i_z_e___t _a_t_t_r_B_u_f_S_i_z_e, _u_n_s_i_g_n_e_d _l_o_n_g _o_p_t_i_o_n_s);
+
+DDEESSCCRRIIPPTTIIOONN
+     The ggeettaattttrrlliisstt() function returns attributes (that is, metadata) of file
+     system objects.  ggeettaattttrrlliisstt() works on the file system object named by
+     _p_a_t_h, while ffggeettaattttrrlliisstt() works on the provided file descriptor _f_d.  You
+     can think of ggeettaattttrrlliisstt() as a seriously enhanced version of stat(2).
+     The functions return attributes about the specified file system object
+     into the buffer specified by _a_t_t_r_B_u_f and _a_t_t_r_B_u_f_S_i_z_e.  The _a_t_t_r_L_i_s_t
+     parameter determines what attributes are returned.  The _o_p_t_i_o_n_s parameter
+     lets you control specific aspects of the function's behavior.
+
+     The ggeettaattttrrlliisstt() and ffggeettaattttrrlliisstt() functions are only supported by cer-
+     tain volume format implementations.  For maximum compatibility, client
+     programs should use high-level APIs (such as the Carbon File Manager) to
+     access file system attributes.  These high-level APIs include logic to
+     emulate file system attributes on volumes that don't support the calls.
+
+     Not all volumes support all attributes.  See the discussion of
+     ATTR_VOL_ATTRIBUTES for a discussion of how to determine whether a par-
+     ticular volume supports a particular attribute.
+
+     Furthermore, you should only request the attributes that you need.  Some
+     attributes are expensive to calculate on some volume formats.  For exam-
+     ple, ATTR_DIR_ENTRYCOUNT is usually expensive to calculate on non-HFS
+     [Plus] volumes.  If you don't need a particular attribute, you should not
+     ask for it.
+
+     The _p_a_t_h parameter must reference a valid file system object.  Read,
+     write or execute permission of the object itself is not required, but all
+     directories listed in the path name leading to the object must be search-
+     able.
+
+     The _a_t_t_r_L_i_s_t parameter is a pointer to an _a_t_t_r_l_i_s_t structure, as defined
+     by <_s_y_s_/_a_t_t_r_._h> (shown below).  It determines what attributes are
+     returned by the function.	You are responsible for filling out all fields
+     of this structure before calling the function.
+
+     typedef u_int32_t attrgroup_t;
+
+     struct attrlist {
+	 u_short     bitmapcount; /* number of attr. bit sets in list */
+	 u_int16_t   reserved;	  /* (to maintain 4-byte alignment) */
+	 attrgroup_t commonattr;  /* common attribute group */
+	 attrgroup_t volattr;	  /* volume attribute group */
+	 attrgroup_t dirattr;	  /* directory attribute group */
+	 attrgroup_t fileattr;	  /* file attribute group */
+	 attrgroup_t forkattr;	  /* fork attribute group */
+     };
+     #define ATTR_BIT_MAP_COUNT 5
+
+     The fields of the _a_t_t_r_l_i_s_t structure are defined as follows.
+
+     bitmapcount     Number of attribute bit sets in the structure.  In cur-
+		     rent systems you must set this to ATTR_BIT_MAP_COUNT.
+
+     reserved	     Reserved.	You must set this to 0.
+
+     commonattr      A bit set that specifies the common attributes that you
+		     require.  Common attributes relate to all types of file
+		     system objects.  See below for a description of these
+		     attributes.
+
+     volattr	     A bit set that specifies the volume attributes that you
+		     require.  Volume attributes relate to volumes (that is,
+		     mounted file systems).  See below for a description of
+		     these attributes.	If you request volume attributes, _p_a_t_h
+		     must reference the root of a volume.  In addition, you
+		     can't request volume attributes if you also request file
+		     or directory attributes.
+
+     dirattr	     A bit set that specifies the directory attributes that
+		     you require.  See below for a description of these
+		     attributes.
+
+     fileattr	     A bit set that specifies the file attributes that you
+		     require.  See below for a description of these
+		     attributes.
+
+     forkattr	     A bit set that specifies the fork attributes that you
+		     require.  Fork attributes relate to the actual data in
+		     the file, which can be held in multiple named contiguous
+		     ranges, or forks.	See below for a description of these
+		     attributes.
+
+     Unless otherwise noted in the lists below, attributes are read-only.
+     Attributes labelled as read/write can be set using setattrlist(2).
+
+     The _a_t_t_r_B_u_f and _a_t_t_r_B_u_f_S_i_z_e parameters specify a buffer into which the
+     function places attribute values.	The format of this buffer is suffi-
+     ciently complex that its description requires a separate section (see
+     below).  The initial contents of this buffer are ignored.
+
+     The _o_p_t_i_o_n_s parameter is a bit set that controls the behaviour of the
+     functions.  The following option bits are defined.
+
+     FSOPT_NOFOLLOW	     If this bit is set, ggeettaattttrrlliisstt() will not follow
+			     a symlink if it occurs as the last component of
+			     _p_a_t_h.
+
+     FSOPT_REPORT_FULLSIZE   The size of the attributes reported (in the first
+			     _u___i_n_t_3_2___t field in the attribute buffer) will be
+			     the size needed to hold all the requested
+			     attributes; if not set, only the attributes actu-
+			     ally returned will be reported.  This allows the
+			     caller to determine if any truncation occurred.
+
+     FSOPT_PACK_INVAL_ATTRS  If this is bit is set, then all requested
+			     attributes, even ones that are not supported by
+			     the object or file system, will be returned.
+			     Default values will be used for the invalid ones.
+			     Requires that ATTR_CMN_RETURNED_ATTRS be
+			     requested.
+
+AATTTTRRIIBBUUTTEE BBUUFFFFEERR
+     The data returned in the buffer described by _a_t_t_r_B_u_f and _a_t_t_r_B_u_f_S_i_z_e is
+     formatted as follows.
+
+     1.   The first element of the buffer is a _u___i_n_t_3_2___t that contains the
+	  overall length, in bytes, of the attributes returned.  This size
+	  includes the length field itself.
+
+     2.   Following the length field is a list of attributes.  Each attribute
+	  is represented by a field of its type, where the type is given as
+	  part of the attribute description (below).
+
+     3.   The attributes are placed into the attribute buffer in the order
+	  that they are described below.
+
+     4.   Each attribute is aligned to a 4-byte boundary (including 64-bit
+	  data types).
+
+     If the attribute is of variable length, it is represented in the list by
+     an _a_t_t_r_r_e_f_e_r_e_n_c_e structure, as defined by <_s_y_s_/_a_t_t_r_._h> (shown below).
+
+     typedef struct attrreference {
+	 int32_t	attr_dataoffset;
+	 u_int32_t	attr_length;
+     } attrreference_t;
+
+     This structure contains a 'pointer' to the variable length attribute
+     data.  The _a_t_t_r___l_e_n_g_t_h field is the length of the attribute data (in
+     bytes).  The _a_t_t_r___d_a_t_a_o_f_f_s_e_t field is the offset in bytes from the
+     _a_t_t_r_r_e_f_e_r_e_n_c_e structure to the attribute data.  This offset will always
+     be a multiple of sizeof(u_int32_t) bytes, so you can safely access common
+     data types without fear of alignment exceptions.
+
+     The ggeettaattttrrlliisstt() function will silently truncate attribute data if
+     _a_t_t_r_B_u_f_S_i_z_e is too small.	The length field at the front of the attribute
+     list always represents the length of the data actually copied into the
+     attribute buffer.	If the data is truncated, there is no easy way to
+     determine the buffer size that's required to get all of the requested
+     attributes.  You should always pass an _a_t_t_r_B_u_f_S_i_z_e that is large enough
+     to accommodate the known size of the attributes in the attribute list
+     (including the leading length field).
+
+     Because the returned attributes are simply truncated if the buffer is too
+     small, it's possible for a variable length attribute to reference data
+     beyond the end of the attribute buffer.  That is, it's possible for the
+     attribute data to start beyond the end of the attribute buffer (that is,
+     if _a_t_t_r_R_e_f is a pointer to the _a_t_t_r_r_e_f_e_r_e_n_c_e___t, ( ( (char *) _a_t_t_r_R_e_f ) +
+     _a_t_t_r___d_a_t_a_o_f_f_s_e_t ) > ( ( (char *) _a_t_t_r_B_u_f ) + _a_t_t_r_S_i_z_e ) ) or, indeed, for
+     the attribute data to extend beyond the end of the attribute buffer (that
+     is, ( ( (char *) _a_t_t_r_R_e_f ) + _a_t_t_r___d_a_t_a_o_f_f_s_e_t + _a_t_t_r___d_a_t_a_l_e_n_g_t_h ) > ( (
+     (char *) _a_t_t_r_B_u_f ) + _a_t_t_r_S_i_z_e ) ).  If this happens you must increase the
+     size of the buffer and call ggeettaattttrrlliisstt() to get an accurate copy of the
+     attribute.
+
+CCOOMMMMOONN AATTTTRRIIBBUUTTEESS
+     Common attributes relate to all types of file system objects.  The fol-
+     lowing common attributes are defined.
+
+     ATTR_CMN_RETURNED_ATTRS   An _a_t_t_r_i_b_u_t_e___s_e_t___t structure which is used to
+			       report which of the requested attributes were
+			       actually returned. This attribute, when
+			       requested, will always be the first attribute
+			       returned. By default, unsupported attributes
+			       will be skipped (i.e. not packed into the out-
+			       put buffer). This behavior can be over-ridden
+			       using the FSOPT_PACK_INVAL_ATTRS option flag.
+			       Only getattrlist(2) supports this attribute (
+			       getdirentriesattr(2) and searchfs(2) do not
+			       support it ).
+
+     ATTR_CMN_NAME	       An _a_t_t_r_r_e_f_e_r_e_n_c_e structure containing the name
+			       of the file system object as UTF-8 encoded,
+			       null terminated C string.  The attribute data
+			       length will not be greater than NAME_MAX + 1.
+
+     ATTR_CMN_DEVID	       A _d_e_v___t containing the device number of the
+			       device on which this file system object's vol-
+			       ume is mounted.	Equivalent to the _s_t___d_e_v field
+			       of the _s_t_a_t structure returned by stat(2).
+
+     ATTR_CMN_FSID	       An _f_s_i_d___t structure containing the file system
+			       identifier for the volume on which the file
+			       system object resides.  Equivalent to the
+			       _f___f_s_i_d field of the _s_t_a_t_f_s structure returned
+			       by statfs(2).
+
+			       This value is not related to the file system ID
+			       from traditional Mac OS (for example, the
+			       _f_i_l_e_s_y_s_t_e_m_I_D field of the _F_S_V_o_l_u_m_e_I_n_f_o struc-
+			       ture returned by Carbon's FSGetVolumeInfo()
+			       function).  On current versions of Mac OS X
+			       that value is synthesised by the Carbon File
+			       Manager.
+
+     ATTR_CMN_OBJTYPE	       An _f_s_o_b_j___t_y_p_e___t that identifies the type of
+			       file system object.  The values are taken from
+			       _e_n_u_m _v_t_y_p_e in <_s_y_s_/_v_n_o_d_e_._h>.
+
+     ATTR_CMN_OBJTAG	       An _f_s_o_b_j___t_a_g___t that identifies the type of file
+			       system containing the object.  The values are
+			       taken from _e_n_u_m _v_t_a_g_t_y_p_e in <_s_y_s_/_v_n_o_d_e_._h>.
+
+     ATTR_CMN_OBJID	       An _f_s_o_b_j___i_d___t structure that uniquely identi-
+			       fies the file system object within its volume.
+			       The fid_generation field of this structure will
+			       be zero for all non-root callers (effective UID
+			       not 0).	This identifier need not be persistent
+			       across an unmount/mount sequence.
+
+			       Some volume formats use well known values for
+			       the _f_i_d___o_b_j_n_o field for the root directory (2)
+			       and the parent of root directory (1).  This is
+			       not a required behaviour of this attribute.
+
+     ATTR_CMN_OBJPERMANENTID   An _f_s_o_b_j___i_d___t structure that uniquely identi-
+			       fies the file system object within its volume.
+			       The fid_generation field of this structure will
+			       be zero for all non-root callers (effective UID
+			       not 0).	This identifier should be persistent
+			       across an unmount/mount sequence.
+
+			       Some file systems (for example, original HFS)
+			       may need to modify the on-disk structure to
+			       return a persistent identifier.	If such a file
+			       system is mounted read-only, an attempt to get
+			       this attribute will fail with the error EROFS.
+
+     ATTR_CMN_PAROBJID	       An _f_s_o_b_j___i_d___t structure that identifies the
+			       parent directory of the file system object.
+			       The fid_generation field of this structure will
+			       be zero for all non-root callers (effective UID
+			       not 0).	Equivalent to the ATTR_CMN_OBJID
+			       attribute of the parent directory.  This iden-
+			       tifier need not be persistent across an
+			       unmount/mount sequence.
+
+			       On a volume that supports hard links, a multi-
+			       ply linked file has no unique parent.  This
+			       attribute will return an unspecified parent.
+
+			       For some volume formats this attribute is very
+			       expensive to calculate.
+
+     ATTR_CMN_SCRIPT	       (read/write) A _t_e_x_t___e_n_c_o_d_i_n_g___t containing a
+			       text encoding hint for the file system object's
+			       name.  It is included to facilitate the loss-
+			       less round trip conversion of names between
+			       Unicode and traditional Mac OS script encod-
+			       ings.  The values are defined in
+			       <_C_a_r_b_o_n_C_o_r_e_/_T_e_x_t_C_o_m_m_o_n_._h>.  File systems that
+			       do not have an appropriate text encoding value
+			       should return kTextEncodingMacUnicode.  See DTS
+			       Q&A 1173 "File Manager Text Encoding Hints".
+
+     ATTR_CMN_CRTIME	       (read/write) A _t_i_m_e_s_p_e_c structure containing
+			       the time that the file system object was cre-
+			       ated.
+
+     ATTR_CMN_MODTIME	       (read/write) A _t_i_m_e_s_p_e_c structure containing
+			       the time that the file system object was last
+			       modified.  Equivalent to the _s_t___m_t_i_m_e_s_p_e_c field
+			       of the _s_t_a_t structure returned by stat(2).
+
+     ATTR_CMN_CHGTIME	       (read/write) A _t_i_m_e_s_p_e_c structure containing
+			       the time that the file system object's
+			       attributes were last modified.  Equivalent to
+			       the _s_t___c_t_i_m_e_s_p_e_c field of the _s_t_a_t structure
+			       returned by stat(2).
+
+     ATTR_CMN_ACCTIME	       (read/write) A _t_i_m_e_s_p_e_c structure containing
+			       the time that the file system object was last
+			       accessed.  Equivalent to the _s_t___a_t_i_m_e_s_p_e_c field
+			       of the _s_t_a_t structure returned by stat(2).
+
+     ATTR_CMN_BKUPTIME	       (read/write) A _t_i_m_e_s_p_e_c structure containing
+			       the time that the file system object was last
+			       backed up.  This value is for use by backup
+			       utilities.  The file system stores but does not
+			       interpret the value.
+
+     ATTR_CMN_FNDRINFO	       (read/write) 32 bytes of data for use by the
+			       Finder.	Equivalent to the concatenation of a
+			       _F_i_l_e_I_n_f_o structure and an _E_x_t_e_n_d_e_d_F_i_l_e_I_n_f_o
+			       structure (or, for directories, a _F_o_l_d_e_r_I_n_f_o
+			       structure and an _E_x_t_e_n_d_e_d_F_o_l_d_e_r_I_n_f_o structure).
+			       These structures are defined in
+			       <_C_a_r_b_o_n_C_o_r_e_/_F_i_n_d_e_r_._h>.
+
+			       This attribute is not byte swapped by the file
+			       system.	The value of multibyte fields on disk
+			       is always big endian.  When running on a little
+			       endian system (such as Darwin on x86), you must
+			       byte swap any multibyte fields.
+
+     ATTR_CMN_OWNERID	       (read/write) A _u_i_d___t containing the owner of
+			       the file system object.	Equivalent to the
+			       _s_t___u_i_d field of the _s_t_a_t structure returned by
+			       stat(2).
+
+     ATTR_CMN_GRPID	       (read/write) A _g_i_d___t containing the group of
+			       the file system object.	Equivalent to the
+			       _s_t___g_i_d field of the _s_t_a_t structure returned by
+			       stat(2).
+
+     ATTR_CMN_ACCESSMASK       (read/write) A _u___i_n_t_3_2___t containing the access
+			       permissions of the file system object.  Equiva-
+			       lent to the _s_t___m_o_d_e field of the _s_t_a_t structure
+			       returned by stat(2).
+
+     ATTR_CMN_NAMEDATTRCOUNT   A _u___i_n_t_3_2___t containing the number of named
+			       attributes of the file system object.
+
+     ATTR_CMN_NAMEDATTRLIST    An _a_t_t_r_r_e_f_e_r_e_n_c_e structure containing a list of
+			       named attributes of the file system object.  No
+			       built-in file systems on Mac OS X currently
+			       support named attributes.  Because of this, the
+			       structure of this attribute's value is not yet
+			       defined.
+
+     ATTR_CMN_FLAGS	       (read/write) A _u___i_n_t_3_2___t containing file flags.
+			       Equivalent to the _s_t___f_l_a_g_s field of the _s_t_a_t
+			       structure returned by stat(2).  For more infor-
+			       mation about these flags, see chflags(2).
+
+			       The order that attributes are placed into the
+			       attribute buffer almost invariably matches the
+			       order of the attribute mask bit values.	The
+			       exception is ATTR_CMN_FLAGS.  If its order was
+			       based on its bit position, it would be before
+			       the ATTR_CMN_NAMEDATTRCOUNT /
+			       ATTR_CMN_NAMEDATTRLIST pair, however, it is
+			       placed in the buffer after them.
+
+     ATTR_CMN_USERACCESS       A _u___i_n_t_3_2___t containing the effective permis-
+			       sions of the current user (the calling
+			       process's effective UID) for this file system
+			       object.	You can test for read, write, and exe-
+			       cute permission using R_OK, W_OK, and X_OK,
+			       respectively.  See access(2) for more details.
+
+     ATTR_CMN_EXTENDED_SECURITY
+			       A variable-length object (thus an _a_t_t_r_r_e_f_e_r_e_n_c_e
+			       structure) containing a _k_a_u_t_h___f_i_l_e_s_e_c struc-
+			       ture, of which only the ACL entry is used.
+
+     ATTR_CMN_UUID	       A _g_u_i_d___t of the owner of the file system
+			       object.	Analoguous to ATTR_CMN_OWNERID.
+
+     ATTR_CMN_GRPUUID	       A _g_u_i_d___t of the group to which the file system
+			       object belongs.	Analoguous to ATTR_CMN_GRPID.
+
+     ATTR_CMN_FILEID	       A _u___i_n_t_6_4___t that uniquely identifies the file
+			       system object within its volume.
+
+     ATTR_CMN_PARENTID	       A _u___i_n_t_6_4___t that identifies the parent direc-
+			       tory of the file system object.
+
+     ATTR_CMN_FULLPATH	       An _a_t_t_r_r_e_f_e_r_e_n_c_e structure containing the full
+			       path (resolving all symlinks) to the file sys-
+			       tem object as a UTF-8 encoded, null terminated
+			       C string.  The attribute data length will not
+			       be greater than PATH_MAX. Inconsistent behavior
+			       may be observed when this attribute is
+			       requested on hard-linked items, particularly
+			       when the file system does not support
+			       ATTR_CMN_PARENTID natively. Callers should be
+			       aware of this when requesting the full path of
+			       a hard-linked item.
+
+VVOOLLUUMMEE AATTTTRRIIBBUUTTEESS
+     Volume attributes relate to volumes (that is, mounted file systems).  The
+     following volume attributes are defined.
+
+     ATTR_VOL_INFO	       For reasons that are not at all obvious, you
+			       must set ATTR_VOL_INFO in the _v_o_l_a_t_t_r field if
+			       you request any other volume attributes.  This
+			       does not result in any attribute data being
+			       added to the attribute buffer.
+
+     ATTR_VOL_FSTYPE	       A _u___i_n_t_3_2___t containing the file system type.
+			       Equivalent to the _f___t_y_p_e field of the _s_t_a_t_f_s
+			       structure returned by statfs(2).  Generally not
+			       a useful value.
+
+     ATTR_VOL_SIGNATURE        A _u___i_n_t_3_2___t containing the volume signature
+			       word.  This value is unique within a given file
+			       system type and lets you distinguish between
+			       different volume formats handled by the same
+			       file system.  See <_C_a_r_b_o_n_C_o_r_e_/_F_i_l_e_s_._h> for more
+			       details.
+
+     ATTR_VOL_SIZE	       An _o_f_f___t containing the total size of the vol-
+			       ume in bytes.
+
+     ATTR_VOL_SPACEFREE        An _o_f_f___t containing the free space on the vol-
+			       ume in bytes.
+
+     ATTR_VOL_SPACEAVAIL       An _o_f_f___t containing the space, in bytes, on the
+			       volume available to non-privileged processes.
+			       This is the free space minus the amount of
+			       space reserved by the system to prevent criti-
+			       cal disk exhaustion errors.  Non-privileged
+			       programs, like a disk management tool, should
+			       use this value to display the space available
+			       to the user.
+
+			       ATTR_VOL_SPACEAVAIL is to ATTR_VOL_SPACEFREE as
+			       _f___b_a_v_a_i_l is to _f___b_f_r_e_e in statfs(2).
+
+     ATTR_VOL_MINALLOCATION    An _o_f_f___t containing the minimum allocation size
+			       on the volume in bytes.	If you create a file
+			       containing one byte, it will consume this much
+			       space.
+
+     ATTR_VOL_ALLOCATIONCLUMP  An _o_f_f___t containing the allocation clump size
+			       on the volume, in bytes.  As a file is
+			       extended, the file system will attempt to allo-
+			       cate this much space each time in order to
+			       reduce fragmentation.
+
+     ATTR_VOL_IOBLOCKSIZE      A _u___i_n_t_3_2___t containing the optimal block size
+			       when reading or writing data.  Equivalent to
+			       the _f___i_o_s_i_z_e field of the _s_t_a_t_f_s structure
+			       returned by statfs(2).
+
+     ATTR_VOL_OBJCOUNT	       A _u___i_n_t_3_2___t containing the number of file sys-
+			       tem objects on the volume.
+
+     ATTR_VOL_FILECOUNT        A _u___i_n_t_3_2___t containing the number of files on
+			       the volume.
+
+     ATTR_VOL_DIRCOUNT	       A _u___i_n_t_3_2___t containing the number of directo-
+			       ries on the volume.
+
+     ATTR_VOL_MAXOBJCOUNT      A _u___i_n_t_3_2___t containing the maximum number of
+			       file system objects that can be stored on the
+			       volume.
+
+     ATTR_VOL_MOUNTPOINT       An _a_t_t_r_r_e_f_e_r_e_n_c_e structure containing the path
+			       to the volume's mount point as a UTF-8 encoded,
+			       null terminated C string.  The attribute data
+			       length will not be greater than MAXPATHLEN.
+			       Equivalent to the _f___m_n_t_o_n_n_a_m_e field of the
+			       _s_t_a_t_f_s structure returned by statfs(2).
+
+     ATTR_VOL_NAME	       (read/write) An _a_t_t_r_r_e_f_e_r_e_n_c_e structure con-
+			       taining the name of the volume as a UTF-8
+			       encoded, null terminated C string.  The
+			       attribute data length will not be greater than
+			       NAME_MAX + 1.
+
+			       This attribute is only read/write if the
+			       VOL_CAP_INT_VOL_RENAME bit is set in the volume
+			       capabilities (see below).
+
+     ATTR_VOL_MOUNTFLAGS       A _u___i_n_t_3_2___t containing the volume mount flags.
+			       This is a copy of the value passed to the _f_l_a_g_s
+			       parameter of mount(2) when the volume was
+			       mounted.  Equivalent to the _f___f_l_a_g_s field of
+			       the _s_t_a_t_f_s structure returned by statfs(2).
+
+     ATTR_VOL_MOUNTEDDEVICE    An _a_t_t_r_r_e_f_e_r_e_n_c_e structure that returns the
+			       same value as the _f___m_n_t_f_r_o_m_n_a_m_e field of the
+			       _s_t_a_t_f_s structure returned by statfs(2).	For
+			       local volumes this is the path to the device on
+			       which the volume is mounted as a UTF-8 encoded,
+			       null terminated C string.  For network volumes,
+			       this is a unique string that identifies the
+			       mount.  The attribute data length will not be
+			       greater than MAXPATHLEN.
+
+     ATTR_VOL_ENCODINGSUSED    An _u_n_s_i_g_n_e_d _l_o_n_g _l_o_n_g containing a bitmap of
+			       the text encodings used on this volume.	For
+			       more information about this, see the discussion
+			       of _e_n_c_o_d_i_n_g_s_B_i_t_m_a_p in DTS Technote 1150 "HFS
+			       Plus Volume Format".
+
+     ATTR_VOL_CAPABILITIES     A _v_o_l___c_a_p_a_b_i_l_i_t_i_e_s___a_t_t_r___t structure describing
+			       the optional features supported by this volume.
+			       See below for a discussion of volume capabili-
+			       ties.
+
+     ATTR_VOL_UUID	       A _u_u_i_d___t containing the file system UUID.  Typ-
+			       ically this will be a version 5 UUID.
+
+     ATTR_VOL_ATTRIBUTES       A _v_o_l___a_t_t_r_i_b_u_t_e_s___a_t_t_r___t structure describing
+			       the attributes supported by this volume.  This
+			       structure is discussed below, along with volume
+			       capabilities.
+
+DDIIRREECCTTOORRYY AATTTTRRIIBBUUTTEESS
+     The following directory attributes are defined.
+
+     ATTR_DIR_LINKCOUNT        A _u___i_n_t_3_2___t containing the number of hard links
+			       to the directory; this does not include the
+			       historical "." and ".." entries.  For file sys-
+			       tems that do not support hard links to directo-
+			       ries, this value will be 1.
+
+     ATTR_DIR_ENTRYCOUNT       A _u___i_n_t_3_2___t containing the number of file sys-
+			       tem objects in the directory, not including any
+			       synthetic items.  The historical "." and ".."
+			       entries are also excluded from this count.
+
+     ATTR_DIR_MOUNTSTATUS      A _u___i_n_t_3_2___t containing flags describing what's
+			       mounted on the directory.  Currently the only
+			       flag defined is DIR_MNTSTATUS_MNTPOINT, which
+			       indicates that there is a file system mounted
+			       on this directory.
+
+     Requested directory attributes are not returned for file system objects
+     that are not directories.
+
+FFIILLEE AATTTTRRIIBBUUTTEESS
+     The following file attributes are defined.
+
+     ATTR_FILE_LINKCOUNT       A _u___i_n_t_3_2___t containing the number of hard links
+			       to this file.  Equivalent to the _s_t___n_l_i_n_k field
+			       of the _s_t_a_t structure returned by stat(2).
+
+     ATTR_FILE_TOTALSIZE       An _o_f_f___t containing the total number of bytes
+			       in all forks of the file (the logical size).
+
+     ATTR_FILE_ALLOCSIZE       An _o_f_f___t containing a count of the bytes on
+			       disk used by all of the file's forks (the phys-
+			       ical size).
+
+     ATTR_FILE_IOBLOCKSIZE     A _u___i_n_t_3_2___t containing the optimal block size
+			       when reading or writing this file's data.
+
+     ATTR_FILE_CLUMPSIZE       A _u___i_n_t_3_2___t containing the allocation clump
+			       size for this file, in bytes.  As the file is
+			       extended, the file system will attempt to allo-
+			       cate this much space each time in order to
+			       reduce fragmentation.  This value applies to
+			       the data fork.
+
+     ATTR_FILE_DEVTYPE	       (read/write) A _u___i_n_t_3_2___t containing the device
+			       type for a special device file.	Equivalent to
+			       the _s_t___r_d_e_v field of the _s_t_a_t structure
+			       returned by stat(2).
+
+     ATTR_FILE_FILETYPE        A _u___i_n_t_3_2___t that whose value is reserved.
+			       Clients should ignore its value.  New volume
+			       format implementations should not support this
+			       attribute.
+
+     ATTR_FILE_FORKCOUNT       A _u___i_n_t_3_2___t containing the number of forks in
+			       the file.  No built-in file systems on Mac OS X
+			       currently support forks other than the data and
+			       resource fork.
+
+     ATTR_FILE_FORKLIST        An _a_t_t_r_r_e_f_e_r_e_n_c_e structure containing a list of
+			       named forks of the file.  No built-in file sys-
+			       tems on Mac OS X currently support forks other
+			       than the data and resource fork.  Because of
+			       this, the structure of this attribute's value
+			       is not yet defined.
+
+     ATTR_FILE_DATALENGTH      An _o_f_f___t containing the length of the data fork
+			       in bytes (the logical size).
+
+     ATTR_FILE_DATAALLOCSIZE   An _o_f_f___t containing a count of the bytes on
+			       disk used by the data fork (the physical size).
+
+     ATTR_FILE_DATAEXTENTS     An _e_x_t_e_n_t_r_e_c_o_r_d array for the data fork.  The
+			       array contains eight _d_i_s_k_e_x_t_e_n_t structures
+			       which represent the first eight extents of the
+			       fork.
+
+			       This attributes exists for compatibility rea-
+			       sons.  New clients should not use this
+			       attribute.  Rather, they should use the
+			       F_LOG2PHYS command in fcntl(2).
+
+			       In current implementations the value may not be
+			       entirely accurate for a variety of reasons.
+
+     ATTR_FILE_RSRCLENGTH      An _o_f_f___t containing the length of the resource
+			       fork in bytes (the logical size).
+
+     ATTR_FILE_RSRCALLOCSIZE   An _o_f_f___t containing a count of the bytes on
+			       disk used by the resource fork (the physical
+			       size).
+
+     ATTR_FILE_RSRCEXTENTS     An _e_x_t_e_n_t_r_e_c_o_r_d array for the resource fork.
+			       The array contains eight _d_i_s_k_e_x_t_e_n_t structures
+			       which represent the first eight extents of the
+			       fork.
+
+			       See also ATTR_FILE_DATAEXTENTS.
+
+     File attributes are used for any file system object that is not a direc-
+     tory, not just ordinary files.  Requested file attributes are not
+     returned for file system objects that are directories.
+
+FFOORRKK AATTTTRRIIBBUUTTEESS
+     Fork attributes relate to the actual data in the file, which can be held
+     in multiple named contiguous ranges, or forks.  The following fork
+     attributes are defined.
+
+     ATTR_FORK_TOTALSIZE       An _o_f_f___t containing the length of the fork in
+			       bytes (the logical size).
+
+     ATTR_FORK_ALLOCSIZE       An _o_f_f___t containing a count of the bytes on
+			       disk used by the fork (the physical size).
+
+     Fork attributes are not properly implemented by any current Mac OS X vol-
+     ume format implementation.  We strongly recommend that client programs do
+     not request fork attributes.  If you are implementing a volume format,
+     you should not support these attributes.
+
+VVOOLLUUMMEE CCAAPPAABBIILLIITTIIEESS
+     Not all volumes support all features.  The ATTR_VOL_CAPABILITIES
+     attribute returns a _v_o_l___c_a_p_a_b_i_l_i_t_i_e_s___a_t_t_r___t structure (shown below) that
+     indicates which features are supported by the volume.
+
+     typedef u_int32_t vol_capabilities_set_t[4];
+
+     #define VOL_CAPABILITIES_FORMAT	 0
+     #define VOL_CAPABILITIES_INTERFACES 1
+     #define VOL_CAPABILITIES_RESERVED1  2
+     #define VOL_CAPABILITIES_RESERVED2  3
+
+     typedef struct vol_capabilities_attr {
+	 vol_capabilities_set_t capabilities;
+	 vol_capabilities_set_t valid;
+     } vol_capabilities_attr_t;
+
+     The structure contains two fields, _c_a_p_a_b_i_l_i_t_i_e_s and _v_a_l_i_d.  Each consists
+     of an array of four elements.  The arrays are indexed by the following
+     values.
+
+     VOL_CAPABILITIES_FORMAT	      This element contains information about
+				      the volume format.  See
+				      VOL_CAP_FMT_PERSISTENTOBJECTIDS and so
+				      on, below.
+
+     VOL_CAPABILITIES_INTERFACES      This element contains information about
+				      which optional functions are supported
+				      by the volume format implementation.
+				      See VOL_CAP_INT_SEARCHFS and so on,
+				      below.
+
+     VOL_CAPABILITIES_RESERVED1       Reserved.  A file system implementation
+				      should set this element to zero.	A
+				      client program should ignore this ele-
+				      ment.
+
+     VOL_CAPABILITIES_RESERVED2       Reserved.  A file system implementation
+				      should set this element to zero.	A
+				      client program should ignore this ele-
+				      ment.
+
+     The _v_a_l_i_d field contains bit sets that indicate which flags are known to
+     the volume format implementation.	Each bit indicates whether the con-
+     tents of the corresponding bit in the _c_a_p_a_b_i_l_i_t_i_e_s field is valid.
+
+     The _c_a_p_a_b_i_l_i_t_i_e_s field contains bit sets that indicate whether a particu-
+     lar feature is implemented by this volume format.
+
+     The following bits are defined in the first element (indexed by
+     VOL_CAPABILITIES_FORMAT) of the _c_a_p_a_b_i_l_i_t_i_e_s and _v_a_l_i_d fields of the
+     _v_o_l___c_a_p_a_b_i_l_i_t_i_e_s___a_t_t_r___t structure.
+
+     VOL_CAP_FMT_PERSISTENTOBJECTIDS  If this bit is set the volume format
+				      supports persistent object identifiers
+				      and can look up file system objects by
+				      their IDs.  See ATTR_CMN_OBJPERMANENTID
+				      for details about how to obtain these
+				      identifiers.
+
+     VOL_CAP_FMT_SYMBOLICLINKS	      If this bit is set the volume format
+				      supports symbolic links.
+
+     VOL_CAP_FMT_HARDLINKS	      If this bit is set the volume format
+				      supports hard links.
+
+     VOL_CAP_FMT_JOURNAL	      If this bit is set the volume format
+				      supports a journal used to speed recov-
+				      ery in case of unplanned restart (such
+				      as a power outage or crash).  This does
+				      not necessarily mean the volume is
+				      actively using a journal.
+
+				      Introduced with Darwin 7.0 (Mac OS X
+				      version 10.3).
+
+     VOL_CAP_FMT_JOURNAL_ACTIVE       If this bit is set the volume is cur-
+				      rently using a journal for speedy recov-
+				      ery after an unplanned restart.  This
+				      bit can be set only if
+				      VOL_CAP_FMT_JOURNAL is also set.
+
+				      Introduced with Darwin 7.0 (Mac OS X
+				      version 10.3).
+
+     VOL_CAP_FMT_NO_ROOT_TIMES	      If this bit is set the volume format
+				      does not store reliable times for the
+				      root directory, so you should not depend
+				      on them to detect changes, identify vol-
+				      umes across unmount/mount, and so on.
+
+				      Introduced with Darwin 7.0 (Mac OS X
+				      version 10.3).
+
+     VOL_CAP_FMT_SPARSE_FILES	      If this bit is set the volume format
+				      supports sparse files, that is, files
+				      which can have 'holes' that have never
+				      been written to, and thus do not consume
+				      space on disk.  A sparse file may have
+				      an allocated size on disk that is less
+				      than its logical length (that is,
+				      ATTR_FILE_ALLOCSIZE <
+				      ATTR_FILE_TOTALSIZE ).
+
+				      Introduced with Darwin 7.0 (Mac OS X
+				      version 10.3).
+
+     VOL_CAP_FMT_ZERO_RUNS	      For security reasons, parts of a file
+				      (runs) that have never been written to
+				      must appear to contain zeroes.  When
+				      this bit is set, the volume keeps track
+				      of allocated but unwritten runs of a
+				      file so that it can substitute zeroes
+				      without actually writing zeroes to the
+				      media.  This provides performance simi-
+				      lar to sparse files, but not the space
+				      savings.
+
+				      Introduced with Darwin 7.0 (Mac OS X
+				      version 10.3).
+
+     VOL_CAP_FMT_CASE_SENSITIVE       If this bit is set the volume format
+				      treats upper and lower case characters
+				      in file and directory names as differ-
+				      ent.  Otherwise an upper case character
+				      is equivalent to a lower case character,
+				      and you can't have two names that differ
+				      solely in the case of the characters.
+
+				      Introduced with Darwin 7.0 (Mac OS X
+				      version 10.3).
+
+     VOL_CAP_FMT_CASE_PRESERVING      If this bit is set the volume format
+				      preserves the case of file and directory
+				      names.  Otherwise the volume may change
+				      the case of some characters (typically
+				      making them all upper or all lower
+				      case).  A volume that sets
+				      VOL_CAP_FMT_CASE_SENSITIVE must also set
+				      VOL_CAP_FMT_CASE_PRESERVING.
+
+				      Introduced with Darwin 7.0 (Mac OS X
+				      version 10.3).
+
+     VOL_CAP_FMT_FAST_STATFS	      This bit is used as a hint to upper lay-
+				      ers (specifically the Carbon File Man-
+				      ager) to indicate that statfs(2) is fast
+				      enough that its results need not be
+				      cached by the caller.  A volume format
+				      implementation that caches the statfs(2)
+				      information in memory should set this
+				      bit.  An implementation that must always
+				      read from disk or always perform a net-
+				      work transaction to satisfy statfs(2)
+				      should not set this bit.
+
+				      Introduced with Darwin 7.0 (Mac OS X
+				      version 10.3).
+
+     VOL_CAP_FMT_2TB_FILESIZE	      If this bit is set the volume format
+				      supports file sizes larger than 4GB, and
+				      potentially up to 2TB; it does not indi-
+				      cate whether the file system supports
+				      files larger than that.
+
+				      Introduced with Darwin 8.0 (Mac OS X
+				      version 10.4).
+
+     VOL_CAP_FMT_OPENDENYMODES	      If this bit is set, the volume format
+				      supports open deny modes (e.g., "open
+				      for read write, deny write").
+
+     VOL_CAP_FMT_HIDDEN_FILES	      If this bit is set, the volume format
+				      supports the UF_HIDDEN file flag, and
+				      the UF_HIDDEN flag is mapped to that
+				      volume's native "hidden" or "invisible"
+				      bit (e.g., the invisible bit from the
+				      Finder Info extended attribute).
+
+     VOL_CAP_FMT_PATH_FROM_ID	      If this bit is set, the volume format
+				      supports the ability to derive a path-
+				      name to the root of the file system
+				      given only the ID of an object.  This
+				      also implies that object IDs on this
+				      file system are persistent and not recy-
+				      cled.  Most file systems will not sup-
+				      port this capability.
+
+     VOL_CAP_FMT_NO_VOLUME_SIZES      If this bit is set the volume format
+				      does not support determining values for
+				      total data blocks, available blocks, or
+				      free blocks, as in _f___b_l_o_c_k_s_, _f___b_a_v_a_i_l_,
+				      and _f___b_f_r_e_e in the _s_t_r_u_c_t _s_t_a_t_f_s
+				      returned by statfs(2).  Historically,
+				      those values were set to 0xFFFFFFFF for
+				      volumes that did not support them.
+
+				      Introduced with Darwin 10.0 (Mac OS X
+				      version 10.6).
+
+     The following bits are defined in the second element (indexed by
+     VOL_CAPABILITIES_INTERFACES) of the _c_a_p_a_b_i_l_i_t_i_e_s and _v_a_l_i_d fields of the
+     _v_o_l___c_a_p_a_b_i_l_i_t_i_e_s___a_t_t_r___t structure.
+
+     VOL_CAP_INT_SEARCHFS	      If this bit is set the volume format
+				      implementation supports searchfs(2).
+
+     VOL_CAP_INT_ATTRLIST	      If this bit is set the volume format
+				      implementation supports ggeettaattttrrlliisstt()
+				      and setattrlist(2).
+
+     VOL_CAP_INT_NFSEXPORT	      If this bit is set the volume format
+				      implementation allows this volume to be
+				      exported via NFS.
+
+     VOL_CAP_INT_READDIRATTR	      If this bit is set the volume format
+				      implementation supports
+				      getdirentriesattr(2).
+
+     VOL_CAP_INT_EXCHANGEDATA	      If this bit is set the volume format
+				      implementation supports exchangedata(2).
+
+				      Introduced with Darwin 7.0 (Mac OS X
+				      version 10.3).
+
+     VOL_CAP_INT_COPYFILE	      If this bit is set the volume format
+				      implementation supports the (private and
+				      undocumented) copyfile() function.
+				      (This is not the copyfile(3) function.)
+
+				      Introduced with Darwin 7.0 (Mac OS X
+				      version 10.3).
+
+     VOL_CAP_INT_ALLOCATE	      If this bit is set the volume format
+				      implementation supports the
+				      F_PREALLOCATE selector of fcntl(2).
+
+				      Introduced with Darwin 7.0 (Mac OS X
+				      version 10.3).
+
+     VOL_CAP_INT_VOL_RENAME	      If this bit is set the volume format
+				      implementation allows you to modify the
+				      volume name using setattrlist(2).
+
+				      Introduced with Darwin 7.0 (Mac OS X
+				      version 10.3).
+
+     VOL_CAP_INT_ADVLOCK	      If this bit is set the volume format
+				      implementation supports advisory lock-
+				      ing, that is, the F_GETLK, F_SETLK, and
+				      F_SETLKW selectors to fcntl(2).
+
+				      Introduced with Darwin 7.0 (Mac OS X
+				      version 10.3).
+
+     VOL_CAP_INT_FLOCK		      If this bit is set the volume format
+				      implementation supports whole file
+				      locks.  This includes flock(2) and the
+				      O_EXLOCK and O_SHLOCK flags to open(2).
+
+				      Introduced with Darwin 7.0 (Mac OS X
+				      version 10.3).
+
+     VOL_CAP_INT_EXTENDED_SECURITY    If this bit is set the volume format
+				      implementation supports extended secu-
+				      rity controls (ACLs).
+
+				      Introduced with Darwin 8.0 (Mac OS X
+				      version 10.4).
+
+     VOL_CAP_INT_USERACCESS	      If this bit is set the volume format
+				      implementation supports the
+				      ATTR_CMN_USERACCESS attribute.
+
+				      Introduced with Darwin 8.0 (Mac OS X
+				      version 10.4).
+
+     VOL_CAP_INT_MANLOCK	      If this bit is set, the volume format
+				      implementation supports AFP-style manda-
+				      tory byte range locks via ioctl(2).
+
+     VOL_CAP_INT_EXTENDED_ATTR	      If this bit is set, the volume format
+				      implementation supports native extended
+				      attributes (see setxattr(2) ).
+
+     VOL_CAP_INT_NAMEDSTREAMS	      If this bit is set, the volume format
+				      implementation supports native named
+				      streams.
+
+     A volume can also report which attributes it supports.  This information
+     is returned by the ATTR_VOL_ATTRIBUTES attribute, which returns a
+     _v_o_l___a_t_t_r_i_b_u_t_e_s___a_t_t_r___t structure (shown below).
+
+     typedef struct attribute_set {
+	 attrgroup_t commonattr; /* common attribute group */
+	 attrgroup_t volattr;	 /* volume attribute group */
+	 attrgroup_t dirattr;	 /* directory attribute group */
+	 attrgroup_t fileattr;	 /* file attribute group */
+	 attrgroup_t forkattr;	 /* fork attribute group */
+     } attribute_set_t;
+
+     typedef struct vol_attributes_attr {
+	 attribute_set_t validattr;
+	 attribute_set_t nativeattr;
+     } vol_attributes_attr_t;
+
+     The _v_a_l_i_d_a_t_t_r field consists of a number of bit sets that indicate
+     whether an attribute is supported by the volume format implementation.
+     The _n_a_t_i_v_e_a_t_t_r is similar except that the bit sets indicate whether an
+     attribute is supported natively by the volume format.  An attribute is
+     supported natively if the volume format implementation does not have to
+     do any complex conversions to access the attribute.  For example, a vol-
+     ume format might support persistent object identifiers, but doing so
+     requires a complex table lookup that is not part of the core volume for-
+     mat.  In that case, the ATTR_VOL_ATTRIBUTES attribute would return
+     ATTR_CMN_OBJPERMANENTID set in the _v_a_l_i_d_a_t_t_r field of the
+     _v_o_l___a_t_t_r_i_b_u_t_e_s___a_t_t_r___t, but not in the _n_a_t_i_v_e_a_t_t_r field.
+
+RREETTUURRNN VVAALLUUEESS
+     Upon successful completion a value of 0 is returned.  Otherwise, a value
+     of -1 is returned and _e_r_r_n_o is set to indicate the error.
+
+CCOOMMPPAATTIIBBIILLIITTYY
+     Not all volumes support ggeettaattttrrlliisstt().  The best way to test whether a
+     volume supports this function is to simply call it and check the error
+     result.  ggeettaattttrrlliisstt() will return ENOTSUP if it is not supported on a
+     particular volume.
+
+     The ggeettaattttrrlliisstt() function has been undocumented for more than two years.
+     In that time a number of volume format implementations have been created
+     without a proper specification for the behaviour of this routine.	You
+     may encounter volume format implementations with slightly different be-
+     haviour than what is described here.  Your program is expected to be tol-
+     erant of this variant behaviour.
+
+     If you're implementing a volume format that supports ggeettaattttrrlliisstt(), you
+     should be careful to support the behaviour specified by this document.
+
+EERRRROORRSS
+     ggeettaattttrrlliisstt() and ffggeettaattttrrlliisstt() will fail if:
+
+     [ENOTSUP]		The volume does not support the query.
+
+     [ENOTDIR]		A component of the path prefix for ggeettaattttrrlliisstt() is
+			not a directory.
+
+     [ENAMETOOLONG]	A component of a path name for ggeettaattttrrlliisstt() exceeded
+			NAME_MAX characters, or an entire path name exceeded
+			PATH_MAX characters.
+
+     [ENOENT]		The file system object for ggeettaattttrrlliisstt() does not
+			exist.
+
+     [EBADF]		The file descriptor argument for ffggeettaattttrrlliisstt() is not
+			a valid file descriptor.
+
+     [EACCES]		Search permission is denied for a component of the
+			path prefix for ggeettaattttrrlliisstt().
+
+     [ELOOP]		Too many symbolic links were encountered in translat-
+			ing the pathname for ggeettaattttrrlliisstt().
+
+     [EFAULT]		_p_a_t_h, _a_t_t_r_L_i_s_t or _a_t_t_r_B_u_f points to an invalid
+			address.
+
+     [EINVAL]		The _b_i_t_m_a_p_c_o_u_n_t field of _a_t_t_r_L_i_s_t is not
+			ATTR_BIT_MAP_COUNT.
+
+     [EINVAL]		You requested an invalid attribute.
+
+     [EINVAL]		You requested an attribute that is not supported for
+			this file system object.
+
+     [EINVAL]		You requested volume attributes and directory or file
+			attributes.
+
+     [EINVAL]		You requested volume attributes but _p_a_t_h does not ref-
+			erence the root of the volume.
+
+     [EROFS]		The volume is read-only but must be modified in order
+			to return this attribute.
+
+     [EIO]		An I/O error occurred while reading from or writing to
+			the file system.
+
+CCAAVVEEAATTSS
+     If you request any volume attributes, you must set ATTR_VOL_INFO in the
+     _v_o_l_a_t_t_r field, even though it generates no result in the attribute
+     buffer.
+
+     The order that attributes are stored in the attribute buffer almost
+     invariably matches the order of attribute mask bit values.  For example,
+     ATTR_CMN_NAME (0x00000001) comes before ATTR_CMN_DEVID (0x00000002)
+     because its value is smaller.  However, you can not rely on this ordering
+     because there is one key exception: ATTR_CMN_FLAGS is placed after the
+     ATTR_CMN_NAMEDATTRCOUNT / ATTR_CMN_NAMEDATTRLIST pair, even though its
+     bit position indicates that it should come before.  This is due to a bug
+     in an early version of Mac OS X that can't be fixed for binary compati-
+     bility reasons.  When ordering attributes, you should always use the
+     order in which they are described above.
+
+     The _t_i_m_e_s_p_e_c structure is 64-bits (two 32-bit elements) in 32-bit code,
+     and 128-bits (two 64-bit elements) in 64-bit code; however, it is aligned
+     on a 4-byte (32-bit) boundary, even in 64-bit code.
+
+     Inconsistent behavior may be observed when the ATTR_CMN_FULLPATH
+     attribute is requested on hard-linked items, particularly when the file
+     system does not support ATTR_CMN_PARENTID natively. Callers should be
+     aware of this when requesting the full path of a hard-linked item, espe-
+     cially if the full path crosses mount points.
+
+     For more caveats, see also the compatibility notes above.
+
+EEXXAAMMPPLLEESS
+     The following code prints the file type and creator of a file, assuming
+     that the volume supports the required attributes.
+
+     #include <assert.h>
+     #include <stdio.h>
+     #include <string.h>
+     #include <sys/attr.h>
+     #include <sys/errno.h>
+     #include <unistd.h>
+     #include <sys/vnode.h>
+
+     typedef struct attrlist attrlist_t;
+
+     struct FInfoAttrBuf {
+	 u_int32_t	 length;
+	 fsobj_type_t	 objType;
+	 char		 finderInfo[32];
+     };
+     typedef struct FInfoAttrBuf FInfoAttrBuf;
+
+     static int FInfoDemo(const char *path)
+     {
+	 int		 err;
+	 attrlist_t	 attrList;
+	 FInfoAttrBuf	 attrBuf;
+
+	 memset(&attrList, 0, sizeof(attrList));
+	 attrList.bitmapcount = ATTR_BIT_MAP_COUNT;
+	 attrList.commonattr  = ATTR_CMN_OBJTYPE | ATTR_CMN_FNDRINFO;
+
+	 err = getattrlist(path, &attrList, &attrBuf, sizeof(attrBuf), 0);
+	 if (err != 0) {
+	     err = errno;
+	 }
+
+	 if (err == 0) {
+	     assert(attrBuf.length == sizeof(attrBuf));
+
+	     printf("Finder information for %s:\n", path);
+	     switch (attrBuf.objType) {
+		 case VREG:
+		     printf("file type	  = '%.4s'\n", &attrBuf.finderInfo[0]);
+		     printf("file creator = '%.4s'\n", &attrBuf.finderInfo[4]);
+		     break;
+		 case VDIR:
+		     printf("directory\n");
+		     break;
+		 default:
+		     printf("other object type, %d\n", attrBuf.objType);
+		     break;
+	     }
+	 }
+
+	 return err;
+     }
+
+     The following code is an alternative implementation that uses nested
+     structures to group the related attributes.
+
+     #include <assert.h>
+     #include <stdio.h>
+     #include <stddef.h>
+     #include <string.h>
+     #include <sys/attr.h>
+     #include <sys/errno.h>
+     #include <unistd.h>
+     #include <sys/vnode.h>
+
+     typedef struct attrlist attrlist_t;
+
+     struct FInfo2CommonAttrBuf {
+	 fsobj_type_t	 objType;
+	 char		 finderInfo[32];
+     };
+     typedef struct FInfo2CommonAttrBuf FInfo2CommonAttrBuf;
+
+     struct FInfo2AttrBuf {
+	 u_int32_t	     length;
+	 FInfo2CommonAttrBuf common;
+     };
+     typedef struct FInfo2AttrBuf FInfo2AttrBuf;
+
+     static int FInfo2Demo(const char *path)
+     {
+	 int		 err;
+	 attrlist_t	 attrList;
+	 FInfo2AttrBuf	 attrBuf;
+
+	 memset(&attrList, 0, sizeof(attrList));
+	 attrList.bitmapcount = ATTR_BIT_MAP_COUNT;
+	 attrList.commonattr  = ATTR_CMN_OBJTYPE | ATTR_CMN_FNDRINFO;
+
+	 err = getattrlist(path, &attrList, &attrBuf, sizeof(attrBuf), 0);
+	 if (err != 0) {
+	     err = errno;
+	 }
+
+	 if (err == 0) {
+	     assert(attrBuf.length == sizeof(attrBuf));
+
+	     printf("Finder information for %s:\n", path);
+	     switch (attrBuf.common.objType) {
+		 case VREG:
+		     printf(
+			 "file type    = '%.4s'\n",
+			 &attrBuf.common.finderInfo[0]
+		     );
+		     printf(
+			 "file creator = '%.4s'\n",
+			 &attrBuf.common.finderInfo[4]
+		     );
+		     break;
+		 case VDIR:
+		     printf("directory\n");
+		     break;
+		 default:
+		     printf(
+			 "other object type, %d\n",
+			 attrBuf.common.objType
+		     );
+		     break;
+	     }
+	 }
+
+	 return err;
+     }
+
+     The following example shows how to deal with variable length attributes.
+     It assumes that the volume specified by _p_a_t_h supports the necessary
+     attributes.
+
+     #include <assert.h>
+     #include <stdio.h>
+     #include <stddef.h>
+     #include <string.h>
+     #include <sys/attr.h>
+     #include <sys/errno.h>
+     #include <unistd.h>
+     #include <sys/vnode.h>
+
+     typedef struct attrlist attrlist_t;
+
+     struct VolAttrBuf {
+	 u_int32_t	 length;
+	 u_int32_t	 fileCount;
+	 u_int32_t	 dirCount;
+	 attrreference_t mountPointRef;
+	 attrreference_t volNameRef;
+	 char		 mountPointSpace[MAXPATHLEN];
+	 char		 volNameSpace[MAXPATHLEN];
+     };
+     typedef struct VolAttrBuf VolAttrBuf;
+
+     static int VolDemo(const char *path)
+     {
+	 int		 err;
+	 attrlist_t	 attrList;
+	 VolAttrBuf	 attrBuf;
+
+	 memset(&attrList, 0, sizeof(attrList));
+	 attrList.bitmapcount = ATTR_BIT_MAP_COUNT;
+	 attrList.volattr     =   ATTR_VOL_INFO
+				| ATTR_VOL_FILECOUNT
+				| ATTR_VOL_DIRCOUNT
+				| ATTR_VOL_MOUNTPOINT
+				| ATTR_VOL_NAME;
+
+	 err = getattrlist(path, &attrList, &attrBuf, sizeof(attrBuf), 0);
+	 if (err != 0) {
+	     err = errno;
+	 }
+
+	 if (err == 0) {
+	     assert(attrBuf.length >  offsetof(VolAttrBuf, mountPointSpace));
+	     assert(attrBuf.length <= sizeof(attrBuf));
+
+	     printf("Volume information for %s:\n", path);
+	     printf("ATTR_VOL_FILECOUNT:  %u\n", attrBuf.fileCount);
+	     printf("ATTR_VOL_DIRCOUNT:   %u\n", attrBuf.dirCount);
+	     printf(
+		 "ATTR_VOL_MOUNTPOINT: %.*s\n",
+		 (int) attrBuf.mountPointRef.attr_length,
+		 ( ((char *) &attrBuf.mountPointRef)
+		   + attrBuf.mountPointRef.attr_dataoffset )
+	     );
+	     printf(
+		 "ATTR_VOL_NAME:       %.*s\n",
+		 (int) attrBuf.volNameRef.attr_length,
+		 ( ((char *) &attrBuf.volNameRef)
+		   + attrBuf.volNameRef.attr_dataoffset )
+	     );
+	 }
+
+	 return err;
+     }
+
+SSEEEE AALLSSOO
+     access(2), chflags(2), exchangedata(2), fcntl(2), getdirentriesattr(2),
+     mount(2), searchfs(2), setattrlist(2), stat(2), statfs(2)
+
+HHIISSTTOORRYY
+     A ggeettaattttrrlliisstt() function call appeared in Darwin 1.3.1 (Mac OS X version
+     10.0).
+
+Darwin			       October 14, 2004 			Darwin

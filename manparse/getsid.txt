@@ -1,0 +1,39 @@
+GETSID(2)		    BSD System Calls Manual		     GETSID(2)
+
+NNAAMMEE
+     ggeettssiidd -- get process session
+
+LLIIBBRRAARRYY
+     Standard C Library (libc, -lc)
+
+SSYYNNOOPPSSIISS
+     ##iinncclluuddee <<uunniissttdd..hh>>
+
+     _p_i_d___t
+     ggeettssiidd(_p_i_d___t _p_i_d);
+
+DDEESSCCRRIIPPTTIIOONN
+     The session ID of the process identified by _p_i_d is returned by ggeettssiidd().
+     If _p_i_d is zero, ggeettssiidd() returns the session ID of the current process.
+
+RREETTUURRNN VVAALLUUEESS
+     Upon successful completion, the function ggeettssiidd() returns the session ID
+     of the specified process; otherwise, it returns a value of -1 and sets
+     errno to indicate an error.
+
+EERRRROORRSS
+     The ggeettssiidd() system call will fail if:
+
+     [ESRCH]		There is no process with a process ID equal to _p_i_d.
+
+     Note that an implementation may restrict this function call to processes
+     within the same session ID as the calling process.
+
+SSEEEE AALLSSOO
+     getpgid(2), getpgrp(2), setpgid(2), setsid(2), termios(4)
+
+HHIISSTTOORRYY
+     The ggeettssiidd() function call appeared in FreeBSD 3.0.  The ggeettssiidd() func-
+     tion call is derived from its usage in AT&T System V UNIX.
+
+BSD				August 19, 1997 			   BSD

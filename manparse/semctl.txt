@@ -1,0 +1,113 @@
+SEMCTL(2)		    BSD System Calls Manual		     SEMCTL(2)
+
+NNAAMMEE
+     sseemmccttll -- control operations on a semaphore set
+
+SSYYNNOOPPSSIISS
+     ##iinncclluuddee <<ssyyss//sseemm..hh>>
+
+     _i_n_t
+     sseemmccttll(_i_n_t _s_e_m_i_d, _i_n_t _s_e_m_n_u_m, _i_n_t _c_m_d, _._._.);
+
+DDEESSCCRRIIPPTTIIOONN
+     The sseemmccttll() system call performs the operation indicated by _c_m_d on the
+     semaphore set indicated by _s_e_m_i_d.	A fourth argument, a _u_n_i_o_n _s_e_m_u_n _a_r_g,
+     is required for certain values of _c_m_d.  For the commands that use the _a_r_g
+     argument, _u_n_i_o_n _s_e_m_u_n is defined as follows:
+
+     union semun {
+	     int     val;	     /* value for SETVAL */
+	     struct  semid_ds *buf;  /* buffer for IPC_STAT & IPC_SET */
+	     u_short *array;	     /* array for GETALL & SETALL */
+     };
+
+     Commands are performed as follows:
+
+     IPC_STAT	  Fetch the semaphore set's _s_t_r_u_c_t _s_e_m_i_d___d_s, storing it in the
+		  memory pointed to by _a_r_g_._b_u_f.
+
+     IPC_SET	  Changes the _s_e_m___p_e_r_m_._u_i_d, _s_e_m___p_e_r_m_._g_i_d, and _s_e_m___p_e_r_m_._m_o_d_e
+		  members of the semaphore set's _s_t_r_u_c_t _s_e_m_i_d___d_s to match
+		  those of the struct pointed to by _a_r_g_._b_u_f.  The calling
+		  process's effective uid must match either _s_e_m___p_e_r_m_._u_i_d or
+		  _s_e_m___p_e_r_m_._c_u_i_d, or it must have superuser privileges.
+
+     IPC_RMID	  Immediately removes the semaphore set from the system.  The
+		  calling process's effective uid must equal the semaphore
+		  set's _s_e_m___p_e_r_m_._u_i_d or _s_e_m___p_e_r_m_._c_u_i_d, or the process must
+		  have superuser privileges.
+
+     GETVAL	  Return the value of semaphore number _s_e_m_n_u_m.
+
+     SETVAL	  Set the value of semaphore number _s_e_m_n_u_m to _a_r_g_._v_a_l.	Out-
+		  standing adjust on exit values for this semaphore in any
+		  process are cleared.
+
+     GETPID	  Return the pid of the last process to perform an operation
+		  on semaphore number _s_e_m_n_u_m.
+
+     GETNCNT	  Return the number of processes waiting for semaphore number
+		  _s_e_m_n_u_m's value to become greater than its current value.
+
+     GETZCNT	  Return the number of processes waiting for semaphore number
+		  _s_e_m_n_u_m's value to become 0.
+
+     GETALL	  Fetch the value of all of the semaphores in the set into the
+		  array pointed to by _a_r_g_._a_r_r_a_y.
+
+     SETALL	  Set the values of all of the semaphores in the set to the
+		  values in the array pointed to by _a_r_g_._a_r_r_a_y.	Outstanding
+		  adjust on exit values for all semaphores in this set, in any
+		  process are cleared.
+
+     The _s_t_r_u_c_t _s_e_m_i_d___d_s is defined as follows:
+
+     struct semid_ds {
+	     struct  ipc_perm sem_perm;      /* operation permission struct */
+	     struct  sem *sem_base;  /* pointer to first semaphore in set */
+	     u_short sem_nsems;      /* number of sems in set */
+	     time_t  sem_otime;      /* last operation time */
+	     long    sem_pad1;	     /* SVABI/386 says I need this here */
+	     time_t  sem_ctime;      /* last change time */
+				     /* Times measured in secs since */
+				     /* 00:00:00 GMT, Jan. 1, 1970 */
+	     long    sem_pad2;	     /* SVABI/386 says I need this here */
+	     long    sem_pad3[4];    /* SVABI/386 says I need this here */
+     };
+
+RREETTUURRNN VVAALLUUEESS
+     On success, when _c_m_d is one of GETVAL, GETPID, GETNCNT or GETZCNT,
+     sseemmccttll() returns the corresponding value; otherwise, 0 is returned.  On
+     failure, -1 is returned, and _e_r_r_n_o is set to indicate the error.
+
+EERRRROORRSS
+     The sseemmccttll() system call will fail if:
+
+     [EACCES]		Permission denied due to mismatch between operation
+			and mode of semaphore set.
+
+     [EINVAL]		No semaphore set corresponds to _s_e_m_i_d.
+
+     [EINVAL]		The _s_e_m_n_u_m argument is not in the range of valid sema-
+			phores for given semaphore set.
+
+     [EPERM]		The calling process's effective uid does not match the
+			uid of the semaphore set's owner or creator.
+
+     [ERANGE]		SETVAL or SETALL attempted to set a semaphore outside
+			the allowable range [0 .. SEMVMX].
+
+LLEEGGAACCYY SSYYNNOOPPSSIISS
+     ##iinncclluuddee <<ssyyss//ttyyppeess..hh>>
+     ##iinncclluuddee <<ssyyss//iippcc..hh>>
+     ##iinncclluuddee <<ssyyss//sseemm..hh>>
+
+     The include files <_s_y_s_/_t_y_p_e_s_._h> and <_s_y_s_/_i_p_c_._h> are necessary.
+
+SSEEEE AALLSSOO
+     semget(2), semop(2), compat(5)
+
+BBUUGGSS
+     SETALL may update some semaphore elements before returning an error.
+
+BSD			      September 12, 1995			   BSD

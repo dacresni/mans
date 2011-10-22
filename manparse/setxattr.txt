@@ -1,0 +1,100 @@
+SETXATTR(2)		    BSD System Calls Manual		   SETXATTR(2)
+
+NNAAMMEE
+     sseettxxaattttrr,, ffsseettxxaattttrr -- set an extended attribute value
+
+SSYYNNOOPPSSIISS
+     ##iinncclluuddee <<ssyyss//xxaattttrr..hh>>
+
+     _i_n_t
+     sseettxxaattttrr(_c_o_n_s_t _c_h_a_r _*_p_a_t_h, _c_o_n_s_t _c_h_a_r _*_n_a_m_e, _v_o_i_d _*_v_a_l_u_e, _s_i_z_e___t _s_i_z_e,
+	 _u___i_n_t_3_2___t _p_o_s_i_t_i_o_n, _i_n_t _o_p_t_i_o_n_s);
+
+     _i_n_t
+     ffsseettxxaattttrr(_i_n_t _f_d, _c_o_n_s_t _c_h_a_r _*_n_a_m_e, _v_o_i_d _*_v_a_l_u_e, _s_i_z_e___t _s_i_z_e,
+	 _u___i_n_t_3_2___t _p_o_s_i_t_i_o_n, _i_n_t _o_p_t_i_o_n_s);
+
+DDEESSCCRRIIPPTTIIOONN
+     Extended attributes extend the basic attributes associated with files and
+     directories in the file system.  They are stored as name:data pairs asso-
+     ciated with file system objects (files, directories, symlinks, etc).
+
+     sseettxxaattttrr() associates _n_a_m_e and _d_a_t_a together as an attribute of _p_a_t_h.
+
+     An extended attribute's _n_a_m_e is a simple NULL-terminated UTF-8 string.
+     _V_a_l_u_e is a pointer to a data buffer of _s_i_z_e bytes containing textual or
+     binary data to be associated with the extended attribute.	_P_o_s_i_t_i_o_n spec-
+     ifies the offset within the extended attribute.  In the current implemen-
+     tation, only the resource fork extended attribute makes use of this argu-
+     ment.  For all others, _p_o_s_i_t_i_o_n is reserved and should be set to zero.
+
+     _o_p_t_i_o_n_s controls how the attribute is set:
+
+     XATTR_NOFOLLOW  do not follow symbolic links.  sseettxxaattttrr() normally sets
+		     attributes on the target of _p_a_t_h if it is a symbolic
+		     link.  With this option, sseettxxaattttrr() will act on the link
+		     itself.
+
+     XATTR_CREATE    fail if the named attribute already exists.
+
+     XATTR_REPLACE   fail if the named attribute does not exist.  Failure to
+		     specify XATTR_REPLACE or XATTR_CREATE allows creation and
+		     replacement.
+
+     ffsseettxxaattttrr() is identical to sseettxxaattttrr(), except that it sets an extended
+     attribute on an open file referenced by file descriptor _f_d.
+
+RREETTUURRNN VVAALLUUEESS
+     On success, 0 is returned.  On failure, -1 is returned and the global
+     variable _e_r_r_n_o is set as follows.
+
+EERRRROORRSS
+     [EEXIST]		_o_p_t_i_o_n_s contains _X_A_T_T_R___C_R_E_A_T_E and the named attribute
+			already exists.
+
+     [ENOATTR]		_o_p_t_i_o_n_s is set to _X_A_T_T_R___R_E_P_L_A_C_E and the named
+			attribute does not exist.
+
+     [ENOTSUP]		The file system does not support extended attributes
+			or has them disabled.
+
+     [EROFS]		The file system is mounted read-only.
+
+     [ERANGE]		The data size of the attribute is out of range (some
+			attributes have size restrictions).
+
+     [EPERM]		Attributes cannot be associated with this type of
+			object.  For example, attributes are not allowed for
+			resource forks.
+
+     [EINVAL]		_n_a_m_e or _o_p_t_i_o_n_s is invalid.  _n_a_m_e must be valid UTF-8
+			and _o_p_t_i_o_n_s must make sense.
+
+     [ENOTDIR]		A component of _p_a_t_h is not a directory.
+
+     [ENAMETOOLONG]	_n_a_m_e exceeded XATTR_MAXNAMELEN UTF-8 bytes, or a com-
+			ponent of _p_a_t_h exceeded NAME_MAX characters, or the
+			entire _p_a_t_h exceeded PATH_MAX characters.
+
+     [EACCES]		Search permission is denied for a component of _p_a_t_h or
+			permission to set the attribute is denied.
+
+     [ELOOP]		Too many symbolic links were encountered resolving
+			_p_a_t_h.
+
+     [EFAULT]		_p_a_t_h or _n_a_m_e points to an invalid address.
+
+     [EIO]		An I/O error occurred while reading from or writing to
+			the file system.
+
+     [E2BIG]		The data size of the extended attribute is too large.
+
+     [ENOSPC]		Not enough space left on the file system.
+
+SSEEEE AALLSSOO
+     getxattr(2), listxattr(2), removexattr(2)
+
+HHIISSTTOORRYY
+     sseettxxaattttrr() and ffsseettxxaattttrr() first appeared in Mac OS X 10.4.
+
+Mac OS X			 Oct 19, 2004			      Mac OS X

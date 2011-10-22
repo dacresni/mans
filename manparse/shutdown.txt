@@ -1,0 +1,41 @@
+SHUTDOWN(2)		    BSD System Calls Manual		   SHUTDOWN(2)
+
+NNAAMMEE
+     sshhuuttddoowwnn -- shut down part of a full-duplex connection
+
+SSYYNNOOPPSSIISS
+     ##iinncclluuddee <<ssyyss//ssoocckkeett..hh>>
+
+     _i_n_t
+     sshhuuttddoowwnn(_i_n_t _s_o_c_k_e_t, _i_n_t _h_o_w);
+
+DDEESSCCRRIIPPTTIIOONN
+     The sshhuuttddoowwnn() call causes all or part of a full-duplex connection on the
+     socket associated with _s_o_c_k_e_t to be shut down.  If _h_o_w is SHUT_RD, fur-
+     ther receives will be disallowed.	If _h_o_w is SHUT_WR, further sends will
+     be disallowed.  If _h_o_w is SHUT_RDWR, further sends and receives will be
+     disallowed.
+
+RREETTUURRNN VVAALLUUEESS
+     The sshhuuttddoowwnn() function returns the value 0 if successful; otherwise the
+     value -1 is returned and the global variable _e_r_r_n_o is set to indicate the
+     error.
+
+EERRRROORRSS
+     The call succeeds unless:
+
+     [EBADF]		_S_o_c_k_e_t is not a valid descriptor.
+
+     [EINVAL]		The _h_o_w argument is invalid.
+
+     [ENOTCONN] 	The specified socket is not connected.
+
+     [ENOTSOCK] 	_S_o_c_k_e_t is a file, not a socket.
+
+SSEEEE AALLSSOO
+     connect(2), socket(2)
+
+HHIISSTTOORRYY
+     The sshhuuttddoowwnn() function call appeared in 4.2BSD.
+
+4.2 Berkeley Distribution	 June 4, 1993	     4.2 Berkeley Distribution

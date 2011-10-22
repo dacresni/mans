@@ -1,0 +1,60 @@
+AIO_SUSPEND(2)		    BSD System Calls Manual		AIO_SUSPEND(2)
+
+NNAAMMEE
+     aaiioo__ssuussppeenndd -- suspend until asynchronous I/O operations or timeout com-
+     plete (REALTIME)
+
+LLIIBBRRAARRYY
+     Standard C Library (libc, -lc)
+
+SSYYNNOOPPSSIISS
+     ##iinncclluuddee <<aaiioo..hh>>
+
+     _i_n_t
+     aaiioo__ssuussppeenndd(_c_o_n_s_t _s_t_r_u_c_t _a_i_o_c_b _*_c_o_n_s_t _l_i_s_t_[_], _i_n_t _n_e_n_t,
+	 _c_o_n_s_t _s_t_r_u_c_t _t_i_m_e_s_p_e_c _*_t_i_m_e_o_u_t);
+
+DDEESSCCRRIIPPTTIIOONN
+     The aaiioo__ssuussppeenndd() system call suspends the calling process until at least
+     one of the specified asynchronous I/O requests have completed, a signal
+     is delivered, or the _t_i_m_e_o_u_t has passed.
+
+     The _l_i_s_t argument is an array of _n_e_n_t pointers to asynchronous I/O
+     requests.	Array members containing NULL will be silently ignored.
+
+     If _t_i_m_e_o_u_t is a non-nil pointer, it specifies a maximum interval to sus-
+     pend.  If _t_i_m_e_o_u_t is a nil pointer, the suspend blocks indefinitely.  To
+     effect a poll, the _t_i_m_e_o_u_t should point to a zero-value timespec struc-
+     ture.
+
+RREETTUURRNN VVAALLUUEESS
+     If one or more of the specified asynchronous I/O requests have completed,
+     aaiioo__ssuussppeenndd() returns 0.  Otherwise, it returns -1 and sets _e_r_r_n_o to
+     indicate the error, as enumerated below.
+
+EERRRROORRSS
+     The aaiioo__ssuussppeenndd() system call will fail if:
+
+     [EAGAIN]		The _t_i_m_e_o_u_t expired before any of the listed I/O
+			requests completed.
+
+     [EINTR]		The suspend was interrupted by a signal.
+
+     [EINVAL]		The _l_i_s_t argument contains more than AIO_LISTIO_MAX
+			asynchronous I/O requests, or at least one of the
+			requests is not valid.
+
+SSEEEE AALLSSOO
+     aio_cancel(2), aio_error(2), aio_return(2), aio_write(2), aio(4)
+
+SSTTAANNDDAARRDDSS
+     The aaiioo__ssuussppeenndd() system call is expected to conform to the IEEE Std
+     1003.1 (``POSIX.1'') standard.
+
+HHIISSTTOORRYY
+     The aaiioo__ssuussppeenndd() system call first appeared in FreeBSD 3.0.
+
+AAUUTTHHOORRSS
+     This manual page was written by Wes Peters <wes@softweyr.com>.
+
+BSD				 June 2, 1999				   BSD

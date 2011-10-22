@@ -1,0 +1,245 @@
+AUDITON(2)		    BSD System Calls Manual		    AUDITON(2)
+
+NNAAMMEE
+     aauuddiittoonn -- configure system audit parameters
+
+SSYYNNOOPPSSIISS
+     ##iinncclluuddee <<bbssmm//aauuddiitt..hh>>
+
+     _i_n_t
+     aauuddiittoonn(_i_n_t _c_m_d, _v_o_i_d _*_d_a_t_a, _u___i_n_t _l_e_n_g_t_h);
+
+DDEESSCCRRIIPPTTIIOONN
+     The aauuddiittoonn() system call is used to manipulate various audit control
+     operations.  The _d_a_t_a argument should point to a structure whose type
+     depends on the command.  The _l_e_n_g_t_h argument specifies the size of _*_d_a_t_a
+     in bytes.	The _c_m_d argument may be any of the following:
+
+     A_SETPOLICY      Set audit policy flags.  The _d_a_t_a argument must point to
+		      a _i_n_t value set to one or more the following audit pol-
+		      icy control values bitwise OR'ed together: AUDIT_CNT,
+		      AUDIT_AHLT, AUDIT_ARGV, and AUDIT_ARGE.  If AUDIT_CNT is
+		      set, the system will continue even if it becomes low on
+		      space and discontinue logging events until the low space
+		      condition is remedied.  If it is not set, audited events
+		      will block until the low space condition is remedied.
+		      Unaudited events, however, are unaffected.  If
+		      AUDIT_AHLT is set, a panic(9) if it cannot write an
+		      event to the global audit log file.  If AUDIT_ARGV is
+		      set, then the argument list passed to the execve(2) sys-
+		      tem call will be audited.  If AUDIT_ARGE is set, then
+		      the environment variables passed to the execve(2) system
+		      call will be audited.  The default policy is none of the
+		      audit policy control flags set.
+
+     A_SETKAUDIT      Set the host information.  The _d_a_t_a argument must point
+		      to a _a_u_d_i_t_i_n_f_o___a_d_d_r___t structure containing the host IP
+		      address information.  After setting, audit records that
+		      are created as a result of kernel events will contain
+		      this information.
+
+     A_SETKMASK       Set the kernel preselection masks (success and failure).
+		      The _d_a_t_a argument must point to a _a_u___m_a_s_k___t structure
+		      containing the mask values as defined in <_b_s_m_/_a_u_d_i_t_._h>.
+		      These masks are used for non-attributable audit event
+		      preselection.  The field _a_m___s_u_c_c_e_s_s specifies which
+		      classes of successful audit events are to be logged to
+		      the audit trail. The field _a_m___f_a_i_l_u_r_e specifies which
+		      classes of failed audit events are to be logged. The
+		      value of both fields is the bitwise OR'ing of the audit
+		      event classes specified in _b_s_m_/_a_u_d_i_t_._h.  The various
+		      audit classes are described more fully in
+		      audit_class(5).
+
+     A_SETQCTRL       Set kernel audit queue parameters.  The _d_a_t_a argument
+		      must point to a _a_u___q_c_t_r_l___t structure (defined in
+		      <_b_s_m_/_a_u_d_i_t_._h>) containing the kernel audit queue control
+		      settings: _a_q___h_i_w_a_t_e_r, _a_q___l_o_w_a_t_e_r, _a_q___b_u_f_s_z, _a_q___d_e_l_a_y,
+		      and _a_q___m_i_n_f_r_e_e.  The field _a_q___h_i_w_a_t_e_r defines the maxi-
+		      mum number of audit record entries in the queue used to
+		      store the audit records ready for delivery to disk.  New
+		      records are inserted at the tail of the queue and
+		      removed from the head.  For new records which would
+		      exceed the high water mark, the calling thread is
+		      inserted into the wait queue, waiting for the audit
+		      queue to have enough space available as defined with the
+		      field _a_q___l_o_w_a_t_e_r.  The field _a_q___b_u_f_s_z defines the maxi-
+		      mum length of the audit record that can be supplied with
+		      audit(2).  The field _a_q___d_e_l_a_y is unused.	The field
+		      _a_q___m_i_n_f_r_e_e specifies the minimum amount of free blocks
+		      on the disk device used to store audit records.  If the
+		      value of free blocks falls below the configured minimum
+		      amount, the kernel informs the audit daemon about low
+		      disk space.  The value is to be specified in percent of
+		      free file system blocks.	A value of 0 results in a dis-
+		      abling of the check.  The default and maximum values
+		      (default/maximum) for the audit queue control parameters
+		      are:
+
+			    aq_hiwater	  100/10000 (audit records)
+			    aq_lowater	  10/aq_hiwater (audit records)
+			    aq_bufsz	  32767/1048576 (bytes)
+			    aq_delay	  (Not currently used.)
+
+     A_SETSTAT	      Return ENOSYS.  (Not implemented.)
+
+     A_SETUMASK       Return ENOSYS.  (Not implemented.)
+
+     A_SETSMASK       Return ENOSYS.  (Not implemented.)
+
+     A_SETCOND	      Set the current auditing condition.  The _d_a_t_a argument
+		      must point to a _i_n_t value containing the new audit con-
+		      dition, one of AUC_AUDITING, AUC_NOAUDIT, or
+		      AUC_DISABLED.  If AUC_NOAUDIT is set, then auditing is
+		      temporarily suspended. If AUC_AUDITING is set, auditing
+		      is resumed. If AUC_DISABLED is set, the auditing system
+		      will shutdown, draining all audit records and closing
+		      out the audit trail file.
+
+     A_SETCLASS       Set the event class preselection mask for an audit
+		      event.  The _d_a_t_a argument must point to a
+		      _a_u___e_v_c_l_a_s_s___m_a_p___t structure containing the audit event
+		      and mask.  The field _e_c___n_u_m_b_e_r is the audit event and
+		      _e_c___c_l_a_s_s is the audit class mask. See audit_event(5) for
+		      more information on audit event to class mapping.
+
+     A_SETPMASK       Set the preselection masks for a process.  The _d_a_t_a
+		      argument must point to a _a_u_d_i_t_p_i_n_f_o___t structure that
+		      contains the given process's audit preselection masks
+		      for both success and failure.  The field _a_p___p_i_d is the
+		      process id of the target process.  The field _a_p___m_a_s_k
+		      must point to a _a_u___m_a_s_k___t structure which holds the pre-
+		      selection masks as described in the section above.
+
+     A_SETFSIZE       Set the maximum size of the audit log file.  The _d_a_t_a
+		      argument must point to a _a_u___f_s_t_a_t___t structure with the
+		      _a_f___f_i_l_e_s_z field set to the maximum audit log file size.
+		      A value of 0 indicates no limit to the size.
+
+     A_GETCLASS       Return the event to class mapping for the designated
+		      audit event.  The _d_a_t_a argument must point to a
+		      _a_u___e_v_c_l_a_s_s___m_a_p___t structure. See the A_SETCLASS section
+		      above for more information.
+
+     A_GETKAUDIT      Get the current host information.  The _d_a_t_a argument
+		      must point to a _a_u_d_i_t_i_n_f_o___a_d_d_r___t structure.
+
+     A_GETPINFO       Return the audit settings for a process.	The _d_a_t_a argu-
+		      ment must point to a _a_u_d_i_t_p_i_n_f_o___t structure which will
+		      be set to contain _a_p___a_u_i_d (the audit ID), _a_p___m_a_s_k (the
+		      preselection mask), _a_p___t_e_r_m_i_d (the terminal ID), and
+		      _a_p___a_s_i_d (the audit session ID) of the given target
+		      process.	The process ID of the target process is passed
+		      into the kernel using the _a_p___p_i_d field.  See the section
+		      A_SETPMASK above and getaudit(2) for more information.
+
+     A_GETPINFO_ADDR  Return the extended audit settings for a process.  The
+		      _d_a_t_a argument must point to a _a_u_d_i_t_p_i_n_f_o___a_d_d_r___t struc-
+		      ture which is similar to the _a_u_d_i_t_p_i_n_f_o___a_d_d_r___t structure
+		      described above.	The exception is the _a_p___t_e_r_m_i_d (the
+		      terminal ID) field which points to a _a_u___t_i_d___a_d_d_r___t
+		      structure can hold much a larger terminal address and an
+		      address type.  The process ID of the target process is
+		      passed into the kernel using the _a_p___p_i_d field.  See the
+		      section A_SETPMASK above and getaudit(2) for more infor-
+		      mation.
+
+     A_GETSINFO_ADDR  Return the extended audit settings for a session.  The
+		      _d_a_t_a argument must point to a _a_u_d_i_t_i_n_f_o___a_d_d_r___t struc-
+		      ture.  The audit session ID of the target session is
+		      passed into the kernel using the _a_i___a_s_i_d field.  See
+		      getaudit_addr(2) for more information about the
+		      _a_u_d_i_t_i_n_f_o___a_d_d_r___t structure.
+
+     A_GETKMASK       Return the current kernel preselection masks.  The _d_a_t_a
+		      argument must point to a _a_u___m_a_s_k___t structure which will
+		      be set to the current kernel preselection masks for non-
+		      attributable events.
+
+     A_GETPOLICY      Return the current audit policy setting.	The _d_a_t_a argu-
+		      ment must point to a _i_n_t value which will be set to one
+		      of the current audit policy flags.  The audit policy
+		      flags are described in the A_SETPOLICY section above.
+
+     A_GETQCTRL       Return the current kernel audit queue control parame-
+		      ters.  The _d_a_t_a argument must point to a _a_u___q_c_t_r_l___t
+		      structure which will be set to the current kernel audit
+		      queue control parameters.  See the A_SETQCTL section
+		      above for more information.
+
+     A_GETFSIZE       Returns the maximum size of the audit log file.  The
+		      _d_a_t_a argument must point to a _a_u___f_s_t_a_t___t structure.  The
+		      _a_f___f_i_l_e_s_z field will be set to the maximum audit log
+		      file size.  A value of 0 indicates no limit to the size.
+		      The _a_f___c_u_r_r_s_z field will be set to the current audit log
+		      file size.
+
+     A_GETCWD	      Return ENOSYS.  (Not implemented.)
+
+     A_GETCAR	      Return ENOSYS.  (Not implemented.)
+
+     A_GETSTAT	      Return ENOSYS.  (Not implemented.)
+
+     A_GETCOND	      Return the current auditing condition.  The _d_a_t_a argu-
+		      ment must point to a _i_n_t value which will be set to the
+		      current audit condition, one of AUC_AUDITING,
+		      AUC_NOAUDIT or AUC_DISABLED.  See the A_SETCOND section
+		      above for more information.
+
+     A_SENDTRIGGER    Send a trigger to the audit daemon.  The _d_a_t_a argument
+		      must point to a _i_n_t value set to one of the acceptable
+		      trigger values: AUDIT_TRIGGER_LOW_SPACE (low disk space
+		      where the audit log resides), AUDIT_TRIGGER_OPEN_NEW
+		      (open a new audit log file), AUDIT_TRIGGER_READ_FILE
+		      (read the _a_u_d_i_t___c_o_n_t_r_o_l file),
+		      AUDIT_TRIGGER_CLOSE_AND_DIE (close the current log file
+		      and exit), AUDIT_TRIGGER_NO_SPACE (no disk space left
+		      for audit log file).  AUDIT_TRIGGER_ROTATE_USER (request
+		      audit log file rotation).  AUDIT_TRIGGER_INITIALIZE
+		      (initialize audit subsystem for Mac OS X only).  or
+		      AUDIT_TRIGGER_EXPIRE_TRAILS (request audit log file
+		      expiration).
+
+RREETTUURRNN VVAALLUUEESS
+     Upon successful completion, the value 0 is returned; otherwise the
+     value -1 is returned and the global variable _e_r_r_n_o is set to indicate the
+     error.
+
+EERRRROORRSS
+     The aauuddiittoonn() function will fail if:
+
+     [ENOSYS]		Returned by options not yet implemented.
+
+     [EFAULT]		A failure occurred while data transferred to or from
+			the kernel failed.
+
+     [EINVAL]		Illegal argument was passed by a system call.
+
+     [EPERM]		The process does not have sufficient permission to
+			complete the operation.
+
+     The A_SENDTRIGGER command is specific to the FreeBSD and Mac OS X imple-
+     mentations, and is not present in Solaris.
+
+SSEEEE AALLSSOO
+     audit(2), auditctl(2), getaudit(2), getaudit_addr(2), getauid(2),
+     setaudit(2), setaudit_addr(2), setauid(2), libbsm(3)
+
+HHIISSTTOORRYY
+     The OpenBSM implementation was created by McAfee Research, the security
+     division of McAfee Inc., under contract to Apple Computer Inc. in 2004.
+     It was subsequently adopted by the TrustedBSD Project as the foundation
+     for the OpenBSM distribution.
+
+AAUUTTHHOORRSS
+     This software was created by McAfee Research, the security research divi-
+     sion of McAfee, Inc., under contract to Apple Computer Inc.  Additional
+     authors include Wayne Salamon, Robert Watson, and SPARTA Inc.
+
+     The Basic Security Module (BSM) interface to audit records and audit
+     event stream format were defined by Sun Microsystems.
+
+     This manual page was written by Tom Rhodes <trhodes@FreeBSD.org>, Robert
+     Watson <rwatson@FreeBSD.org>, and Wayne Salamon <wsalamon@FreeBSD.org>.
+
+BSD			       January 29, 2009 			   BSD

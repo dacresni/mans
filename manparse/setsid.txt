@@ -1,0 +1,44 @@
+SETSID(2)		    BSD System Calls Manual		     SETSID(2)
+
+NNAAMMEE
+     sseettssiidd -- create session and set process group ID
+
+SSYYNNOOPPSSIISS
+     ##iinncclluuddee <<uunniissttdd..hh>>
+
+     _p_i_d___t
+     sseettssiidd(_v_o_i_d);
+
+DDEESSCCRRIIPPTTIIOONN
+     The sseettssiidd function creates a new session.  The calling process is the
+     session leader of the new session, is the process group leader of a new
+     process group and has no controlling terminal.  The calling process is
+     the only process in either the session or the process group.
+
+     Upon successful completion, the sseettssiidd function returns the value of the
+     process group ID of the new process group, which is the same as the
+     process ID of the calling process.
+
+EERRRROORRSS
+     If an error occurs, sseettssiidd returns -1 and the global variable _e_r_r_n_o is
+     set to indicate the error, as follows:
+
+     [EPERM]		The calling process is already a process group leader,
+			or the process group ID of a process other than the
+			calling process matches the process ID of the calling
+			process.
+
+LLEEGGAACCYY SSYYNNOOPPSSIISS
+     ##iinncclluuddee <<ssyyss//ttyyppeess..hh>>
+     ##iinncclluuddee <<uunniissttdd..hh>>
+
+     The include file <_s_y_s_/_t_y_p_e_s_._h> is necessary.
+
+SSEEEE AALLSSOO
+     setpgid(3), tcgetpgrp(3), tcsetpgrp(3), compat(5)
+
+SSTTAANNDDAARRDDSS
+     The sseettssiidd function is expected to be compliant with the IEEE Std
+     1003.1-1988 (``POSIX.1'') specification.
+
+BSD				 June 4, 1993				   BSD

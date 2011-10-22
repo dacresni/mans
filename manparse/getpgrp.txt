@@ -1,0 +1,69 @@
+GETPGRP(2)		    BSD System Calls Manual		    GETPGRP(2)
+
+NNAAMMEE
+     ggeettppggiidd, ggeettppggrrpp -- get process group
+
+LLIIBBRRAARRYY
+     Standard C Library (libc, -lc)
+
+SSYYNNOOPPSSIISS
+     ##iinncclluuddee <<uunniissttdd..hh>>
+
+     _p_i_d___t
+     ggeettppggiidd(_p_i_d___t _p_i_d);
+
+     _p_i_d___t
+     ggeettppggrrpp(_v_o_i_d);
+
+DDEESSCCRRIIPPTTIIOONN
+     The process group of the current process is returned by ggeettppggrrpp().  The
+     process group of the process identified by _p_i_d is returned by ggeettppggiidd().
+     If _p_i_d is zero, ggeettppggiidd() returns the process group of the current
+     process.
+
+     Process groups are used for distribution of signals, and by terminals to
+     arbitrate requests for their input: processes that have the same process
+     group as the terminal are foreground and may read, while others will
+     block with a signal if they attempt to read.
+
+     This call is thus used by programs such as csh(1) to create process
+     groups in implementing job control.  The ttccggeettppggrrpp() and ttccsseettppggrrpp()
+     calls are used to get/set the process group of the control terminal.
+
+RREETTUURRNN VVAALLUUEESS
+     The ggeettppggrrpp() call always succeeds.  Upon successful completion, the
+     ggeettppggiidd() call returns the process group of the specified process; other-
+     wise, it returns a value of -1 and sets _e_r_r_n_o to indicate the error.
+
+EERRRROORRSS
+     ggeettppggiidd() will succeed unless:
+
+     [ESRCH]		There is no process whose process ID equals _p_i_d.
+
+SSEEEE AALLSSOO
+     getsid(2), setpgid(2), termios(4)
+
+HHIISSTTOORRYY
+     The ggeettppggrrpp() function call appeared in 4.0BSD.  The ggeettppggiidd() function
+     call is derived from its usage in System V Release 4.
+
+SSTTAANNDDAARRDDSS
+     The ggeettppggrrpp() function call is expected to conform to ISO/IEC 9945-1:1990
+     (``POSIX.1'').
+
+CCOOMMPPAATTIIBBIILLIITTYY
+     This version of ggeettppggrrpp() differs from past Berkeley versions by not tak-
+     ing a _p_i_d___t _p_i_d argument.	This incompatibility is required by ISO/IEC
+     9945-1:1990 (``POSIX.1'').
+
+     From the ISO/IEC 9945-1:1990 (``POSIX.1'') Rationale:
+
+     4.3BSD provides a ggeettppggrrpp() function that returns the process group ID
+     for a specified process.  Although this function is used to support job
+     control, all known job-control shells always specify the calling process
+     with this function.  Thus, the simpler AT&T System V UNIX ggeettppggrrpp() suf-
+     fices, and the added complexity of the 4.3BSD ggeettppggrrpp() has been omitted
+     from POSIX.1.  The old functionality is available from the ggeettppggiidd()
+     function.
+
+BSD				 June 4, 1993				   BSD

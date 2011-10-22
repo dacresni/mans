@@ -1,0 +1,317 @@
+SIGACTION(2)		    BSD System Calls Manual		  SIGACTION(2)
+
+NNAAMMEE
+     ssiiggaaccttiioonn -- software signal facilities
+
+LLIIBBRRAARRYY
+     Standard C Library (libc, -lc)
+
+SSYYNNOOPPSSIISS
+     ##iinncclluuddee <<ssiiggnnaall..hh>>
+
+
+     struct  sigaction {
+	     union __sigaction_u __sigaction_u;  /* signal handler */
+	     sigset_t sa_mask;		     /* signal mask to apply */
+	     int     sa_flags;		     /* see signal options below */
+     };
+
+     union __sigaction_u {
+	     void    (*__sa_handler)(int);
+	     void    (*__sa_sigaction)(int, struct __siginfo *,
+			    void *);
+     };
+
+     #define sa_handler      __sigaction_u.__sa_handler
+     #define sa_sigaction    __sigaction_u.__sa_sigaction
+
+
+     _i_n_t
+     ssiiggaaccttiioonn(_i_n_t _s_i_g, _c_o_n_s_t _s_t_r_u_c_t _s_i_g_a_c_t_i_o_n _*_r_e_s_t_r_i_c_t _a_c_t,
+	 _s_t_r_u_c_t _s_i_g_a_c_t_i_o_n _*_r_e_s_t_r_i_c_t _o_a_c_t);
+
+DDEESSCCRRIIPPTTIIOONN
+     The system defines a set of signals that may be delivered to a process.
+     Signal delivery resembles the occurrence of a hardware interrupt: the
+     signal is normally blocked from further occurrence, the current process
+     context is saved, and a new one is built.	A process may specify a
+     _h_a_n_d_l_e_r to which a signal is delivered, or specify that a signal is to be
+     _i_g_n_o_r_e_d.  A process may also specify that a default action is to be taken
+     by the system when a signal occurs.  A signal may also be _b_l_o_c_k_e_d, in
+     which case its delivery is postponed until it is _u_n_b_l_o_c_k_e_d.  The action
+     to be taken on delivery is determined at the time of delivery.  Normally,
+     signal handlers execute on the current stack of the process.  This may be
+     changed, on a per-handler basis, so that signals are taken on a special
+     _s_i_g_n_a_l _s_t_a_c_k.
+
+     Signal routines normally execute with the signal that caused their invo-
+     cation _b_l_o_c_k_e_d, but other signals may yet occur.  A global _s_i_g_n_a_l _m_a_s_k
+     defines the set of signals currently blocked from delivery to a process.
+     The signal mask for a process is initialized from that of its parent
+     (normally empty).	It may be changed with a sigprocmask(2) call, or when
+     a signal is delivered to the process.
+
+     When a signal condition arises for a process, the signal is added to a
+     set of signals pending for the process.  If the signal is not currently
+     _b_l_o_c_k_e_d by the process then it is delivered to the process.  Signals may
+     be delivered any time a process enters the operating system (e.g., during
+     a system call, page fault or trap, or clock interrupt).  If multiple sig-
+     nals are ready to be delivered at the same time, any signals that could
+     be caused by traps are delivered first.  Additional signals may be pro-
+     cessed at the same time, with each appearing to interrupt the handlers
+     for the previous signals before their first instructions.	The set of
+     pending signals is returned by the sigpending(2) system call.  When a
+     caught signal is delivered, the current state of the process is saved, a
+     new signal mask is calculated (as described below), and the signal han-
+     dler is invoked.  The call to the handler is arranged so that if the sig-
+     nal handling routine returns normally the process will resume execution
+     in the context from before the signal's delivery.	If the process wishes
+     to resume in a different context, then it must arrange to restore the
+     previous context itself.
+
+     When a signal is delivered to a process a new signal mask is installed
+     for the duration of the process' signal handler (or until a
+     sigprocmask(2) system call is made).  This mask is formed by taking the
+     union of the current signal mask set, the signal to be delivered, and the
+     signal mask associated with the handler to be invoked.
+
+     The ssiiggaaccttiioonn() system call assigns an action for a signal specified by
+     _s_i_g.  If _a_c_t is non-zero, it specifies an action (SIG_DFL, SIG_IGN, or a
+     handler routine) and mask to be used when delivering the specified sig-
+     nal.  If _o_a_c_t is non-zero, the previous handling information for the sig-
+     nal is returned to the user.
+
+     Once a signal handler is installed, it normally remains installed until
+     another ssiiggaaccttiioonn() system call is made, or an execve(2) is performed.  A
+     signal-specific default action may be reset by setting _s_a___h_a_n_d_l_e_r to
+     SIG_DFL.  The defaults are process termination, possibly with core dump;
+     no action; stopping the process; or continuing the process.  See the sig-
+     nal list below for each signal's default action.  If _s_a___h_a_n_d_l_e_r is
+     SIG_DFL, the default action for the signal is to discard the signal, and
+     if a signal is pending, the pending signal is discarded even if the sig-
+     nal is masked.  If _s_a___h_a_n_d_l_e_r is set to SIG_IGN current and pending
+     instances of the signal are ignored and discarded.
+
+     Options may be specified by setting _s_a___f_l_a_g_s.  The meaning of the various
+     bits is as follows:
+
+	   SA_NOCLDSTOP    If this bit is set when installing a catching func-
+			   tion for the SIGCHLD signal, the SIGCHLD signal
+			   will be generated only when a child process exits,
+			   not when a child process stops.
+
+	   SA_NOCLDWAIT    If this bit is set when calling ssiiggaaccttiioonn() for the
+			   SIGCHLD signal, the system will not create zombie
+			   processes when children of the calling process
+			   exit.  If the calling process subsequently issues a
+			   wait(2) (or equivalent), it blocks until all of the
+			   calling process's child processes terminate, and
+			   then returns a value of -1 with errno set to
+			   ECHILD.
+
+	   SA_ONSTACK	   If this bit is set, the system will deliver the
+			   signal to the process on a _s_i_g_n_a_l _s_t_a_c_k, specified
+			   with sigaltstack(2).
+
+	   SA_NODEFER	   If this bit is set, further occurrences of the
+			   delivered signal are not masked during the execu-
+			   tion of the handler.
+
+	   SA_RESETHAND    If this bit is set, the handler is reset back to
+			   SIG_DFL at the moment the signal is delivered.
+
+	   SA_RESTART	   See paragraph below.
+
+	   SA_SIGINFO	   If this bit is set, the handler function is assumed
+			   to be pointed to by the sa_sigaction member of
+			   struct sigaction and should match the prototype
+			   shown above or as below in _E_X_A_M_P_L_E_S.  This bit
+			   should not be set when assigning SIG_DFL or
+			   SIG_IGN.
+
+     If a signal is caught during the system calls listed below, the call may
+     be forced to terminate with the error EINTR, the call may return with a
+     data transfer shorter than requested, or the call may be restarted.
+     Restart of pending calls is requested by setting the SA_RESTART bit in
+     _s_a___f_l_a_g_s.	The affected system calls include open(2), read(2), write(2),
+     sendto(2), recvfrom(2), sendmsg(2) and recvmsg(2) on a communications
+     channel or a slow device (such as a terminal, but not a regular file) and
+     during a wait(2) or ioctl(2).  However, calls that have already committed
+     are not restarted, but instead return a partial success (for example, a
+     short read count).
+
+     After a fork(2) or vfork(2) all signals, the signal mask, the signal
+     stack, and the restart/interrupt flags are inherited by the child.
+
+     The execve(2) system call reinstates the default action for all signals
+     which were caught and resets all signals to be caught on the user stack.
+     Ignored signals remain ignored; the signal mask remains the same; signals
+     that restart pending system calls continue to do so.
+
+     The following is a list of all signals with names as in the include file
+     <_s_i_g_n_a_l_._h>:
+
+     NNAAMMEE	     DDeeffaauulltt AAccttiioonn	     DDeessccrriippttiioonn
+     SIGHUP	     terminate process	     terminal line hangup
+     SIGINT	     terminate process	     interrupt program
+     SIGQUIT	     create core image	     quit program
+     SIGILL	     create core image	     illegal instruction
+     SIGTRAP	     create core image	     trace trap
+     SIGABRT	     create core image	     abort(3) call (formerly SIGIOT)
+     SIGEMT	     create core image	     emulate instruction executed
+     SIGFPE	     create core image	     floating-point exception
+     SIGKILL	     terminate process	     kill program
+     SIGBUS	     create core image	     bus error
+     SIGSEGV	     create core image	     segmentation violation
+     SIGSYS	     create core image	     non-existent system call invoked
+     SIGPIPE	     terminate process	     write on a pipe with no reader
+     SIGALRM	     terminate process	     real-time timer expired
+     SIGTERM	     terminate process	     software termination signal
+     SIGURG	     discard signal	     urgent condition present on
+					     socket
+     SIGSTOP	     stop process	     stop (cannot be caught or
+					     ignored)
+     SIGTSTP	     stop process	     stop signal generated from
+					     keyboard
+     SIGCONT	     discard signal	     continue after stop
+     SIGCHLD	     discard signal	     child status has changed
+     SIGTTIN	     stop process	     background read attempted from
+					     control terminal
+     SIGTTOU	     stop process	     background write attempted to
+					     control terminal
+     SIGIO	     discard signal	     I/O is possible on a descriptor
+					     (see fcntl(2))
+     SIGXCPU	     terminate process	     cpu time limit exceeded (see
+					     setrlimit(2))
+     SIGXFSZ	     terminate process	     file size limit exceeded (see
+					     setrlimit(2))
+     SIGVTALRM	     terminate process	     virtual time alarm (see
+					     setitimer(2))
+     SIGPROF	     terminate process	     profiling timer alarm (see
+					     setitimer(2))
+     SIGWINCH	     discard signal	     Window size change
+     SIGINFO	     discard signal	     status request from keyboard
+     SIGUSR1	     terminate process	     User defined signal 1
+     SIGUSR2	     terminate process	     User defined signal 2
+
+NNOOTTEE
+     The _s_a___m_a_s_k field specified in _a_c_t is not allowed to block SIGKILL or
+     SIGSTOP.  Any attempt to do so will be silently ignored.
+
+     The following functions are either reentrant or not interruptible by sig-
+     nals and are async-signal safe.  Therefore applications may invoke them,
+     without restriction, from signal-catching functions:
+
+     Base Interfaces:
+
+     __eexxiitt(), aacccceessss(), aallaarrmm(), ccffggeettiissppeeeedd(), ccffggeettoossppeeeedd(), ccffsseettiissppeeeedd(),
+     ccffsseettoossppeeeedd(), cchhddiirr(), cchhmmoodd(), cchhoowwnn(), cclloossee(), ccrreeaatt(), dduupp(),
+     dduupp22(), eexxeeccllee(), eexxeeccvvee(), ffccnnttll(), ffoorrkk(), ffppaatthhccoonnff(), ffssttaatt(),
+     ffssyynncc(), ggeetteeggiidd(), ggeetteeuuiidd(), ggeettggiidd(), ggeettggrroouuppss(), ggeettppggrrpp(),
+     ggeettppiidd(), ggeettppppiidd(), ggeettuuiidd(), kkiillll(), lliinnkk(), llsseeeekk(), mmkkddiirr(),
+     mmkkffiiffoo(), ooppeenn(), ppaatthhccoonnff(), ppaauussee(), ppiippee(), rraaiissee(), rreeaadd(), rreennaammee(),
+     rrmmddiirr(), sseettggiidd(), sseettppggiidd(), sseettssiidd(), sseettuuiidd(), ssiiggaaccttiioonn(),
+     ssiiggaaddddsseett(), ssiiggddeellsseett(), ssiiggeemmppttyysseett(), ssiiggffiillllsseett(), ssiiggiissmmeemmbbeerr(),
+     ssiiggnnaall(), ssiiggppeennddiinngg(), ssiiggpprrooccmmaasskk(), ssiiggssuussppeenndd(), sslleeeepp(), ssttaatt(),
+     ssyyssccoonnff(), ttccddrraaiinn(), ttccffllooww(), ttccfflluusshh(), ttccggeettaattttrr(), ttccggeettppggrrpp(),
+     ttccsseennddbbrreeaakk(), ttccsseettaattttrr(), ttccsseettppggrrpp(), ttiimmee(), ttiimmeess(), uummaasskk(),
+     uunnaammee(), uunnlliinnkk(), uuttiimmee(), wwaaiitt(), wwaaiittppiidd(), wwrriittee().
+
+     Realtime Interfaces:
+
+     aaiioo__eerrrroorr(), ssiiggppaauussee(), aaiioo__rreettuurrnn(), aaiioo__ssuussppeenndd(), sseemm__ppoosstt(),
+     ssiiggsseett().
+
+     ANSI C Interfaces:
+
+     ssttrrccppyy(), ssttrrccaatt(), ssttrrnnccppyy(), ssttrrnnccaatt(), and perhaps some others.
+
+     Extension Interfaces:
+
+     ssttrrllccppyy(), ssttrrllccaatt().
+
+     All functions not in the above lists are considered to be unsafe with
+     respect to signals.  That is to say, the behaviour of such functions when
+     called from a signal handler is undefined.  In general though, signal
+     handlers should do little more than set a flag; most other actions are
+     not safe.
+
+     Also, it is good practice to make a copy of the global variable _e_r_r_n_o and
+     restore it before returning from the signal handler.  This protects
+     against the side effect of _e_r_r_n_o being set by functions called from
+     inside the signal handler.
+
+RREETTUURRNN VVAALLUUEESS
+     The ssiiggaaccttiioonn() function returns the value 0 if successful; otherwise the
+     value -1 is returned and the global variable _e_r_r_n_o is set to indicate the
+     error.
+
+EEXXAAMMPPLLEESS
+     There are three possible prototypes the handler may match:
+
+	   ANSI C:
+		  _v_o_i_d hhaannddlleerr(_i_n_t);
+
+	   POSIX SA_SIGINFO:
+		  _v_o_i_d hhaannddlleerr(_i_n_t, _s_i_g_i_n_f_o___t _*_i_n_f_o, _u_c_o_n_t_e_x_t___t _*_u_a_p);
+
+     The handler function should match the SA_SIGINFO prototype if the SA_SIG-
+     INFO bit is set in flags.	It then should be pointed to by the
+     sa_sigaction member of struct sigaction.  Note that you should not assign
+     SIG_DFL or SIG_IGN this way.
+
+     If the SA_SIGINFO flag is not set, the handler function should match
+     either the ANSI C or traditional BSD prototype and be pointed to by the
+     sa_handler member of struct sigaction.  In practice, FreeBSD always sends
+     the three arguments of the latter and since the ANSI C prototype is a
+     subset, both will work.  The sa_handler member declaration in FreeBSD
+     include files is that of ANSI C (as required by POSIX), so a function
+     pointer of a BSD-style function needs to be casted to compile without
+     warning.  The traditional BSD style is not portable and since its capa-
+     bilities are a full subset of a SA_SIGINFO handler, its use is depre-
+     cated.
+
+     The _s_i_g argument is the signal number, one of the SIG... values from
+     <signal.h>.
+
+     The _c_o_d_e argument of the BSD-style handler and the si_code member of the
+     info argument to a SA_SIGINFO handler contain a numeric code explaining
+     the cause of the signal, usually one of the SI_... values from <sys/sig-
+     nal.h> or codes specific to a signal, i.e. one of the FPE_... values for
+     SIGFPE.
+
+     The _u_a_p argument to a POSIX SA_SIGINFO handler points to an instance of
+     ucontext_t.
+
+EERRRROORRSS
+     The ssiiggaaccttiioonn() system call will fail and no new signal handler will be
+     installed if one of the following occurs:
+
+     [EFAULT]		Either _a_c_t or _o_a_c_t points to memory that is not a
+			valid part of the process address space.
+
+     [EINVAL]		The _s_i_g argument is not a valid signal number.
+
+     [EINVAL]		An attempt is made to ignore or supply a handler for
+			SIGKILL or SIGSTOP.
+
+     [EINVAL]		An attempt was made to set the action to SIG_DFL for a
+			signal that cannot be caught or ignored (or both).
+
+SSTTAANNDDAARRDDSS
+     The ssiiggaaccttiioonn() system call is expected to conform to ISO/IEC 9945-1:1990
+     (``POSIX.1'').  The SA_ONSTACK and SA_RESTART flags are Berkeley exten-
+     sions, as are the signals, SIGTRAP, SIGEMT, SIGBUS, SIGSYS, SIGURG,
+     SIGIO, SIGXCPU, SIGXFSZ, SIGVTALRM, SIGPROF, SIGWINCH, and SIGINFO.
+     Those signals are available on most BSD-derived systems.  The SA_NODEFER
+     and SA_RESETHAND flags are intended for backwards compatibility with
+     other operating systems.  The SA_NOCLDSTOP, and SA_NOCLDWAIT flags are
+     featuring options commonly found in other operating systems.
+
+SSEEEE AALLSSOO
+     kill(1), kill(2), ptrace(2), sigaltstack(2), sigblock(2), sigpause(2),
+     sigpending(2), sigprocmask(2), sigsetmask(2), sigsuspend(2), sigvec(2),
+     wait(2), fpsetmask(3), setjmp(3), siginterrupt(3), sigsetops(3),
+     ucontext(3), tty(4)
+
+BSD			      September 18, 2008			   BSD

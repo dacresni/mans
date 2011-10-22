@@ -1,0 +1,165 @@
+SEND(2) 		    BSD System Calls Manual		       SEND(2)
+
+NNAAMMEE
+     sseenndd, sseennddmmssgg, sseennddttoo -- send a message from a socket
+
+SSYYNNOOPPSSIISS
+     ##iinncclluuddee <<ssyyss//ssoocckkeett..hh>>
+
+     _s_s_i_z_e___t
+     sseenndd(_i_n_t _s_o_c_k_e_t, _c_o_n_s_t _v_o_i_d _*_b_u_f_f_e_r, _s_i_z_e___t _l_e_n_g_t_h, _i_n_t _f_l_a_g_s);
+
+     _s_s_i_z_e___t
+     sseennddmmssgg(_i_n_t _s_o_c_k_e_t, _c_o_n_s_t _s_t_r_u_c_t _m_s_g_h_d_r _*_m_e_s_s_a_g_e, _i_n_t _f_l_a_g_s);
+
+     _s_s_i_z_e___t
+     sseennddttoo(_i_n_t _s_o_c_k_e_t, _c_o_n_s_t _v_o_i_d _*_b_u_f_f_e_r, _s_i_z_e___t _l_e_n_g_t_h, _i_n_t _f_l_a_g_s,
+	 _c_o_n_s_t _s_t_r_u_c_t _s_o_c_k_a_d_d_r _*_d_e_s_t___a_d_d_r, _s_o_c_k_l_e_n___t _d_e_s_t___l_e_n);
+
+DDEESSCCRRIIPPTTIIOONN
+     SSeenndd(), sseennddttoo(), and sseennddmmssgg() are used to transmit a message to another
+     socket.  SSeenndd() may be used only when the socket is in a _c_o_n_n_e_c_t_e_d state,
+     while sseennddttoo() and sseennddmmssgg() may be used at any time.
+
+     The address of the target is given by _d_e_s_t___a_d_d_r with _d_e_s_t___l_e_n specifying
+     its size.	The length of the message is given by _l_e_n_g_t_h.  If the message
+     is too long to pass atomically through the underlying protocol, the error
+     EMSGSIZE is returned, and the message is not transmitted.
+
+     No indication of failure to deliver is implicit in a sseenndd().  Locally
+     detected errors are indicated by a return value of -1.
+
+     If no messages space is available at the socket to hold the message to be
+     transmitted, then sseenndd() normally blocks, unless the socket has been
+     placed in non-blocking I/O mode.  The select(2) call may be used to
+     determine when it is possible to send more data.
+
+     The _f_l_a_g_s parameter may include one or more of the following:
+
+     #define MSG_OOB	    0x1  /* process out-of-band data */
+     #define MSG_DONTROUTE  0x4  /* bypass routing, use direct interface */
+
+     The flag MSG_OOB is used to send ``out-of-band'' data on sockets that
+     support this notion (e.g.	SOCK_STREAM); the underlying protocol must
+     also support ``out-of-band'' data.  MSG_DONTROUTE is usually used only by
+     diagnostic or routing programs.
+
+     The sseennddmmssgg() system call uses a _m_s_g_h_d_r structure to minimize the number
+     of directly supplied arguments.  The _m_s_g___i_o_v and _m_s_g___i_o_v_l_e_n fields of
+     message specify zero or more buffers containing the data to be sent.
+     _m_s_g___i_o_v points to an array of iovec structures; _m_s_g___i_o_v_l_e_n shall be set
+     to the dimension of this array.  In each iovec structure, the _i_o_v___b_a_s_e
+     field specifies a storage area and the _i_o_v___l_e_n field gives its size in
+     bytes. Some of these sizes can be zero.  The data from each storage area
+     indicated by _m_s_g___i_o_v is sent in turn.  See recv(2) for a complete
+     description of the _m_s_g_h_d_r structure.
+
+RREETTUURRNN VVAALLUUEESS
+     Upon successful completion, the number of bytes which were sent is
+     returned.	Otherwise, -1 is returned and the global variable _e_r_r_n_o is set
+     to indicate the error.
+
+EERRRROORRSS
+     The sseenndd(), sseennddmmssgg(), and sseennddttoo() system calls will fail if:
+
+     [EACCES]		The SO_BROADCAST option is not set on the socket and a
+			broadcast address is given as the destination.
+
+     [EAGAIN]		The socket is marked non-blocking and the requested
+			operation would block.
+
+     [EBADF]		An invalid descriptor is specified.
+
+     [ECONNRESET]	A connection is forcibly closed by a peer.
+
+     [EFAULT]		An invalid user space address is specified for a
+			parameter.
+
+     [EHOSTUNREACH]	The destination address specifies an unreachable host.
+
+     [EINTR]		A signal interrupts the system call before any data is
+			transmitted.
+
+     [EMSGSIZE] 	The socket requires that message be sent atomically,
+			and the size of the message to be sent makes this
+			impossible.  IOV_MAX.
+
+     [ENETDOWN] 	The local network interface used to reach the destina-
+			tion is down.
+
+     [ENETUNREACH]	No route to the network is present.
+
+     [ENOBUFS]		The system is unable to allocate an internal buffer.
+			The operation may succeed when buffers become avail-
+			able.
+
+     [ENOBUFS]		The output queue for a network interface is full.
+			This generally indicates that the interface has
+			stopped sending, but may be caused by transient con-
+			gestion.
+
+     [ENOTSOCK] 	The argument _s_o_c_k_e_t is not a socket.
+
+     [EOPNOTSUPP]	_s_o_c_k_e_t does not support (some of) the option(s) speci-
+			fied in _f_l_a_g_s.
+
+     [EPIPE]		The socket is shut down for writing or the socket is
+			connection-mode and is no longer connected.  In the
+			latter case, and if the socket is of type SOCK_STREAM,
+			the SIGPIPE signal is generated to the calling thread.
+
+     The sseennddmmssgg() and sseennddttoo() system calls will fail if:
+
+     [EAFNOSUPPORT]	Addresses in the specified address family cannot be
+			used with this socket.
+
+     [EDESTADDRREQ]	The socket is not connection-mode and does not have
+			its peer address set, and no destination address is
+			specified.
+
+     [EISCONN]		A destination address was specified and the socket is
+			already connected.
+
+     [ENOENT]		A component of the pathname does not name an existing
+			file or the path name is an empty string.
+
+     [ENOMEM]		Insufficient memory is available to fulfill the
+			request.
+
+     [ENOTCONN] 	The socket is connection-mode, but is not connected.
+
+     [ENOTDIR]		A component of the path prefix of the pathname in the
+			socket address is not a directory.
+
+     The sseenndd() system call will fail if:
+
+     [EDESTADDRREQ]	The socket is not connection-mode and no peer address
+			is set.
+
+     [ENOTCONN] 	The socket is not connected or otherwise has not had
+			the peer pre-specified.
+
+     The sseennddmmssgg() system call will fail if:
+
+     [EINVAL]		The sum of the iov_len values overflows an ssize_t.
+
+     [EMSGSIZE] 	The socket requires that message be sent atomically,
+			and the size of the message to be sent makes this
+			impossible, or the msg_iovlen member of the msghdr
+			structure pointed to by message is less than or equal
+			to 0 or is greater than IOV_MAX.
+
+LLEEGGAACCYY SSYYNNOOPPSSIISS
+     ##iinncclluuddee <<ssyyss//ttyyppeess..hh>>
+     ##iinncclluuddee <<ssyyss//ssoocckkeett..hh>>
+
+     The include file <_s_y_s_/_t_y_p_e_s_._h> is necessary.
+
+SSEEEE AALLSSOO
+     fcntl(2), getsockopt(2), recv(2), select(2), socket(2), write(2),
+     compat(5)
+
+HHIISSTTOORRYY
+     The sseenndd() function call appeared in 4.2BSD.
+
+4.2 Berkeley Distribution      February 21, 1994     4.2 Berkeley Distribution

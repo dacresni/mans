@@ -1,0 +1,53 @@
+SEM_WAIT(2)		    BSD System Calls Manual		   SEM_WAIT(2)
+
+NNAAMMEE
+     sseemm__ttrryywwaaiitt,, sseemm__wwaaiitt -- lock a semaphore
+
+SSYYNNOOPPSSIISS
+     ##iinncclluuddee <<sseemmaapphhoorree..hh>>
+
+     _i_n_t
+     sseemm__ttrryywwaaiitt(_s_e_m___t _*_s_e_m);
+
+     _i_n_t
+     sseemm__wwaaiitt(_s_e_m___t _*_s_e_m);
+
+DDEESSCCRRIIPPTTIIOONN
+     The semaphore referenced by _s_e_m is locked.  When calling sseemm__wwaaiitt(), if
+     the semaphore's value is zero, the calling thread will block until the
+     lock is acquired or until the call is interrupted by a signal. Alterna-
+     tively, the sseemm__ttrryywwaaiitt() function will fail if the semaphore is already
+     locked, rather than blocking on the semaphore.
+
+     If successful (the lock was acquired), sseemm__wwaaiitt() and sseemm__ttrryywwaaiitt() will
+     return 0.	Otherwise, -1 is returned and _e_r_r_n_o is set, and the state of
+     the semaphore is unchanged.
+
+EERRRROORRSS
+     sseemm__wwaaiitt() and sseemm__ttrryywwaaiitt() succeed unless:
+
+     [EAGAIN]		The semaphore is already locked.
+
+     [EDEADLK]		A deadlock was detected.
+
+     [EINTR]		The call was interrupted by a signal.
+
+     [EINVAL]		_s_e_m is not a valid semaphore descriptor.
+
+NNOOTTEESS
+     Applications may encounter a priority inversion while using semaphores.
+     When a thread is waiting on a semaphore which is about to be posted by a
+     lower-priority thread and the lower-priority thread is preempted by
+     another thread (of medium priority), a priority inversion has occured,
+     and the higher-priority thread will be blocked for an unlimited time
+     period.  Programmers using the realtime functionality of the system
+     should take care to avoid priority inversions.
+
+SSEEEE AALLSSOO
+     sem_open(2), sem_post(2), semctl(2), semget(2), semop(2)
+
+HHIISSTTOORRYY
+     sseemm__wwaaiitt() and sseemm__ttrryywwaaiitt() are specified in the POSIX Realtime Exten-
+     sion (1003.1b-1993/1003.1i-1995).
+
+Darwin				 June 8, 2000				Darwin

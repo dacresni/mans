@@ -1,0 +1,180 @@
+MMAP(2) 		    BSD System Calls Manual		       MMAP(2)
+
+NNAAMMEE
+     mmmmaapp -- allocate memory, or map files or devices into memory
+
+LLIIBBRRAARRYY
+     Standard C Library (libc, -lc)
+
+SSYYNNOOPPSSIISS
+     ##iinncclluuddee <<ssyyss//mmmmaann..hh>>
+
+     _v_o_i_d _*
+     mmmmaapp(_v_o_i_d _*_a_d_d_r, _s_i_z_e___t _l_e_n, _i_n_t _p_r_o_t, _i_n_t _f_l_a_g_s, _i_n_t _f_d, _o_f_f___t _o_f_f_s_e_t);
+
+DDEESSCCRRIIPPTTIIOONN
+     The mmmmaapp() system call causes the pages starting at _a_d_d_r and continuing
+     for at most _l_e_n bytes to be mapped from the object described by _f_d,
+     starting at byte offset _o_f_f_s_e_t.  If _o_f_f_s_e_t or _l_e_n is not a multiple of
+     the pagesize, the mapped region may extend past the specified range.  Any
+     extension beyond the end of the mapped object will be zero-filled.
+
+     The _a_d_d_r argument is used by the system to determine the starting address
+     of the mapping, and its interpretation is dependent on the setting of the
+     MAP_FIXED flag.  If MAP_FIXED is specified in _f_l_a_g_s, the system will try
+     to place the mapping at the specified address, possibly removing a map-
+     ping that already exists at that location.  If MAP_FIXED is not speci-
+     fied, then the system will attempt to use the range of addresses starting
+     at _a_d_d_r if they do not overlap any existing mappings, including memory
+     allocated by malloc(3) and other such allocators.	Otherwise, the system
+     will choose an alternate address for the mapping (using an implementation
+     dependent algorithm) that does not overlap any existing mappings.	In
+     other words, without MAP_FIXED the system will attempt to find an empty
+     location in the address space if the specified address range has already
+     been mapped by something else.  If _a_d_d_r is zero and MAP_FIXED is not
+     specified, then an address will be selected by the system so as not to
+     overlap any existing mappings in the address space.  In all cases, the
+     actual starting address of the region is returned.  If MAP_FIXED is spec-
+     ified, a successful _m_m_a_p deletes any previous mapping in the allocated
+     address range.  Previous mappings are never deleted if MAP_FIXED is not
+     specified.
+
+     The protections (region accessibility) are specified in the _p_r_o_t argument
+     by _o_r'ing the following values:
+
+     PROT_NONE	 Pages may not be accessed.
+     PROT_READ	 Pages may be read.
+     PROT_WRITE  Pages may be written.
+     PROT_EXEC	 Pages may be executed.
+
+     Note that, due to hardware limitations, on some platforms PROT_WRITE may
+     imply PROT_READ, and PROT_READ may imply PROT_EXEC.  Portable programs
+     should not rely on these flags being separately enforcable.
+
+     The _f_l_a_g_s argument specifies the type of the mapped object, mapping
+     options and whether modifications made to the mapped copy of the page are
+     private to the process (copy-on-write) or are to be shared with other
+     references.  Sharing, mapping type and options are specified in the _f_l_a_g_s
+     argument by _o_r'ing the following values:
+
+     MAP_ANON	       Map anonymous memory not associated with any specific
+		       file.  The _o_f_f_s_e_t argument is ignored.  Mac OS X spe-
+		       cific: the file descriptor used for creating MAP_ANON
+		       regions can be used to pass some Mach VM flags, and can
+		       be specified as -1 if no such flags are associated with
+		       the region.  Mach VM flags are defined in <mach/vm_sta-
+		       tistics.h> and the ones that currently apply to mmmmaapp
+		       are:
+
+		       VM_FLAGS_PURGABLE   to create Mach purgable (i.e.
+		       volatile) memory
+
+		       VM_MAKE_TAG(tag)    to associate an 8-bit tag with the
+		       region
+		       <mach/vm_statistics.h> defines some preset tags (with a
+		       VM_MEMORY_ prefix).  Users are encouraged to use tags
+		       between 240 and 255.  Tags are used by tools such as
+		       vmmap(1) to help identify specific memory regions.
+
+     MAP_FILE	       Mapped from a regular file.  (This is the default map-
+		       ping type, and need not be specified.)
+
+     MAP_FIXED	       Do not permit the system to select a different address
+		       than the one specified.	If the specified address can-
+		       not be used, mmmmaapp() will fail.  If MAP_FIXED is speci-
+		       fied, _a_d_d_r must be a multiple of the pagesize.  If a
+		       MAP_FIXED request is successful, the mapping estab-
+		       lished by mmmmaapp() replaces any previous mappings for the
+		       process' pages in the range from _a_d_d_r to _a_d_d_r + _l_e_n.
+		       Use of this option is discouraged.
+
+     MAP_HASSEMAPHORE  Notify the kernel that the region may contain sema-
+		       phores and that special handling may be necessary.
+
+     MAP_PRIVATE       Modifications are private (copy-on-write).
+
+     MAP_SHARED        Modifications are shared.
+
+     MAP_NOCACHE       Pages in this mapping are not retained in the kernel's
+		       memory cache.  If the system runs low on memory, pages
+		       in MAP_NOCACHE mappings will be among the first to be
+		       reclaimed.  This flag is intended for mappings that
+		       have little locality and provides a hint to the kernel
+		       that pages in this mapping are unlikely to be needed
+		       again in the near future.
+
+     Conforming applications must specify either MAP_PRIVATE or MAP_SHARED.
+
+     The close(2) system call does not unmap pages, see munmap(2) for further
+     information.
+
+     The current design does not allow a process to specify the location of
+     swap space.  In the future we may define an additional mapping type,
+     MAP_SWAP, in which the file descriptor argument specifies a file or
+     device to which swapping should be done.
+
+RREETTUURRNN VVAALLUUEESS
+     Upon successful completion, mmmmaapp() returns a pointer to the mapped
+     region.  Otherwise, a value of MAP_FAILED is returned and _e_r_r_n_o is set to
+     indicate the error.
+
+EERRRROORRSS
+     The mmmmaapp() system call will fail if:
+
+     [EACCES]		The flag PROT_READ was specified as part of the _p_r_o_t
+			argument and _f_d was not open for reading.  The flags
+			MAP_SHARED and PROT_WRITE were specified as part of
+			the _f_l_a_g_s and _p_r_o_t argument and _f_d was not open for
+			writing.
+
+     [EBADF]		The _f_d argument is not a valid open file descriptor.
+
+     [EINVAL]		MAP_FIXED was specified and the _a_d_d_r argument was not
+			page aligned, or part of the desired address space
+			resides out of the valid address space for a user
+			process.
+
+     [EINVAL]		_f_l_a_g_s does not include either MAP_PRIVATE or
+			MAP_SHARED.
+
+     [EINVAL]		The _l_e_n argument was negative.
+
+     [EINVAL]		The _o_f_f_s_e_t argument was not page-aligned based on the
+			page size as returned by getpagesize(3).
+
+     [ENODEV]		MAP_ANON has not been specified and the file _f_d refers
+			to does not support mapping.
+
+     [ENOMEM]		MAP_FIXED was specified and the _a_d_d_r argument was not
+			available.  MAP_FIXED was specified and the address
+			range specified exceeds the address space limit for
+			the process.  MAP_ANON was specified and insufficient
+			memory was available.
+
+     [ENXIO]		Addresses in the specified range are invalid for _f_d.
+
+     [EOVERFLOW]	Addresses in the specified range exceed the maximum
+			offset set for _f_d.
+
+LLEEGGAACCYY SSYYNNOOPPSSIISS
+     ##iinncclluuddee <<ssyyss//ttyyppeess..hh>>
+     ##iinncclluuddee <<ssyyss//mmmmaann..hh>>
+
+     The include file <_s_y_s_/_t_y_p_e_s_._h> is necessary.
+
+CCOOMMPPAATTIIBBIILLIITTYY
+     mmmmaapp() now returns with _e_r_r_n_o set to EINVAL in places that historically
+     succeeded.  The rules have changed as follows:
+
+     ++oo	 The _f_l_a_g_s parameter must specify either MAP_PRIVATE or MAP_SHARED.
+
+     ++oo	 The _s_i_z_e parameter must not be 0.
+
+     ++oo	 The _o_f_f parameter must be a multiple of pagesize, as returned by
+	 ssyyssccoonnff().
+
+SSEEEE AALLSSOO
+     madvise(2), mincore(2), minherit(2), mlock(2), mprotect(2), msync(2),
+     munlock(2), munmap(2), shmat(2), getpagesize(3)
+
+BSD				April 21, 2006				   BSD

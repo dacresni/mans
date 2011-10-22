@@ -1,0 +1,35 @@
+SEM_POST(2)		    BSD System Calls Manual		   SEM_POST(2)
+
+NNAAMMEE
+     sseemm__ppoosstt -- unlock a semaphore
+
+SSYYNNOOPPSSIISS
+     ##iinncclluuddee <<sseemmaapphhoorree..hh>>
+
+     _i_n_t
+     sseemm__ppoosstt(_s_e_m___t _*_s_e_m);
+
+DDEESSCCRRIIPPTTIIOONN
+     The semaphore referenced by _s_e_m is unlocked, the value of the semaphore
+     is incremented, and all threads which are waiting on the semaphore are
+     awakened.
+
+     sseemm__ppoosstt() is reentrant with respect to signals and may be called from
+     within a signal hanlder.
+
+     If successful, sseemm__ppoosstt() will return 0.  Otherwise, -1 is returned and
+     _e_r_r_n_o is set.
+
+EERRRROORRSS
+     sseemm__ppoosstt() succeeds unless:
+
+     [EINVAL]		_s_e_m is not a valid semaphore descriptor.
+
+SSEEEE AALLSSOO
+     sem_open(2), sem_trywait(2), sem_wait(2), semctl(2), semget(2), semop(2)
+
+HHIISSTTOORRYY
+     sseemm__ppoosstt() is specified in the POSIX Realtime Extension
+     (1003.1b-1993/1003.1i-1995).
+
+Darwin				 June 8, 2000				Darwin

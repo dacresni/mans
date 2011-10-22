@@ -1,0 +1,229 @@
+SETATTRLIST(2)		    BSD System Calls Manual		SETATTRLIST(2)
+
+NNAAMMEE
+     sseettaattttrrlliisstt, ffsseettaattttrrlliisstt -- set file system attributes
+
+SSYYNNOOPPSSIISS
+     ##iinncclluuddee <<ssyyss//aattttrr..hh>>
+     ##iinncclluuddee <<uunniissttdd..hh>>
+
+     _i_n_t
+     sseettaattttrrlliisstt(_c_o_n_s_t _c_h_a_r_* _p_a_t_h, _s_t_r_u_c_t _a_t_t_r_l_i_s_t _* _a_t_t_r_L_i_s_t, _v_o_i_d _* _a_t_t_r_B_u_f,
+	 _s_i_z_e___t _a_t_t_r_B_u_f_S_i_z_e, _u_n_s_i_g_n_e_d _l_o_n_g _o_p_t_i_o_n_s);
+
+     _i_n_t
+     ffsseettaattttrrlliisstt(_i_n_t _f_d, _s_t_r_u_c_t _a_t_t_r_l_i_s_t _* _a_t_t_r_L_i_s_t, _v_o_i_d _* _a_t_t_r_B_u_f,
+	 _s_i_z_e___t _a_t_t_r_B_u_f_S_i_z_e, _u_n_s_i_g_n_e_d _l_o_n_g _o_p_t_i_o_n_s);
+
+DDEESSCCRRIIPPTTIIOONN
+     The sseettaattttrrlliisstt() and ffsseettaattttrrlliisstt() functions set attributes (that is,
+     metadata) of file system objects.	They are the logical opposite of
+     getattrlist(2).  The sseettaattttrrlliisstt() function sets attributes about the
+     file system object specified by _p_a_t_h from the values in the buffer speci-
+     fied by _a_t_t_r_B_u_f and _a_t_t_r_B_u_f_S_i_z_e; the ffsseettaattttrrlliisstt() function does the
+     same for the _f_d file descriptor.  The _a_t_t_r_L_i_s_t parameter determines what
+     attributes are set.  The _o_p_t_i_o_n_s parameter lets you control specific
+     aspects of the function's behaviour.
+
+     The functions are only supported by certain volume format implementa-
+     tions.  For maximum compatibility, client programs should use high-level
+     APIs (such as the Carbon File Manager) to access file system attributes.
+     These high-level APIs include logic to emulate file system attributes on
+     volumes that don't support sseettaattttrrlliisstt() and ffsseettaattttrrlliisstt().
+
+     The _p_a_t_h parameter for sseettaattttrrlliisstt() must reference a valid file system
+     object.  All directories listed in the path name leading to the object
+     must be searchable.  The _f_d parameter for ffsseettaattttrrlliisstt() must be a valid
+     file descriptor for the calling process.  You must own the file system
+     object in order to set any of the following attributes:
+
+     ATTR_CMN_GRPID
+     ATTR_CMN_ACCESSMASK
+     ATTR_CMN_FLAGS
+     ATTR_CMN_CRTIME
+     ATTR_CMN_MODTIME
+     ATTR_CMN_CHGTIME
+     ATTR_CMN_ACCTIME
+
+     You must be root (that is, your process's effective UID must be 0) in
+     order to change the ATTR_CMN_OWNERID attribute.  Setting other attributes
+     requires that you have write access to the object.
+
+     The _a_t_t_r_L_i_s_t parameter is a pointer to an _a_t_t_r_l_i_s_t structure.  You are
+     responsible for filling out all fields of this structure before calling
+     the function.  See the discussion of the getattrlist(2) function for a
+     detailed description of this structure.  To set an attribute you must set
+     the corresponding bit in the appropriate _a_t_t_r_g_r_o_u_p___t field of the
+     _a_t_t_r_l_i_s_t structure.
+
+     The _a_t_t_r_B_u_f and _a_t_t_r_B_u_f_S_i_z_e parameters specify a buffer that contains the
+     attribute values to set.  Attributes are packed in exactly the same way
+     as they are returned from getattrlist(2) except that, when setting
+     attributes, the buffer does not include the leading _u___i_n_t_3_2___t length
+     value.
+
+     The _o_p_t_i_o_n_s parameter is a bit set that controls the behaviour of
+     sseettaattttrrlliisstt().  The following option bits are defined.
+
+     FSOPT_NOFOLLOW  If this bit is set, sseettaattttrrlliisstt() will not follow a sym-
+		     link if it occurs as the last component of _p_a_t_h.
+
+RREETTUURRNN VVAALLUUEESS
+     Upon successful completion a value of 0 is returned.  Otherwise, a value
+     of -1 is returned and _e_r_r_n_o is set to indicate the error.
+
+CCOOMMPPAATTIIBBIILLIITTYY
+     Not all volumes support sseettaattttrrlliisstt().  However, if a volume supports
+     getattrlist(2), it must also support sseettaattttrrlliisstt().  See the documenta-
+     tion for getattrlist(2) for details on how to tell whether a volume sup-
+     ports it.
+
+     The sseettaattttrrlliisstt() function has been undocumented for more than two years.
+     In that time a number of volume format implementations have been created
+     without a proper specification for the behaviour of this routine.	You
+     may encounter volume format implementations with slightly different be-
+     haviour than what is described here.  Your program is expected to be tol-
+     erant of this variant behaviour.
+
+     If you're implementing a volume format that supports sseettaattttrrlliisstt(), you
+     should be careful to support the behaviour specified by this document.
+
+EERRRROORRSS
+     sseettaattttrrlliisstt() and ffsseettaattttrrlliisstt() will fail if:
+
+     [ENOTSUP]		The call is not supported by the volume.
+
+     [ENOTDIR]		A component of the path for sseettaattttrrlliisstt() prefix is
+			not a directory.
+
+     [ENAMETOOLONG]	A component of a path name for sseettaattttrrlliisstt() exceeded
+			NAME_MAX characters, or an entire path name exceeded
+			PATH_MAX characters.
+
+     [ENOENT]		The file system object for sseettaattttrrlliisstt() does not
+			exist.
+
+     [EBADF]		The file descriptor argument for ffsseettaattttrrlliisstt() is not
+			a valid file descriptor.
+
+     [EROFS]		The volume is read-only.
+
+     [EACCES]		Search permission is denied for a component of the
+			path prefix for sseettaattttrrlliisstt().
+
+     [ELOOP]		Too many symbolic links were encountered in translat-
+			ing the pathname for sseettaattttrrlliisstt().
+
+     [EFAULT]		_p_a_t_h, _a_t_t_r_L_i_s_t or _a_t_t_r_B_u_f points to an invalid
+			address.
+
+     [EINVAL]		The _b_i_t_m_a_p_c_o_u_n_t field of _a_t_t_r_L_i_s_t is not
+			ATTR_BIT_MAP_COUNT.
+
+     [EINVAL]		You try to set an invalid attribute.
+
+     [EINVAL]		You try to set an attribute that is read-only.
+
+     [EINVAL]		You try to set volume attributes and directory or file
+			attributes at the same time.
+
+     [EINVAL]		You try to set volume attributes but _p_a_t_h does not
+			reference the root of the volume.
+
+     [EPERM]		You try to set an attribute that can only be set by
+			the owner.
+
+     [EACCES]		You try to set an attribute that's only settable if
+			you have write permission, and you do not have write
+			permission.
+
+     [EINVAL]		The buffer size you specified in _a_t_t_r_B_u_f_S_i_z_e is too
+			small to hold all the attributes that you are trying
+			to set.
+
+     [EIO]		An I/O error occurred while reading from or writing to
+			the file system.
+
+CCAAVVEEAATTSS
+     If you try to set any volume attributes, you must set ATTR_VOL_INFO in
+     the _v_o_l_a_t_t_r field, even though it consumes no data from the attribute
+     buffer.
+
+     For more caveats, see also the compatibility notes above.
+
+EEXXAAMMPPLLEESS
+     The following code shows how to set the file type and creator of a file
+     by getting the ATTR_CMN_FNDRINFO attribute using getattrlist(2), modify-
+     ing the appropriate fields of the 32-byte Finder information structure,
+     and then setting the attribute back using sseettaattttrrlliisstt().  This assumes
+     that the target volume supports the required attributes
+
+     #include <assert.h>
+     #include <stdio.h>
+     #include <stddef.h>
+     #include <string.h>
+     #include <sys/attr.h>
+     #include <sys/errno.h>
+     #include <unistd.h>
+     #include <sys/vnode.h>
+
+     typedef struct attrlist attrlist_t;
+
+     struct FInfoAttrBuf {
+	 u_int32_t	 length;
+	 fsobj_type_t	 objType;
+	 char		 finderInfo[32];
+     };
+     typedef struct FInfoAttrBuf FInfoAttrBuf;
+
+     static int FInfoDemo(
+	 const char *path,
+	 const char *type,
+	 const char *creator
+     )
+     {
+	 int		 err;
+	 attrlist_t	 attrList;
+	 FInfoAttrBuf	 attrBuf;
+
+	 assert( strlen(type)	 == 4 );
+	 assert( strlen(creator) == 4 );
+
+	 memset(&attrList, 0, sizeof(attrList));
+	 attrList.bitmapcount = ATTR_BIT_MAP_COUNT;
+	 attrList.commonattr  = ATTR_CMN_OBJTYPE | ATTR_CMN_FNDRINFO;
+
+	 err = getattrlist(path, &attrList, &attrBuf, sizeof(attrBuf), 0);
+	 if (err != 0) {
+	     err = errno;
+	 }
+
+	 if ( (err == 0) && (attrBuf.objType != VREG) ) {
+	     fprintf(stderr, "Not a standard file.\n");
+	     err = EINVAL;
+	 } else {
+	     memcpy( &attrBuf.finderInfo[0], type,    4 );
+	     memcpy( &attrBuf.finderInfo[4], creator, 4 );
+
+	     attrList.commonattr = ATTR_CMN_FNDRINFO;
+	     err = setattrlist(
+		 path,
+		 &attrList,
+		 attrBuf.finderInfo,
+		 sizeof(attrBuf.finderInfo),
+		 0
+	     );
+	 }
+
+	 return err;
+     }
+
+SSEEEE AALLSSOO
+     chflags(2), chmod(2), chown(2), getattrlist(2), getdirentriesattr(2),
+     searchfs(2), utimes(2)
+
+HHIISSTTOORRYY
+     A sseettaattttrrlliisstt() function call appeared in Darwin 1.3.1 (Mac OS X version
+     10.0).
+
+Darwin			       December 15, 2003			Darwin

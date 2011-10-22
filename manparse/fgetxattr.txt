@@ -1,0 +1,99 @@
+GETXATTR(2)		    BSD System Calls Manual		   GETXATTR(2)
+
+NNAAMMEE
+     ggeettxxaattttrr,, ffggeettxxaattttrr -- get an extended attribute value
+
+SSYYNNOOPPSSIISS
+     ##iinncclluuddee <<ssyyss//xxaattttrr..hh>>
+
+     _s_s_i_z_e___t
+     ggeettxxaattttrr(_c_o_n_s_t _c_h_a_r _*_p_a_t_h, _c_o_n_s_t _c_h_a_r _*_n_a_m_e, _v_o_i_d _*_v_a_l_u_e, _s_i_z_e___t _s_i_z_e,
+	 _u___i_n_t_3_2___t _p_o_s_i_t_i_o_n, _i_n_t _o_p_t_i_o_n_s);
+
+     _s_s_i_z_e___t
+     ffggeettxxaattttrr(_i_n_t _f_d, _c_o_n_s_t _c_h_a_r _*_n_a_m_e, _v_o_i_d _*_v_a_l_u_e, _s_i_z_e___t _s_i_z_e,
+	 _u___i_n_t_3_2___t _p_o_s_i_t_i_o_n, _i_n_t _o_p_t_i_o_n_s);
+
+DDEESSCCRRIIPPTTIIOONN
+     Extended attributes extend the basic attributes of files and directories
+     in the file system.  They are stored as name:data pairs associated with
+     file system objects (files, directories, symlinks, etc).
+
+     The ggeettxxaattttrr() function retrieves up to _s_i_z_e bytes of data from the
+     extended attribute identified by _n_a_m_e associated with _p_a_t_h into the pre-
+     allocated buffer pointed to by _v_a_l_u_e.  The function returns the number of
+     bytes of data retrieved.
+
+     An extended attribute's _n_a_m_e is a simple NULL-terminated UTF-8 string.
+     _p_o_s_i_t_i_o_n specifies an offset within the extended attribute.  In the cur-
+     rent implementation, this argument is only used with the resource fork
+     attribute.  For all other extended attributes, this parameter is reserved
+     and should be zero.
+
+     On success, _v_a_l_u_e contains the data associated with _n_a_m_e.	When _v_a_l_u_e is
+     set to NULL, ggeettxxaattttrr() returns current size of the named attribute.
+     This facility can be used to determine the size of a buffer sufficiently
+     large to hold the data currently associated with the attribute.
+
+     _o_p_t_i_o_n_s specify options for retrieving extended attributes:
+
+     XATTR_NOFOLLOW  do not follow symbolic links.  ggeettxxaattttrr() normally
+		     returns information from the target of _p_a_t_h if it is a
+		     symbolic link.  With this option, ggeettxxaattttrr() will return
+		     extended attribute data from the symbolic link instead.
+
+     XATTR_SHOWCOMPRESSION
+		     ggeettxxaattttrr() and ffggeettxxaattttrr() will return HFS Plus Compres-
+		     sion extended attribute _n_a_m_e (if present) for the file
+		     referred to by _p_a_t_h or _f_d.
+
+     ffggeettxxaattttrr() is identical to ggeettxxaattttrr(), except that it retrieves extended
+     attribute data from the open file referenced by the file descriptor _f_d.
+
+RREETTUURRNN VVAALLUUEESS
+     On success, the size of the extended attribute data is returned.  On
+     failure, -1 is returned and the global variable _e_r_r_n_o is set as follows.
+
+EERRRROORRSS
+     [ENOATTR]		The extended attribute does not exist.
+
+     [ENOTSUP]		The file system does not support extended attributes
+			or has the feature disabled.
+
+     [ERANGE]		_v_a_l_u_e (as indicated by _s_i_z_e) is too small to hold the
+			extended attribute data.
+
+     [EPERM]		The named attribute is not permitted for this type of
+			object.
+
+     [EINVAL]		_n_a_m_e is invalid or _o_p_t_i_o_n_s has an unsupported bit set.
+
+     [EISDIR]		_p_a_t_h or _f_d do not refer to a regular file and the
+			attribute in question is only applicable to files.
+			Similar to EPERM.
+
+     [ENOTDIR]		A component of _p_a_t_h _'_s prefix is not a directory.
+
+     [ENAMETOOLONG]	The length of _n_a_m_e exceeds XATTR_MAXNAMELEN UTF-8
+			bytes, or a component of _p_a_t_h exceeds NAME_MAX charac-
+			ters, or the entire _p_a_t_h exceeds PATH_MAX characters.
+
+     [EACCES]		Search permission is denied for a component of _p_a_t_h or
+			the attribute is not allowed to be read (e.g. an ACL
+			prohibits reading the attributes of this file).
+
+     [ELOOP]		Too many symbolic links were encountered in translat-
+			ing the pathname.
+
+     [EFAULT]		_p_a_t_h or _n_a_m_e points to an invalid address.
+
+     [EIO]		An I/O error occurred while reading from or writing to
+			the file system.
+
+SSEEEE AALLSSOO
+     listxattr(2), removexattr(2), setxattr(2)
+
+HHIISSTTOORRYY
+     ggeettxxaattttrr() and ffggeettxxaattttrr() first appeared in Mac OS X 10.4.
+
+Mac OS X			 Oct 19, 2004			      Mac OS X

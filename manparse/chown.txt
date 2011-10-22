@@ -1,0 +1,99 @@
+CHOWN(2)		    BSD System Calls Manual		      CHOWN(2)
+
+NNAAMMEE
+     cchhoowwnn, ffcchhoowwnn, llcchhoowwnn -- change owner and group of a file
+
+SSYYNNOOPPSSIISS
+     ##iinncclluuddee <<uunniissttdd..hh>>
+
+     _i_n_t
+     cchhoowwnn(_c_o_n_s_t _c_h_a_r _*_p_a_t_h, _u_i_d___t _o_w_n_e_r, _g_i_d___t _g_r_o_u_p);
+
+     _i_n_t
+     ffcchhoowwnn(_i_n_t _f_i_l_d_e_s, _u_i_d___t _o_w_n_e_r, _g_i_d___t _g_r_o_u_p);
+
+     _i_n_t
+     llcchhoowwnn(_c_o_n_s_t _c_h_a_r _*_p_a_t_h, _u_i_d___t _o_w_n_e_r, _g_i_d___t _g_r_o_u_p);
+
+DDEESSCCRRIIPPTTIIOONN
+     The owner ID and group ID of the file named by _p_a_t_h or referenced by
+     _f_i_l_d_e_s is changed as specified by the arguments _o_w_n_e_r and _g_r_o_u_p.  The
+     owner of a file may change the _g_r_o_u_p to a group of which he or she is a
+     member, but the change _o_w_n_e_r capability is restricted to the super-user.
+
+     The cchhoowwnn() system call clears the set-user-id and set-group-id bits on
+     the file to prevent accidental or mischievous creation of set-user-id and
+     set-group-id programs if not executed by the super-user.  The cchhoowwnn()
+     system call follows symbolic links to operate on the target of the link
+     rather than the link itself.
+
+     The ffcchhoowwnn() system call is particularly useful when used in conjunction
+     with the file locking primitives (see flock(2)).
+
+     The llcchhoowwnn() system call is similar to cchhoowwnn() but does not follow sym-
+     bolic links.
+
+     One of the owner or group id's may be left unchanged by specifying it as
+     -1.
+
+RREETTUURRNN VVAALLUUEESS
+     Upon successful completion, the value 0 is returned; otherwise the
+     value -1 is returned and the global variable _e_r_r_n_o is set to indicate the
+     error.
+
+EERRRROORRSS
+     The cchhoowwnn() and llcchhoowwnn() system calls will fail if:
+
+     [EACCES]		Search permission is denied for a component of the
+			path prefix.
+
+     [EFAULT]		The _p_a_t_h argument points outside the process's allo-
+			cated address space.
+
+     [ELOOP]		Too many symbolic links are encountered in translating
+			the pathname.  This is taken to be indicative of a
+			looping symbolic link.
+
+     [ENAMETOOLONG]	A component of a pathname exceeded 255 characters, or
+			an entire path name exceeded 1023 characters.
+
+     [ENOENT]		A component of _p_a_t_h does not exist.
+
+     [ENOTDIR]		A component of the path prefix is not a directory.
+
+     The ffcchhoowwnn() system call will fail if:
+
+     [EBADF]		The _f_i_l_d_e_s argument does not refer to a valid descrip-
+			tor.
+
+     [EINVAL]		The _f_i_l_d_e_s argument refers to a socket, not a file.
+
+     Any of these calls will fail if:
+
+     [EINTR]		Its execution is interrupted by a signal.
+
+     [EIO]		An I/O error occurs while reading from or writing to
+			the file system.
+
+     [EPERM]		The effective user ID does not match the owner of the
+			file and the calling process does not have appropriate
+			(i.e., root) privileges.
+
+     [EROFS]		The named file resides on a read-only file system.
+
+SSEEEE AALLSSOO
+     chgrp(1), chmod(2), flock(2), chown(8)
+
+SSTTAANNDDAARRDDSS
+     The cchhoowwnn() system call is expected to conform to ISO/IEC 9945-1:1990
+     (``POSIX.1'').
+
+HHIISSTTOORRYY
+     The cchhoowwnn() function appeared in Version 7 AT&T UNIX.  The ffcchhoowwnn() sys-
+     tem call appeared in 4.2BSD.
+
+     The cchhoowwnn() and ffcchhoowwnn() system calls were changed to follow symbolic
+     links in 4.4BSD.  The llcchhoowwnn() system call was added in FreeBSD 3.0 to
+     compensate for the loss of functionality.
+
+BSD				April 19, 1994				   BSD

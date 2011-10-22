@@ -1,0 +1,130 @@
+RENAME(2)		    BSD System Calls Manual		     RENAME(2)
+
+NNAAMMEE
+     rreennaammee -- change the name of a file
+
+SSYYNNOOPPSSIISS
+     ##iinncclluuddee <<ssttddiioo..hh>>
+
+     _i_n_t
+     rreennaammee(_c_o_n_s_t _c_h_a_r _*_o_l_d, _c_o_n_s_t _c_h_a_r _*_n_e_w);
+
+DDEESSCCRRIIPPTTIIOONN
+     The rreennaammee() system call causes the link named _o_l_d to be renamed as _n_e_w.
+     If _n_e_w exists, it is first removed.  Both _o_l_d and _n_e_w must be of the same
+     type (that is, both must be either directories or non-directories) and
+     must reside on the same file system.
+
+     The rreennaammee() system call guarantees that an instance of _n_e_w will always
+     exist, even if the system should crash in the middle of the operation.
+
+     If the final component of _o_l_d is a symbolic link, the symbolic link is
+     renamed, not the file or directory to which it points.
+
+CCAAVVEEAATTSS
+     The system can deadlock if a loop is present in the file system graph.
+     This loop takes the form of an entry in directory `_a', say `_a_/_f_o_o', being
+     a hard link to directory `_b', and an entry in directory `_b', say `_b_/_b_a_r',
+     being a hard link to directory `_a'.  When such a loop exists and two sep-
+     arate processes attempt to perform `rename a/foo b/bar' and `rename b/bar
+     a/foo', respectively, the system may deadlock attempting to lock both
+     directories for modification.
+
+     Whether or not hard links to directories are supported is specific to the
+     underlying filesystem implementation.
+
+     It is recommended that any hard links to directories in an underlying
+     filesystem should be replaced by symbolic links by the system administra-
+     tor to avoid the possibility of deadlocks.
+
+     Moving or renaming a file or directory into a directory with inheritable
+     ACLs does not result in ACLs being set on the file or directory. Use
+     acl(3) in conjunction with rreennaammee() to set ACLs on the file or directory.
+
+RREETTUURRNN VVAALLUUEESS
+     A 0 value is returned if the operation succeeds, otherwise rreennaammee()
+     returns -1 and the global variable _e_r_r_n_o indicates the reason for the
+     failure.
+
+EERRRROORRSS
+     The rreennaammee() system call will fail and neither of the argument files will
+     be affected if:
+
+     [EACCES]		A component of either path prefix denies search per-
+			mission.
+
+     [EACCES]		The requested operation requires writing in a direc-
+			tory (e.g., _n_e_w, new/.., or old/..) whose modes disal-
+			low this.
+
+     [EDQUOT]		The directory in which the entry for the new name is
+			being placed cannot be extended because the user's
+			quota of disk blocks on the file system containing the
+			directory has been exhausted.
+
+     [EFAULT]		_P_a_t_h points outside the process's allocated address
+			space.
+
+     [EINVAL]		_O_l_d is a parent directory of _n_e_w, or an attempt is
+			made to rename `.' or `..'.
+
+     [EIO]		An I/O error occurs while making or updating a direc-
+			tory entry.
+
+     [EISDIR]		_n_e_w is a directory, but _o_l_d is not a directory.
+
+     [ELOOP]		Too many symbolic links are encountered in translating
+			either pathname.  This is taken to be indicative of a
+			looping symbolic link.
+
+     [ENAMETOOLONG]	A component of a pathname exceeds {NAME_MAX} charac-
+			ters, or an entire path name exceeds {PATH_MAX} char-
+			acters.
+
+     [ENOENT]		A component of the _o_l_d path does not exist, or a path
+			prefix of _n_e_w does not exist.
+
+     [ENOSPC]		The directory in which the entry for the new name is
+			being placed cannot be extended because there is no
+			space left on the file system containing the direc-
+			tory.
+
+     [ENOTDIR]		A component of either path prefix is not a directory.
+
+     [ENOTDIR]		_o_l_d is a directory, but _n_e_w is not a directory.
+
+     [ENOTEMPTY]	_N_e_w is a directory and is not empty.
+
+     [EPERM]		The directory containing _o_l_d is marked sticky, and
+			neither the containing directory nor _o_l_d are owned by
+			the effective user ID.
+
+     [EPERM]		The _n_e_w file exists, the directory containing _n_e_w is
+			marked sticky, and neither the containing directory
+			nor _n_e_w are owned by the effective user ID.
+
+     [EROFS]		The requested link requires writing in a directory on
+			a read-only file system.
+
+     [EXDEV]		The link named by _n_e_w and the file named by _o_l_d are on
+			different logical devices (file systems).  Note that
+			this error code will not be returned if the implemen-
+			tation permits cross-device links.
+
+CCOONNFFOORRMMAANNCCEE
+     The restriction on renaming a directory whose permissions disallow writ-
+     ing is based on the fact that UFS directories contain a ".." entry.  If
+     renaming a directory would move it to another parent directory, this
+     entry needs to be changed.
+
+     This restriction has been generalized to disallow renaming of any write-
+     disabled directory, even when this would not require a change to the ".."
+     entry.  For consistency, HFS+ directories emulate this behavior.
+
+SSEEEE AALLSSOO
+     open(2), symlink(7)
+
+SSTTAANNDDAARRDDSS
+     The rreennaammee() function conforms to IEEE Std 1003.1-1988 (``POSIX.1'').
+
+4.2 Berkeley Distribution     September 18, 2008     4.2 Berkeley Distribution

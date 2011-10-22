@@ -1,0 +1,60 @@
+NFSCLNT(2)		    BSD System Calls Manual		    NFSCLNT(2)
+
+NNAAMMEE
+     nnffssccllnntt -- NFS client services
+
+SSYYNNOOPPSSIISS
+     ##iinncclluuddee <<uunniissttdd..hh>>
+     ##iinncclluuddee <<nnffss//nnffss..hh>>
+
+     _i_n_t
+     nnffssccllnntt(_i_n_t _f_l_a_g_s, _v_o_i_d _*_a_r_g_s_t_r_u_c_t_p);
+
+DDEESSCCRRIIPPTTIIOONN
+     The nnffssccllnntt() function is used by the NFS client daemons to pass informa-
+     tion into and out of the kernel.  The _f_l_a_g_s argument consists of several
+     bits that show what action is to be taken once in the kernel and the
+     _a_r_g_s_t_r_u_c_t_p points to any corresponding data that the action may require.
+
+     rpc.lockd(8) calls nnffssccllnntt() with the flag NFSCLNT_LOCKDANS and a pointer
+     to a
+
+     struct lockd_ans {
+	     int	     la_version;	     /* lockd_ans version */
+	     int	     la_errno;		     /* return status */
+	     u_int64_t	     la_xid;		     /* unique message transaction ID */
+	     int	     la_flags;		     /* answer flags */
+	     pid_t	     la_pid;		     /* pid of lock requester/owner */
+	     off_t	     la_start;		     /* lock starting offset */
+	     off_t	     la_len;		     /* lock length */
+	     int	     la_fh_len; 	     /* The file handle length. */
+	     u_int8_t	     la_fh[NFSV3_MAX_FH_SIZE];/* The file handle. */
+     };
+
+     to pass the response to an NFS file locking request back into the kernel.
+
+RREETTUURRNN VVAALLUUEESS
+     Upon successful completion, a value of 0 is returned.  Otherwise, -1 is
+     returned and the global variable _e_r_r_n_o is set to specify the error.
+
+EERRRROORRSS
+     [EPERM]		The caller is not the super-user.
+
+     [EINVAL]		The action specified by the _f_l_a_g_s argument was not
+			valid.
+
+     [EFAULT]		_a_r_g_s_t_r_u_c_t_p points to an invalid address.
+
+     [EPIPE]		The response doesn't match any currently-outstanding
+			lock request.
+
+SSEEEE AALLSSOO
+     rpc.lockd(8)
+
+BBUUGGSS
+     The nnffssccllnntt system call is designed specifically for the NFS client dae-
+     mons and as such is specific to their requirements.  Several fields of
+     the argument structures are assumed to be valid, such that nnffssccllnntt must
+     be used with extreme care.
+
+BSD				January 9, 2007 			   BSD

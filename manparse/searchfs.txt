@@ -1,0 +1,513 @@
+SEARCHFS(2)		    BSD System Calls Manual		   SEARCHFS(2)
+
+NNAAMMEE
+     sseeaarrcchhffss -- search a volume quickly
+
+SSYYNNOOPPSSIISS
+     ##iinncclluuddee <<ssyyss//aattttrr..hh>>
+     ##iinncclluuddee <<uunniissttdd..hh>>
+
+     _i_n_t
+     sseeaarrcchhffss(_c_o_n_s_t _c_h_a_r_* _p_a_t_h, _s_t_r_u_c_t _f_s_s_e_a_r_c_h_b_l_o_c_k_* _s_e_a_r_c_h_B_l_o_c_k,
+	 _u_n_s_i_g_n_e_d _i_n_t_* _n_u_m_M_a_t_c_h_e_s, _u_n_s_i_g_n_e_d _i_n_t _s_c_r_i_p_t_C_o_d_e,
+	 _u_n_s_i_g_n_e_d _i_n_t _o_p_t_i_o_n_s, _s_t_r_u_c_t _s_e_a_r_c_h_s_t_a_t_e_* _s_t_a_t_e);
+
+DDEESSCCRRIIPPTTIIOONN
+     The sseeaarrcchhffss() function searches the volume (that is, mounted file sys-
+     tem) specified by _p_a_t_h for file system objects matching the criteria
+     specified by _s_e_a_r_c_h_B_l_o_c_k, _s_c_r_i_p_t_C_o_d_e, and _o_p_t_i_o_n_s.  The _n_u_m_M_a_t_c_h_e_s param-
+     eter returns the number of matching file system objects found.  The func-
+     tion also returns attributes of those file system objects in a buffer
+     specified by _s_e_a_r_c_h_B_l_o_c_k.	The _s_e_a_r_c_h_S_t_a_t_e parameter allows you search
+     the volume using multiple calls to sseeaarrcchhffss(), resuming the search where
+     it left off.  The routine will only return objects to which you have
+     access (that is, you have execute permissions on the directories leading
+     to this object from the root).
+
+     The _p_a_t_h parameter must reference a valid file system object on the vol-
+     ume to be searched.  Typically the path is to the volume's root direc-
+     tory.  The entire volume is always searched.  All directories listed in
+     the path name leading to this object must be searchable.
+
+     The _s_e_a_r_c_h_B_l_o_c_k parameter is a pointer to an _f_s_s_e_a_r_c_h_b_l_o_c_k structure, as
+     defined by <_s_y_s_/_a_t_t_r_._h> (shown below).  You are responsible for filling
+     out all fields of this structure before calling the function.
+
+     struct fssearchblock {
+	 struct attrlist *   returnattrs;
+	 void * 	     returnbuffer;
+	 size_t 	     returnbuffersize;
+	 unsigned int	     maxmatches;
+	 struct timeval      timelimit;
+	 void * 	     searchparams1;
+	 size_t 	     sizeofsearchparams1;
+	 void * 	     searchparams2;
+	 size_t 	     sizeofsearchparams2;
+	 struct attrlist     searchattrs;
+     };
+
+     For information about the _a_t_t_r_l_i_s_t structure, see the discussion of
+     getattrlist(2).
+
+     The fields of the _f_s_s_e_a_r_c_h_b_l_o_c_k structure are defined as follows.
+
+     returnattrs	  sseeaarrcchhffss() can return arbitrary attributes of the
+			  file system objects that meet the designated search
+			  criteria passed in via _s_e_a_r_c_h_p_a_r_a_m_s_1 and
+			  _s_e_a_r_c_h_p_a_r_a_m_s_2_. This field must point to an _a_t_t_r_l_i_s_t
+			  structure that specifies the attributes that you
+			  want returned.  To request an attribute you must set
+			  the corresponding bit in the appropriate _a_t_t_r_g_r_o_u_p___t
+			  field of the _a_t_t_r_l_i_s_t structure.  You are responsi-
+			  ble for filling out all fields of this structure
+			  before calling the function.	You must not request
+			  volume attributes.
+
+     returnbuffer	  sseeaarrcchhffss() places attributes of the matching file
+			  system objects into this returned attributes buffer.
+			  The attributes for any given object are grouped
+			  together and packed in exactly the same way as they
+			  would be returned from getdirentriesattr(2).	The
+			  initial contents of this buffer are ignored.
+
+     returnbuffersize	  Set this field to the size, in bytes, of the buffer
+			  pointed to by _r_e_t_u_r_n_b_u_f_f_e_r.
+
+     maxmatches 	  Specifies the maximum number of matches that you
+			  want this call to sseeaarrcchhffss() to return.
+
+     timelimit		  Specifies the maximum time that you want this call
+			  to sseeaarrcchhffss() to run.
+
+			  If you're implementing a volume format, you should
+			  impose your own internal limit on the duration of
+			  this call to prevent a malicious user program from
+			  monopolizing kernel resources.
+
+     searchparams1	  Specifies the lower bound of the search criteria.
+			  This is discussed in detail below.  You must place
+			  attribute values into the buffer in the same way as
+			  they would be returned by getattrlist(2), where the
+			  _s_e_a_r_c_h_a_t_t_r_s field determines the exact layout of the
+			  attribute values.
+
+     sizeofsearchparams1  Set this field to the size, in bytes, of the buffer
+			  pointed to by _s_e_a_r_c_h_p_a_r_a_m_s_1.
+
+     searchparams2	  Specifies the upper bound of the search criteria.
+			  This is discussed in detail below.  You must place
+			  attribute values into the buffer in the same way as
+			  they would be returned by getattrlist(2), where the
+			  _s_e_a_r_c_h_a_t_t_r_s field determines the exact layout of the
+			  attribute values.
+
+     sizeofsearchparams2  Set this field to the size, in bytes, of the buffer
+			  pointed to by _s_e_a_r_c_h_p_a_r_a_m_s_2.
+
+     searchattrs	  Specifies the attributes that you want you use for
+			  your search criteria.  You are responsible for fill-
+			  ing out all fields of this structure before calling
+			  the function.  To search for an attribute you must
+			  set the corresponding bit in the appropriate
+			  _a_t_t_r_g_r_o_u_p___t field of the _a_t_t_r_l_i_s_t structure, and
+			  place the appropriate values into the _s_e_a_r_c_h_p_a_r_a_m_1
+			  and _s_e_a_r_c_h_p_a_r_a_m_2 buffers.  The attributes specified
+			  here determine the format of those buffers.  This is
+			  discussed in detail below.
+
+     The _n_u_m_M_a_t_c_h_e_s parameter points to an _u_n_s_i_g_n_e_d _i_n_t variable.  The initial
+     value of this variable is ignored.  On return, this variable contains the
+     number of matching file system objects found.  The is always less than or
+     equal to the _m_a_x_m_a_t_c_h_e_s field of the _s_e_a_r_c_h_B_l_o_c_k parameter.  The
+     attributes for the matching objects have been placed into the returned
+     attributes buffer.
+
+     The _s_c_r_i_p_t_C_o_d_e parameter is currently ignored.  You should always pass in
+     the value 0x08000103, which corresponds to the UTF-8 text encoding value
+     defined by <_C_a_r_b_o_n_C_o_r_e_/_T_e_x_t_C_o_m_m_o_n_._h>.
+
+     The _o_p_t_i_o_n_s parameter is a bit set that controls the behaviour of
+     sseeaarrcchhffss().  The following option bits are defined.
+
+     SRCHFS_START	       If this bit is set, sseeaarrcchhffss() will ignore the
+			       _s_t_a_t_e parameter and start a new search.	Other-
+			       wise sseeaarrcchhffss() assumes that _s_e_a_r_c_h_s_t_a_t_e is
+			       valid and attempts to resume a previous search
+			       based on that state.
+
+     SRCHFS_MATCHPARTIALNAMES  If this bit is set, sseeaarrcchhffss() will consider
+			       substrings to be successful matches when evalu-
+			       ating the ATTR_CMN_NAME attribute.
+
+     SRCHFS_MATCHDIRS	       If this bit is set, sseeaarrcchhffss() will search for
+			       directories that match the search criteria.  To
+			       get meaningful results you must specify either
+			       this bit or SRCHFS_MATCHFILES, or both.
+
+     SRCHFS_MATCHFILES	       If this bit is set, sseeaarrcchhffss() will search for
+			       files that match the search criteria.  To get
+			       meaningful results you must specify either this
+			       bit or SRCHFS_MATCHDIRS, or both.
+
+     SRCHFS_SKIPLINKS	       If this bit is set, sseeaarrcchhffss() will only return
+			       one reference for a hard linked file, rather
+			       than a reference for each hard link to the
+			       file.
+
+			       This option is not recommended for general
+			       development.  Its primary client is the
+			       quotacheck(2) utility.  Note that not all
+			       filesystems that support sseeaarrcchhffss() support
+			       this option and may return EINVAL if it is
+			       requested.
+
+			       This option is privileged (the caller's effec-
+			       tive UID must be 0) and cannot be used if you
+			       request the ATTR_CMN_NAME or ATTR_CMN_PAROBJID
+			       attributes.
+
+			       Introduced with Darwin 7.0 (Mac OS X version
+			       10.3).
+
+     SRCHFS_SKIPINVISIBLE      If this bit is set, sseeaarrcchhffss() will not match
+			       any invisible file system objects (that is,
+			       objects whose ATTR_CMN_FNDRINFO attribute has
+			       bit 6 set in the ninth byte) or any objects
+			       within invisible directories.
+
+			       Introduced with Darwin 7.0 (Mac OS X version
+			       10.3).
+
+     SRCHFS_SKIPPACKAGES       If this bit is set, sseeaarrcchhffss() will not match
+			       any file system objects that are inside a pack-
+			       age.  A package is defined as a directory whose
+			       extension matches one of the extensions that
+			       are configured into the kernel by Launch Ser-
+			       vices.
+
+			       Introduced with Darwin 7.0 (Mac OS X version
+			       10.3).
+
+     SRCHFS_SKIPINAPPROPRIATE  If this bit is set, sseeaarrcchhffss() will not match
+			       any file system objects that are within an
+			       inappropriate directory.  The current list of
+			       inappropriate directories contains one item:
+			       /System.
+
+			       Introduced with Darwin 7.0 (Mac OS X version
+			       10.3).
+
+     SRCHFS_NEGATEPARAMS       If this bit is set, sseeaarrcchhffss() will return all
+			       the file system objects that do not match the
+			       search criteria.
+
+			       Introduced with Darwin 7.0 (Mac OS X version
+			       10.3).
+
+     The _s_t_a_t_e parameter is a pointer to an opaque data structure that
+     sseeaarrcchhffss() uses to maintain the state of a search between successive
+     calls.  In your first call to sseeaarrcchhffss(), you specify the SRCHFS_START
+     flag in the _o_p_t_i_o_n_s parameter.  This tells sseeaarrcchhffss() that the search
+     state is invalid and that it should start a new search.  When this call
+     completes, it may have only returned partial results; in that case, it
+     will have updated the structure pointed to by _s_t_a_t_e.  If you call
+     sseeaarrcchhffss() again, this time without specifying the SRCHFS_START flag in
+     the _o_p_t_i_o_n_s parameter, it will resume the search where it left off, using
+     the search state that it previously stored in the state structure.  You
+     do not need to explicitly dispose of this state.
+
+     The sseeaarrcchhffss() function returns significant errors in the followings
+     cases.
+
+     ++oo	 If it has found as many objects as you requested in the _m_a_x_m_a_t_c_h_e_s
+	 field of the _s_e_a_r_c_h_B_l_o_c_k parameter, it will return EAGAIN.
+
+     ++oo	 If there is not enough space in the returned attributes buffer for
+	 the first match, it will return ENOBUFS.  You should allocate a
+	 larger returned attributes buffer and try again.  _n_u_m_M_a_t_c_h_e_s will be
+	 zero in this case.
+
+     ++oo	 If the timeout expires it will return EAGAIN.
+
+     ++oo	 If you attempt to resume a search (that is, SRCHFS_START is not spec-
+	 ified in the _o_p_t_i_o_n_s parameter) and the catalog has changed since the
+	 last search, the function will return EBUSY.  You must start your
+	 search again from the beginning.
+
+     If sseeaarrcchhffss() returns EAGAIN, the value in _n_u_m_M_a_t_c_h_e_s may be greater than
+     zero.  This is known as a partial result.	You should be sure to process
+     these matches before calling sseeaarrcchhffss() again.
+
+SSEEAARRCCHH CCRRIITTEERRIIAA
+     You specify the search criteria using a combination of the _s_e_a_r_c_h_a_t_t_r_s,
+     _s_e_a_r_c_h_p_a_r_a_m_s_1, _s_i_z_e_o_f_s_e_a_r_c_h_p_a_r_a_m_s_1_, _s_e_a_r_c_h_p_a_r_a_m_s_2, and
+     _s_i_z_e_o_f_s_e_a_r_c_h_p_a_r_a_m_s_2 fields of the _s_e_a_r_c_h_B_l_o_c_k parameter, and various
+     flags in the _o_p_t_i_o_n_s parameter.  The _s_e_a_r_c_h_a_t_t_r_s field determines the
+     attributes considered when comparing a file system object to the search
+     criteria.	You can specify that an attribute should be considered by set-
+     ting the corresponding bit in the appropriate _a_t_t_r_g_r_o_u_p___t field of the
+     _a_t_t_r_l_i_s_t structure.  See the discussion of getattrlist(2) for a detailed
+     description of this structure.
+
+     The _s_e_a_r_c_h_p_a_r_a_m_s_1, _s_i_z_e_o_f_s_e_a_r_c_h_p_a_r_a_m_s_1, _s_e_a_r_c_h_p_a_r_a_m_s_2, and
+     _s_i_z_e_o_f_s_e_a_r_c_h_p_a_r_a_m_s_2 fields specify the attribute values that must be
+     matched.  The format of each of these buffers is determined by the
+     attributes that you're searching for.  The values are packed in exactly
+     the same way as they would be returned from getattrlist(2), including the
+     leading _u___i_n_t_3_2___t length value.  Note that the size of these buffers must
+     be bounded by SEARCHFS_MAX_SEARCHPARMS bytes, which is defined in
+     <sys/attr.h>.
+
+     The attribute values in the first and second search buffers form a lower
+     and upper bound for the search, respectively.  These have different mean-
+     ings depending on the type of attribute.
+
+     ++oo	 For string attributes (specifically ATTR_CMN_NAME, the object name),
+	 the value in the first search buffer is significant and the value in
+	 the second search buffer is ignored.  The string comparison is either
+	 an exact match or a substring match depending on the
+	 SRCHFS_MATCHPARTIALNAMES flag in the _o_p_t_i_o_n_s parameter.
+
+     ++oo	 For structured attributes (specifically ATTR_CMN_FNDRINFO, the Finder
+	 information), the value from the file system object is masked (logi-
+	 cal AND) with the value in the second search buffer and then com-
+	 pared, byte for byte, against the value in the first search buffer.
+	 If it is equal, the object is a match.
+
+     ++oo	 For scalar attributes (all other attributes, for example,
+	 ATTR_CMN_MODTIME, the modification date), the values in the first and
+	 second search buffers are literally a lower and upper bound.  An
+	 object matches the criteria if its value is greater than or equal to
+	 the value in the first buffer and less than or equal to the value in
+	 the second.
+
+RREETTUURRNN VVAALLUUEESS
+     Upon successful completion, a value of 0 is returned.  This means that
+     the entire volume has been searched and all matches returned.  Otherwise,
+     a value of -1 is returned and _e_r_r_n_o is set to indicate the error.
+
+     See the discussion of the EAGAIN, ENOBUFS, and EBUSY error codes above.
+
+CCOOMMPPAATTIIBBIILLIITTYY
+     Not all volumes support sseeaarrcchhffss().  You can test whether a volume sup-
+     ports sseeaarrcchhffss() by using getattrlist(2) to get the volume capabilities
+     attribute ATTR_VOL_CAPABILITIES, and then testing the
+     VOL_CAP_INT_SEARCHFS flag.
+
+     The sseeaarrcchhffss() function has been undocumented for more than two years.
+     In that time a number of volume format implementations have been created
+     without a proper specification for the behaviour of this routine.	You
+     may encounter volume format implementations with slightly different be-
+     haviour than what is described here.  Your program is expected to be tol-
+     erant of this variant behaviour.
+
+     If you're implementing a volume format that supports sseeaarrcchhffss(), you
+     should be careful to support the behaviour specified by this document.
+
+     A bug in systems prior to Darwin 7.0 (Mac OS X version 10.3) makes
+     searching for the ATTR_CMN_BKUPTIME attribute tricky.  The bug causes the
+     attribute to consume two items in the search attribute buffers, the first
+     in the proper place and the second between ATTR_CMN_FNDRINFO and
+     ATTR_CMN_OWNERID.
+
+EERRRROORRSS
+     sseeaarrcchhffss() will fail if:
+
+     [ENOTSUP]		The volume does not support sseeaarrcchhffss().
+
+     [ENOTDIR]		A component of the path prefix is not a directory.
+
+     [ENAMETOOLONG]	A component of a path name exceeded NAME_MAX charac-
+			ters, or an entire path name exceeded PATH_MAX charac-
+			ters.
+
+     [ENOENT]		The file system object does not exist.
+
+     [EACCES]		Search permission is denied for a component of the
+			path prefix.
+
+     [ELOOP]		Too many symbolic links were encountered in translat-
+			ing the pathname.
+
+     [EFAULT]		One of the pointer parameters points to an invalid
+			address.
+
+     [EINVAL]		The _o_p_t_i_o_n_s parameter contains an invalid flag or
+			sizeofsearchparams1/2 is greater than
+			SEARCHFS_MAX_SEARCHPARMS (see attr.h).	Additionally,
+			filesystems that do not support SRCHFS_SKIPLINKS may
+			return EINVAL if this search option is requested.
+
+     [EAGAIN]		The search terminated with partial results, either
+			because _n_u_m_M_a_t_c_h_e_s has hit the limit specified by
+			_m_a_x_m_a_t_c_h_e_s or because the timeout expired.  Process
+			the matches returned so far and then call sseeaarrcchhffss()
+			again to look for more.
+
+     [ENOBUFS]		The returned attributes buffer is too small for the
+			first match.  You should allocate a larger returned
+			attributes buffer and try again.  _n_u_m_M_a_t_c_h_e_s will be
+			zero in this case.
+
+     [EBUSY]		The search could not be resumed because the volume has
+			changed.
+
+     [EIO]		An I/O error occurred while reading from or writing to
+			the file system.
+
+CCAAVVEEAATTSS
+     The list of searchable attributes currently includes:
+
+     ATTR_CMN_NAME
+     ATTR_CMN_OBJID
+     ATTR_CMN_PAROBJID
+     ATTR_CMN_CRTIME
+     ATTR_CMN_MODTIME
+     ATTR_CMN_CHGTIME
+     ATTR_CMN_ACCTIME
+     ATTR_CMN_BKUPTIME
+     ATTR_CMN_FNDRINFO
+     ATTR_CMN_BKUPTIME
+     ATTR_CMN_OWNERID
+     ATTR_CMN_GRPID
+     ATTR_CMN_ACCESSMASK
+
+     ATTR_DIR_ENTRYCOUNT
+
+     ATTR_FILE_DATALENGTH
+     ATTR_FILE_DATAALLOCSIZE
+     ATTR_FILE_RSRCLENGTH
+     ATTR_FILE_RSRCALLOCSIZE
+
+EEXXAAMMPPLLEESS
+     The following code searches a volume for files of the specified type and
+     creator.
+
+     #include <assert.h>
+     #include <stdio.h>
+     #include <stddef.h>
+     #include <string.h>
+     #include <sys/attr.h>
+     #include <sys/errno.h>
+     #include <unistd.h>
+
+     typedef struct attrlist	     attrlist_t;
+     typedef struct fssearchblock    fssearchblock_t;
+     typedef struct searchstate      searchstate_t;
+
+     struct SearchAttrBuf {
+	 u_int32_t	 length;
+	 char		 finderInfo[32];
+     };
+     typedef struct SearchAttrBuf SearchAttrBuf;
+
+     struct ResultAttrBuf {
+	 u_int32_t	 length;
+	 attrreference_t name;
+	 fsobj_id_t	 parObjID;
+     };
+     typedef struct ResultAttrBuf ResultAttrBuf;
+
+     enum {
+	 kMatchesPerCall = 16
+     };
+
+     static int SearchFSDemo(
+	 const char *volPath,
+	 const char *type,
+	 const char *creator
+     )
+     {
+	 int		 err;
+	 fssearchblock_t searchBlock;
+	 SearchAttrBuf	 lower;
+	 SearchAttrBuf	 upper;
+	 static const unsigned char kAllOnes[4] = { 0xFF, 0xFF, 0xFF, 0xFF };
+	 unsigned int	 matchCount;
+	 unsigned int	 matchIndex;
+	 unsigned int	 options;
+	 searchstate_t	 state;
+	 ResultAttrBuf * thisEntry;
+	 attrlist_t	 returnAttrList;
+	 char		 resultAttrBuf[  kMatchesPerCall
+				       * (sizeof(ResultAttrBuf) + 64)];
+
+	 // resultAttrBuf is big enough for kMatchesPerCall entries,
+	 // assuming that the average name length is less than 64.
+
+	 assert(strlen(type)	== 4);
+	 assert(strlen(creator) == 4);
+
+	 memset(&searchBlock, 0, sizeof(searchBlock));
+	 searchBlock.searchattrs.bitmapcount = ATTR_BIT_MAP_COUNT;
+	 searchBlock.searchattrs.commonattr  = ATTR_CMN_FNDRINFO;
+
+	 memset(&lower, 0, sizeof(lower));
+	 memset(&upper, 0, sizeof(upper));
+	 lower.length = sizeof(lower);
+	 upper.length = sizeof(upper);
+	 memcpy(&lower.finderInfo[0], type,	4);
+	 memcpy(&lower.finderInfo[4], creator,	4);
+	 memcpy(&upper.finderInfo[0], kAllOnes, 4);
+	 memcpy(&upper.finderInfo[4], kAllOnes, 4);
+	 searchBlock.searchparams1	 = &lower;
+	 searchBlock.sizeofsearchparams1 = sizeof(lower);
+	 searchBlock.searchparams2	 = &upper;
+	 searchBlock.sizeofsearchparams2 = sizeof(lower);
+
+	 searchBlock.timelimit.tv_sec  = 0;
+	 searchBlock.timelimit.tv_usec = 100 * 1000;
+
+	 searchBlock.maxmatches = kMatchesPerCall;
+
+	 memset(&returnAttrList, 0, sizeof(returnAttrList));
+	 returnAttrList.bitmapcount = ATTR_BIT_MAP_COUNT;
+	 returnAttrList.commonattr  = ATTR_CMN_NAME | ATTR_CMN_PAROBJID;
+
+	 searchBlock.returnattrs = &returnAttrList;
+	 searchBlock.returnbuffer = resultAttrBuf;
+	 searchBlock.returnbuffersize = sizeof(resultAttrBuf);
+
+	 options = SRCHFS_START | SRCHFS_MATCHFILES;
+
+	 do {
+	     err = searchfs(
+		 volPath,
+		 &searchBlock,
+		 &matchCount,
+		 0x08000103,
+		 options,
+		 &state
+	     );
+	     if (err != 0) {
+		 err = errno;
+	     }
+	     if ( (err == 0) || (err == EAGAIN) ) {
+		 thisEntry = (ResultAttrBuf *) resultAttrBuf;
+
+		 for (matchIndex = 0; matchIndex < matchCount; matchIndex++) {
+		     printf("%08x ", thisEntry->parObjID.fid_objno);
+		     printf(
+			 "%s\n",
+			 ((char *) &thisEntry->name)
+			     + thisEntry->name.attr_dataoffset
+		     );
+		     // Advance to the next entry.
+		     ((char *) thisEntry) += thisEntry->length;
+		 }
+	     }
+
+	     options &= ~SRCHFS_START;
+	 } while (err == EAGAIN);
+
+	 return err;
+     }
+
+SSEEEE AALLSSOO
+     getattrlist(2)
+
+HHIISSTTOORRYY
+     A sseeaarrcchhffss() function call appeared in Darwin 1.3.1 (Mac OS X version
+     10.0).
+
+Darwin			       October 13, 2008 			Darwin

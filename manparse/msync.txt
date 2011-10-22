@@ -1,0 +1,62 @@
+MSYNC(2)		    BSD System Calls Manual		      MSYNC(2)
+
+NNAAMMEE
+     mmssyynncc -- synchronize a mapped region
+
+LLIIBBRRAARRYY
+     Standard C Library (libc, -lc)
+
+SSYYNNOOPPSSIISS
+     ##iinncclluuddee <<ssyyss//mmmmaann..hh>>
+
+     _i_n_t
+     mmssyynncc(_v_o_i_d _*_a_d_d_r, _s_i_z_e___t _l_e_n, _i_n_t _f_l_a_g_s);
+
+DDEESSCCRRIIPPTTIIOONN
+     The mmssyynncc() system call writes modified whole pages back to the filesys-
+     tem and updates the file modification time.  Only those pages containing
+     _a_d_d_r and _l_e_n_-_1 succeeding locations will be examined.
+
+     The _f_l_a_g_s argument may be specified as follows:
+
+     MS_ASYNC	     Return immediately
+     MS_SYNC	     Perform synchronous writes
+     MS_INVALIDATE   Invalidate all cached data
+
+     The _M_S___A_S_Y_N_C flag is not permitted to be combined with other flags.
+
+RREETTUURRNN VVAALLUUEESS
+     If any errors occur, -1 is returned and errno is set to indicate the
+     error.  Otherwise, a 0 value is returned.
+
+EERRRROORRSS
+     mmssyynncc() will fail if:
+
+     [EBUSY]		Some of the specified addresses are locked and
+			MS_INVALIDATE is specified.
+
+     [EINVAL]		_a_d_d_r is not a multiple of the hardware page size.
+
+     [EINVAL]		_l_e_n is too large, or less than 1.
+
+     [EINVAL]		_f_l_a_g_s is invalid (e.g., it combines MS_ASYNC with
+			another flag, which is not permitted).
+
+     [EIO]		An I/O error occurs while writing to the file system.
+
+     [ENOMEM]		The specified address range is outside of the address
+			range of the process or includes an unmapped page.
+
+LLEEGGAACCYY SSYYNNOOPPSSIISS
+     ##iinncclluuddee <<ssyyss//ttyyppeess..hh>>
+     ##iinncclluuddee <<ssyyss//mmmmaann..hh>>
+
+     The include file <_s_y_s_/_t_y_p_e_s_._h> is necessary.
+
+SSEEEE AALLSSOO
+     madvise(2), mincore(2), mprotect(2), munmap(2), compat(5)
+
+HHIISSTTOORRYY
+     The mmssyynncc() function first appeared in 4.4BSD.
+
+BSD				 June 21, 1994				   BSD

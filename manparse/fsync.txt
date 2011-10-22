@@ -1,0 +1,64 @@
+FSYNC(2)		    BSD System Calls Manual		      FSYNC(2)
+
+NNAAMMEE
+     ffssyynncc -- synchronize a file's in-core state with that on disk
+
+SSYYNNOOPPSSIISS
+     ##iinncclluuddee <<uunniissttdd..hh>>
+
+     _i_n_t
+     ffssyynncc(_i_n_t _f_i_l_d_e_s);
+
+DDEESSCCRRIIPPTTIIOONN
+     FFssyynncc() causes all modified data and attributes of _f_i_l_d_e_s to be moved to
+     a permanent storage device.  This normally results in all in-core modi-
+     fied copies of buffers for the associated file to be written to a disk.
+
+     Note that while ffssyynncc() will flush all data from the host to the drive
+     (i.e. the "permanent storage device"), the drive itself may not physi-
+     cally write the data to the platters for quite some time and it may be
+     written in an out-of-order sequence.
+
+     Specifically, if the drive loses power or the OS crashes, the application
+     may find that only some or none of their data was written.  The disk
+     drive may also re-order the data so that later writes may be present,
+     while earlier writes are not.
+
+     This is not a theoretical edge case.  This scenario is easily reproduced
+     with real world workloads and drive power failures.
+
+     For applications that require tighter guarantees about the integrity of
+     their data, Mac OS X provides the F_FULLFSYNC fcntl.  The F_FULLFSYNC
+     fcntl asks the drive to flush all buffered data to permanent storage.
+     Applications, such as databases, that require a strict ordering of writes
+     should use F_FULLFSYNC to ensure that their data is written in the order
+     they expect.  Please see fcntl(2) for more detail.
+
+RREETTUURRNN VVAALLUUEESS
+     The ffssyynncc() function returns the value 0 if successful; otherwise the
+     value -1 is returned and the global variable _e_r_r_n_o is set to indicate the
+     error.
+
+EERRRROORRSS
+     The ffssyynncc() system call will fail if:
+
+     [EBADF]		_f_i_l_d_e_s is not a valid descriptor.
+
+     [EINTR]		Its execution is interrupted by a signal.
+
+     [EINVAL]		_f_i_l_d_e_s refers to a file type (e.g., a socket) that
+			does not support this operation.
+
+     [EIO]		An I/O error occurred while reading from or writing to
+			the file system.
+
+     If a queued I/O operation fails, ffssyynncc() may fail with any of the errors
+     defined for read(2) or write(2).
+
+SSEEEE AALLSSOO
+     fcntl(2), read(2), sync(2), write(2), sync(8), update(8)
+
+HHIISSTTOORRYY
+     The ffssyynncc() function call appeared in 4.2BSD.
+
+4.2 Berkeley Distribution	 June 4, 1993	     4.2 Berkeley Distribution

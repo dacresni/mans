@@ -1,0 +1,147 @@
+SEMOP(2)		    BSD System Calls Manual		      SEMOP(2)
+
+NNAAMMEE
+     sseemmoopp -- atomic array of operations on a semaphore set
+
+SSYYNNOOPPSSIISS
+     ##iinncclluuddee <<ssyyss//sseemm..hh>>
+
+     _i_n_t
+     sseemmoopp(_i_n_t _s_e_m_i_d, _s_t_r_u_c_t _s_e_m_b_u_f _*_s_o_p_s, _s_i_z_e___t _n_s_o_p_s);
+
+DDEESSCCRRIIPPTTIIOONN
+     The sseemmoopp() system call atomically performs the array of operations indi-
+     cated by _s_o_p_s on the semaphore set indicated by _s_e_m_i_d.  The length of
+     _s_o_p_s is indicated by _n_s_o_p_s.  Each operation is encoded in a _s_t_r_u_c_t
+     _s_e_m_b_u_f, which is defined as follows:
+
+     struct sembuf {
+	     u_short sem_num;	     /* semaphore # */
+	     short   sem_op;	     /* semaphore operation */
+	     short   sem_flg;	     /* operation flags */
+     };
+
+     For each element in _s_o_p_s, _s_e_m___o_p and _s_e_m___f_l_g determine an operation to be
+     performed on semaphore number _s_e_m___n_u_m in the set.	The values SEM_UNDO
+     and IPC_NOWAIT may be _O_R'ed into the _s_e_m___f_l_g member in order to modify
+     the behavior of the given operation.
+
+     The operation performed depends as follows on the value of _s_e_m___o_p:
+
+     ++oo	 When _s_e_m___o_p is positive and the process has alter permission, the
+	 semaphore's value is incremented by _s_e_m___o_p's value.  If SEM_UNDO is
+	 specified, the semaphore's adjust on exit value is decremented by
+	 _s_e_m___o_p's value.  A positive value for _s_e_m___o_p generally corresponds to
+	 a process releasing a resource associated with the semaphore.
+
+     ++oo	 The behavior when _s_e_m___o_p is negative and the process has alter per-
+	 mission, depends on the current value of the semaphore:
+
+	 ++oo   If the current value of the semaphore is greater than or equal to
+	     the absolute value of _s_e_m___o_p, then the value is decremented by
+	     the absolute value of _s_e_m___o_p.  If SEM_UNDO is specified, the sem-
+	     aphore's adjust on exit value is incremented by the absolute
+	     value of _s_e_m___o_p.
+
+	 ++oo   If the current value of the semaphore is less than the absolute
+	     value of _s_e_m___o_p, one of the following happens:
+
+	     ++oo	 If IPC_NOWAIT was specified, then sseemmoopp() returns immediately
+		 with a return value of EAGAIN.
+
+	     ++oo	 Otherwise, the calling process is put to sleep until one of
+		 the following conditions is satisfied:
+
+		 ++oo   Some other process removes the semaphore with the
+		     IPC_RMID option of semctl(2).  In this case, sseemmoopp()
+		     returns immediately with a return value of EIDRM.
+
+		 ++oo   The process receives a signal that is to be caught.  In
+		     this case, the process will resume execution as defined
+		     by sigaction(2).
+
+		 ++oo   The semaphore's value is greater than or equal to the
+		     absolute value of _s_e_m___o_p.	When this condition becomes
+		     true, the semaphore's value is decremented by the abso-
+		     lute value of _s_e_m___o_p, the semaphore's adjust on exit
+		     value is incremented by the absolute value of _s_e_m___o_p.
+
+	 A negative value for _s_e_m___o_p generally means that a process is waiting
+	 for a resource to become available.
+
+     ++oo	 When _s_e_m___o_p is zero and the process has read permission, one of the
+	 following will occur:
+
+	 ++oo   If the current value of the semaphore is equal to zero then
+	     sseemmoopp() can return immediately.
+
+	 ++oo   If IPC_NOWAIT was specified, then sseemmoopp() returns immediately
+	     with a return value of EAGAIN.
+
+	 ++oo   Otherwise, the calling process is put to sleep until one of the
+	     following conditions is satisfied:
+
+	     ++oo	 Some other process removes the semaphore with the IPC_RMID
+		 option of semctl(2).  In this case, sseemmoopp() returns immedi-
+		 ately with a return value of EIDRM.
+
+	     ++oo	 The process receives a signal that is to be caught.  In this
+		 case, the process will resume execution as defined by
+		 sigaction(2).
+
+	     ++oo	 The semaphore's value becomes zero.
+
+     For each semaphore a process has in use, the kernel maintains an ``adjust
+     on exit'' value, as alluded to earlier.  When a process exits, either
+     voluntarily or involuntarily, the adjust on exit value for each semaphore
+     is added to the semaphore's value.  This can be used to insure that a
+     resource is released if a process terminates unexpectedly.
+
+RREETTUURRNN VVAALLUUEESS
+     The sseemmoopp() function returns the value 0 if successful; otherwise the
+     value -1 is returned and the global variable _e_r_r_n_o is set to indicate the
+     error.
+
+EERRRROORRSS
+     The sseemmoopp() system call will fail if:
+
+     [E2BIG]		Too many operations are specified.  [SEMOPM]
+
+     [EACCES]		Permission is denied, due to a mismatch between the
+			operation and the mode of the semaphore set.
+
+     [EAGAIN]		The semaphore's value would result in the process
+			being put to sleep and IPC_NOWAIT is specified.
+
+     [EFBIG]		_s_e_m___n_u_m is not in the range of valid semaphores for
+			the set.
+
+     [EIDRM]		The semaphore set is removed from the system.
+
+     [EINTR]		The sseemmoopp() system call is interrupted by a signal.
+
+     [EINVAL]		No semaphore set corresponds to _s_e_m_i_d, or the process
+			would exceed the system-defined limit for the number
+			of per-process SEM_UNDO structures.
+
+     [ENOSPC]		The system SEM_UNDO pool [SEMMNU] is full.
+
+     [ERANGE]		The requested operation would cause either the sema-
+			phore's current value [SEMVMX] or its adjust-on-exit
+			value [SEMAEM] to exceed the system-imposed limits.
+
+LLEEGGAACCYY SSYYNNOOPPSSIISS
+     ##iinncclluuddee <<ssyyss//ttyyppeess..hh>>
+     ##iinncclluuddee <<ssyyss//iippcc..hh>>
+     ##iinncclluuddee <<ssyyss//sseemm..hh>>
+
+     The include files <_s_y_s_/_t_y_p_e_s_._h> and <_s_y_s_/_i_p_c_._h> are necessary.
+
+SSEEEE AALLSSOO
+     semctl(2), semget(2), sigaction(2), compat(5)
+
+BBUUGGSS
+     The sseemmoopp() system call may block waiting for memory even if IPC_NOWAIT
+     was specified.
+
+BSD			      September 22, 1995			   BSD

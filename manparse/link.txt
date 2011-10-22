@@ -1,0 +1,97 @@
+LINK(2) 		    BSD System Calls Manual		       LINK(2)
+
+NNAAMMEE
+     lliinnkk -- make a hard file link
+
+SSYYNNOOPPSSIISS
+     ##iinncclluuddee <<uunniissttdd..hh>>
+
+     _i_n_t
+     lliinnkk(_c_o_n_s_t _c_h_a_r _*_p_a_t_h_1, _c_o_n_s_t _c_h_a_r _*_p_a_t_h_2);
+
+DDEESSCCRRIIPPTTIIOONN
+     The lliinnkk() function call atomically creates the specified directory entry
+     (hard link) _p_a_t_h_2 with the attributes of the underlying object pointed at
+     by _p_a_t_h_1.	If the link is successful, the link count of the underlying
+     object is incremented; _p_a_t_h_1 and _p_a_t_h_2 share equal access and rights to
+     the underlying object.
+
+     If _p_a_t_h_1 is removed, the file _p_a_t_h_2 is not deleted and the link count of
+     the underlying object is decremented.
+
+     In order for the system call to succeed, _p_a_t_h_1 must exist and both _p_a_t_h_1
+     and _p_a_t_h_2 must be in the same file system.  As mandated by POSIX.1, _p_a_t_h_1
+     may not be a directory.
+
+     lliinnkk() will resolve and follow symbolic links contained within both _p_a_t_h_1
+     and _p_a_t_h_2.  If the last component of _p_a_t_h_1 is a symbolic link, lliinnkk()
+     will point the hard link, _p_a_t_h_2, to the underlying object pointed to by
+     _p_a_t_h_1, not to the symbolic link itself.
+
+RREETTUURRNN VVAALLUUEESS
+     Upon successful completion, a value of 0 is returned.  Otherwise, a value
+     of -1 is returned and _e_r_r_n_o is set to indicate the error.
+
+EERRRROORRSS
+     LLiinnkk() will fail and no link will be created if:
+
+     [EACCES]		A component of either path prefix denies search per-
+			mission.
+
+     [EACCES]		The requested link requires writing in a directory
+			with a mode that denies write permission.
+
+     [EACCES]		The current process cannot access the existing file.
+
+     [EDQUOT]		The directory in which the entry for the new link is
+			being placed cannot be extended because the user's
+			quota of disk blocks on the file system containing the
+			directory has been exhausted.
+
+     [EEXIST]		The link named by _p_a_t_h_2 already exists.
+
+     [EFAULT]		One of the pathnames specified is outside the
+			process's allocated address space.
+
+     [EIO]		An I/O error occurs while reading from or writing to
+			the file system to make the directory entry.
+
+     [ELOOP]		Too many symbolic links are encountered in translating
+			one of the pathnames.  This is taken to be indicative
+			of a looping symbolic link.
+
+     [EMLINK]		The file already has {LINK_MAX} links.
+
+     [ENAMETOOLONG]	A component of a pathname exceeds {NAME_MAX} charac-
+			ters, or an entire path name exceeded {PATH_MAX} char-
+			acters.
+
+     [ENOENT]		A component of either path prefix does not exist, or
+			is a dangling symbolic link.
+
+     [ENOENT]		The file named by _p_a_t_h_1 does not exist, or is a dan-
+			gling symbolic link.
+
+     [ENOSPC]		The directory in which the entry for the new link is
+			being placed cannot be extended because there is no
+			space left on the file system containing the direc-
+			tory.
+
+     [ENOTDIR]		A component of either path prefix is not a directory.
+
+     [EPERM]		The file named by _p_a_t_h_1 is a directory.
+
+     [EROFS]		The requested link requires writing in a directory on
+			a read-only file system.
+
+     [EXDEV]		The link named by _p_a_t_h_2 and the file named by _p_a_t_h_1
+			are on different file systems.
+
+SSEEEE AALLSSOO
+     symlink(2), unlink(2)
+
+SSTTAANNDDAARRDDSS
+     The lliinnkk() function is expected to conform to IEEE Std 1003.1-1988
+     (``POSIX.1'').
+
+4th Berkeley Distribution      October 29, 2008      4th Berkeley Distribution

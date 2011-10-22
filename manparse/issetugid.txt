@@ -1,0 +1,51 @@
+ISSETUGID(2)		    BSD System Calls Manual		  ISSETUGID(2)
+
+NNAAMMEE
+     iisssseettuuggiidd -- is current process tainted by uid or gid changes
+
+LLIIBBRRAARRYY
+     Standard C Library (libc, -lc)
+
+SSYYNNOOPPSSIISS
+     ##iinncclluuddee <<uunniissttdd..hh>>
+
+     _i_n_t
+     iisssseettuuggiidd(_v_o_i_d);
+
+DDEESSCCRRIIPPTTIIOONN
+     The iisssseettuuggiidd() system call returns 1 if the process environment or mem-
+     ory address space is considered ``tainted'', and returns 0 otherwise.
+
+     A process is tainted if it was created as a result of an execve(2) system
+     call which had either of the setuid or setgid bits set (and extra privi-
+     leges were given as a result) or if it has changed any of its real,
+     effective or saved user or group ID's since it began execution.
+
+     This system call exists so that library routines (eg: libc, libtermcap)
+     can reliably determine if it is safe to use information that was obtained
+     from the user, in particular the results from getenv(3) should be viewed
+     with suspicion if it is used to control operation.
+
+     A ``tainted'' status is inherited by child processes as a result of the
+     fork(2) system call (or other library code that calls fork, such as
+     popen(3)).
+
+     It is assumed that a program that clears all privileges as it prepares to
+     execute another will also reset the environment, hence the ``tainted''
+     status will not be passed on.  This is important for programs such as
+     su(1) which begin setuid but need to be able to create an untainted
+     process.
+
+EERRRROORRSS
+     The iisssseettuuggiidd() system call is always successful, and no return value is
+     reserved to indicate an error.
+
+SSEEEE AALLSSOO
+     execve(2), fork(2), setegid(2), seteuid(2), setgid(2), setregid(2),
+     setreuid(2), setuid(2)
+
+HHIISSTTOORRYY
+     The iisssseettuuggiidd() system call first appeared in OpenBSD 2.0 and was also
+     implemented in FreeBSD 3.0.
+
+BSD				August 25, 1996 			   BSD

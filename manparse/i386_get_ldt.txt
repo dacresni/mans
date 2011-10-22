@@ -1,0 +1,66 @@
+I386_GET_LDT(2) 	    BSD System Calls Manual	       I386_GET_LDT(2)
+
+NNAAMMEE
+     ii338866__ggeett__llddtt, ii338866__sseett__llddtt -- manage i386 per-process Local Descriptor
+     Table entries
+
+LLIIBBRRAARRYY
+     Standard C Library (libc, -lc)
+
+SSYYNNOOPPSSIISS
+     ##iinncclluuddee <<aarrcchhiitteeccttuurree//ii338866//ttaabbllee..hh>>
+     ##iinncclluuddee <<ii338866//uusseerr__llddtt..hh>>
+
+     _i_n_t
+     ii338866__ggeett__llddtt(_i_n_t _s_t_a_r_t___s_e_l, _u_n_i_o_n _l_d_t___e_n_t_r_y _*_d_e_s_c_s, _i_n_t _n_u_m___s_e_l_s);
+
+     _i_n_t
+     ii338866__sseett__llddtt(_i_n_t _s_t_a_r_t___s_e_l, _u_n_i_o_n _l_d_t___e_n_t_r_y _*_d_e_s_c_s, _i_n_t _n_u_m___s_e_l_s);
+
+DDEESSCCRRIIPPTTIIOONN
+     The ii338866__ggeett__llddtt() system call will return the list of i386 descriptors
+     that the process has in its LDT.  The ii338866__sseett__llddtt() system call will set
+     a list of i386 descriptors for the current process in its LDT.  Both rou-
+     tines accept a starting selector number _s_t_a_r_t___s_e_l, an array of memory
+     that will contain the descriptors to be set or returned _d_e_s_c_s, and the
+     number of entries to set or return _n_u_m___s_e_l_s.
+
+     The argument _d_e_s_c_s can be either code_desc_t, data_desc_t or call_gate_t
+     and are defined in <_a_r_c_h_i_t_e_c_t_u_r_e_/_i_3_8_6_/_d_e_s_c_._h>.  These structures are
+     defined by the architecture as disjoint bit-fields, so care must be taken
+     in constructing them.
+
+     If _s_t_a_r_t___s_e_l is _L_D_T___A_U_T_O___A_L_L_O_C, _n_u_m___s_e_l_s is 1 and the descriptor pointed
+     to by _d_e_s_c_s is legal, then ii338866__sseett__llddtt() will allocate a descriptor and
+     return its selector number.
+
+     If _n_u_m___d_e_s_c_s is 1, _s_t_a_r_t___s_e_l_s is valid, and _d_e_s_c_s is NULL, then
+     ii338866__sseett__llddtt() will free that descriptor (making it available to be real-
+     located again later).
+
+     If _n_u_m___d_e_s_c_s is 0, _s_t_a_r_t___s_e_l_s is 0 and _d_e_s_c_s is NULL then, as a special
+     case, ii338866__sseett__llddtt() will free all descriptors.
+
+RREETTUURRNN VVAALLUUEESS
+     Upon successful completion, ii338866__ggeett__llddtt() returns the number of descrip-
+     tors currently in the LDT.  The ii338866__sseett__llddtt() system call returns the
+     first selector set.  In the case when a descriptor is allocated by the
+     kernel, its number will be returned.  Otherwise, a value of -1 is
+     returned and the global variable _e_r_r_n_o is set to indicate the error.
+
+EERRRROORRSS
+     The ii338866__ggeett__llddtt() and ii338866__sseett__llddtt() system calls will fail if:
+
+     [EINVAL]		An inappropriate value was used for _s_t_a_r_t___s_e_l or
+			_n_u_m___s_e_l_s.
+
+     [EACCES]		The caller attempted to use a descriptor that would
+			circumvent protection or cause a failure.
+
+SSEEEE AALLSSOO
+     i386 Microprocessor Programmer's Reference Manual, Intel
+
+WWAARRNNIINNGG
+     You can really hose your process using this.
+
+BSD			      September 20, 1993			   BSD

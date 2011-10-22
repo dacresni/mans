@@ -1,0 +1,54 @@
+PTHREAD_SETUGID_NP(2)	    BSD System Calls Manual	 PTHREAD_SETUGID_NP(2)
+
+NNAAMMEE
+     pptthhrreeaadd__sseettuuggiidd__nnpp -- Set the per-thread userid and single groupid.
+
+SSYYNNOOPPSSIISS
+     ##iinncclluuddee <<ssyyss//ttyyppeess..hh>>
+     ##iinncclluuddee <<ssyyss//uunniissttdd..hh>>
+
+     _i_n_t
+     pptthhrreeaadd__sseettuuggiidd__nnpp(_u_i_d___t _u_i_d_, _g_i_d___t _g_i_d);
+
+DDEESSCCRRIIPPTTIIOONN
+     pptthhrreeaadd__sseettuuggiidd__nnpp() changes the current thread's effective, real, and
+     saved userid and groupid to the requested userid and groupid ( _u_i_d and
+     _g_i_d , respectively) and clears all other groupids.
+
+     _u_i_d can be the current real userid, KAUTH_UID_NONE, or, if the caller is
+     privileged, any userid.  _g_i_d can be the current real groupid or, if the
+     caller is priviledged, any single groupid.
+
+     Setting _u_i_d to KAUTH_UID_NONE means to "revert to the per process creden-
+     tial".
+
+CCAAVVEEAATTSS
+     Temporarily restoring root privileges for a non-privileged process is
+     only possible on a per-process basis and not a per-thread basis.
+
+     pptthhrreeaadd__sseettuuggiidd__nnpp() is not intended as a privilege escalation mechanism.
+
+     Do not use pptthhrreeaadd__sseettuuggiidd__nnpp..22() in a security sensitive situation.
+
+RREETTUURRNN VVAALLUUEESS
+     Upon successful completion, a value of 0 is returned.  Otherwise, -1 is
+     returned and the global variable _e_r_r_n_o is set to indicate the error.
+
+EERRRROORRSS
+     pptthhrreeaadd__sseettuuggiidd__nnpp() fails if one or more of the following are true:
+
+     [EPERM]		The calling process does not have the correct creden-
+			tials to set the override identity (i.e. The current
+			credentials do not imply "super-user").
+
+     [EPERM]		If _u_i_d is set to KAUTH_UID_NONE, the current thread
+			must already be assuming another identity in order to
+			revert back.
+
+     [EPERM]		The current thread cannot already be assuming another
+			identity.
+
+SSEEEE AALLSSOO
+     setuid(2) setgid(2) seteuid(2) setegid(2)
+
+BSD				October 1, 2008 			   BSD
