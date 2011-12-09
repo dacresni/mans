@@ -1,0 +1,71 @@
+.\" This is free documentation; you can redistribute it and/or
+.\" modify it under the terms of the GNU General Public License as
+.\" published by the Free Software Foundation; either version 2 of
+.\" the License, or (at your option) any later version.
+.\"
+.\" The GNU General Public License's references to "object code"
+.\" and "executables" are to be interpreted as the output of any
+.\" document formatting or typesetting system, including
+.\" intermediate and printed output.
+.\"
+.\" This manual is distributed in the hope that it will be useful,
+.\" but WITHOUT ANY WARRANTY; without even the implied warranty of
+.\" MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+.\" GNU General Public License for more details.
+.\"
+.\" You should have received a copy of the GNU General Public
+.\" License along with this manual; if not, write to the Free
+.\" Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111,
+.\" USA.
+.\"
+.\" 2002-02-16, joey: Converted from glibc.info
+.\"
+.TH ADJTIME 2 2002-02-16 "Linux 2.0" "Linux Programmer's Manual"
+.SH NAME
+adjtime \- smoothly tune kernel clock
+.SH SYNOPSIS
+.B #include <sys/time.h>
+.sp
+.BI "int adjtime(const struct timeval *" delta ", struct timeval *" olddelta );
+.SH DESCRIPTION
+This function speeds up or slows down the system clock in order to
+make a gradual adjustment.  This ensures that the calendar time
+reported by the system clock is always monotonically increasing, which
+might not happen if you simply set the clock.
+
+The
+.I delta
+argument specifies a relative adjustment to be made to the clock time.
+If negative, the system clock is slowed down fora while until it has
+lost this much elapsed time.  If positive, the system clock is speeded
+up for a while.
+
+If the
+.I olddelta
+argument is not a null pointer, the
+.B adjtime
+function returns information about any previous time adjustment that
+has not yet completed.
+
+This function is typically used to synchronize the clocks of computers
+in a local network.  You must be a privileged user to use it.
+.SH "RETURN VALUE"
+The
+.B adjtime
+function returns 0 on success and -1 on failure and sets the external
+variable
+.I errno
+accordingly.
+.SH ERRORS
+.TP
+.B EPERM
+The calling process does not have enough privileges to access the clock.
+.SH NOTE
+With a Linux kernel, you can use the 
+.BR adjtimex (2)
+function to permanently change the system clock speed.
+.SH "CONFORMING TO"
+This function is derived from 4.3 BSD and SVr4.
+.SH "SEE ALSO"
+.BR adjtimex (2),
+.BR settimeofday (2)
