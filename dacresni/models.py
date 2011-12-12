@@ -7,6 +7,7 @@ class Manual(db.Model):
     date = db.DateProperty()
     content = db.TextProperty()
     section = db.IntegerProperty()
+    whatis = db.StringProperty()
     
 class Function(db.Model):
     name = db.StringProperty(required=True)
