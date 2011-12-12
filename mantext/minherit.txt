@@ -1,41 +1,41 @@
 MINHERIT(2)		    BSD System Calls Manual		   MINHERIT(2)
 
-NNAAMMEE
-     mmiinnhheerriitt -- control the inheritance of pages
+NAME
+     minherit -- control the inheritance of pages
 
-SSYYNNOOPPSSIISS
-     ##iinncclluuddee <<ssyyss//ttyyppeess..hh>>
-     ##iinncclluuddee <<ssyyss//mmmmaann..hh>>
+SYNOPSIS
+     #include <sys/types.h>
+     #include <sys/mman.h>
 
-     _i_n_t
-     mmiinnhheerriitt(_c_a_d_d_r___t _a_d_d_r, _s_i_z_e___t _l_e_n, _i_n_t _i_n_h_e_r_i_t);
+     int
+     minherit(caddr_t addr, size_t len, int inherit);
 
-DDEESSCCRRIIPPTTIIOONN
-     The mmiinnhheerriitt() system call changes the specified pages to have the inher-
-     itance characteristic _i_n_h_e_r_i_t, which can be set to VM_INHERIT_NONE,
+DESCRIPTION
+     The minherit() system call changes the specified pages to have the inher-
+     itance characteristic inherit, which can be set to VM_INHERIT_NONE,
      VM_INHERIT_COPY, or VM_INHERIT_SHARE.  Not all implementations will guar-
      antee that the inheritance characteristic can be set on a page basis; the
      granularity of changes may be as large as an entire region.
 
-RREETTUURRNN VVAALLUUEESS
-     The mmiinnhheerriitt() function returns the value 0 if successful; otherwise the
-     value -1 is returned and the global variable _e_r_r_n_o is set to indicate the
+RETURN VALUES
+     The minherit() function returns the value 0 if successful; otherwise the
+     value -1 is returned and the global variable errno is set to indicate the
      error.
 
-EERRRROORRSS
-     The mmiinnhheerriitt() system call will fail if:
+ERRORS
+     The minherit() system call will fail if:
 
-     [EINVAL]		The virtual address range specified by the _a_d_d_r and
-			_l_e_n arguments is not valid.
+     [EINVAL]		The virtual address range specified by the addr and
+			len arguments is not valid.
 
-     [EACCES]		The flags specified by the _i_n_h_e_r_i_t argument were not
-			valid for the pages specified by the _a_d_d_r and _l_e_n
+     [EACCES]		The flags specified by the inherit argument were not
+			valid for the pages specified by the addr and len
 			arguments.
 
-SSEEEE AALLSSOO
+SEE ALSO
      madvise(2), mincore(2), mprotect(2), msync(2), munmap(2)
 
-HHIISSTTOORRYY
-     The mmiinnhheerriitt() function first appeared in OpenBSD.
+HISTORY
+     The minherit() function first appeared in OpenBSD.
 
 BSD				 June 9, 1993				   BSD

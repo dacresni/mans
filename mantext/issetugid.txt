@@ -1,19 +1,19 @@
 ISSETUGID(2)		    BSD System Calls Manual		  ISSETUGID(2)
 
-NNAAMMEE
-     iisssseettuuggiidd -- is current process tainted by uid or gid changes
+NAME
+     issetugid -- is current process tainted by uid or gid changes
 
-LLIIBBRRAARRYY
+LIBRARY
      Standard C Library (libc, -lc)
 
-SSYYNNOOPPSSIISS
-     ##iinncclluuddee <<uunniissttdd..hh>>
+SYNOPSIS
+     #include <unistd.h>
 
-     _i_n_t
-     iisssseettuuggiidd(_v_o_i_d);
+     int
+     issetugid(void);
 
-DDEESSCCRRIIPPTTIIOONN
-     The iisssseettuuggiidd() system call returns 1 if the process environment or mem-
+DESCRIPTION
+     The issetugid() system call returns 1 if the process environment or mem-
      ory address space is considered ``tainted'', and returns 0 otherwise.
 
      A process is tainted if it was created as a result of an execve(2) system
@@ -36,16 +36,16 @@ DDEESSCCRRIIPPTTIIOONN
      su(1) which begin setuid but need to be able to create an untainted
      process.
 
-EERRRROORRSS
-     The iisssseettuuggiidd() system call is always successful, and no return value is
+ERRORS
+     The issetugid() system call is always successful, and no return value is
      reserved to indicate an error.
 
-SSEEEE AALLSSOO
+SEE ALSO
      execve(2), fork(2), setegid(2), seteuid(2), setgid(2), setregid(2),
      setreuid(2), setuid(2)
 
-HHIISSTTOORRYY
-     The iisssseettuuggiidd() system call first appeared in OpenBSD 2.0 and was also
+HISTORY
+     The issetugid() system call first appeared in OpenBSD 2.0 and was also
      implemented in FreeBSD 3.0.
 
 BSD				August 25, 1996 			   BSD

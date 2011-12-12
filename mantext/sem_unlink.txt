@@ -1,38 +1,38 @@
 SEM_UNLINK(2)		    BSD System Calls Manual		 SEM_UNLINK(2)
 
-NNAAMMEE
-     sseemm__uunnlliinnkk -- remove a named semaphore
+NAME
+     sem_unlink -- remove a named semaphore
 
-SSYYNNOOPPSSIISS
-     ##iinncclluuddee <<sseemmaapphhoorree..hh>>
+SYNOPSIS
+     #include <semaphore.h>
 
-     _i_n_t
-     sseemm__uunnlliinnkk(_c_o_n_s_t _c_h_a_r _*_n_a_m_e);
+     int
+     sem_unlink(const char *name);
 
-DDEESSCCRRIIPPTTIIOONN
-     The named semaphore named _n_a_m_e is removed.  If the semaphore is in use by
-     other processes, then _n_a_m_e is immediately disassociated with the sema-
+DESCRIPTION
+     The named semaphore named name is removed.  If the semaphore is in use by
+     other processes, then name is immediately disassociated with the sema-
      phore, but the semaphore itself will not be removed until all references
-     to it have been closed.  Subsequent calls to sseemm__ooppeenn() using _n_a_m_e will
-     refer to or create a new semaphore named _n_a_m_e.
+     to it have been closed.  Subsequent calls to sem_open() using name will
+     refer to or create a new semaphore named name.
 
-     If successful, sseemm__uunnlliinnkk() will return 0.  Otherwise, -1 is returned and
-     _e_r_r_n_o is set, and the state of the semaphore is unchanged.
+     If successful, sem_unlink() will return 0.  Otherwise, -1 is returned and
+     errno is set, and the state of the semaphore is unchanged.
 
-EERRRROORRSS
-     sseemm__uunnlliinnkk() succeeds unless:
+ERRORS
+     sem_unlink() succeeds unless:
 
      [EACCES]		Permission is denied to be remove the semaphore.
 
-     [ENAMETOOLONG]	_n_a_m_e exceeded SEM_NAME_LEN characters.
+     [ENAMETOOLONG]	name exceeded SEM_NAME_LEN characters.
 
      [ENOENT]		The named semaphore does not exist.
 
-SSEEEE AALLSSOO
+SEE ALSO
      sem_close(2), sem_open(2), semctl(2), semget(2), semop(2)
 
-HHIISSTTOORRYY
-     sseemm__uunnlliinnkk() is specified in the POSIX Realtime Extension
+HISTORY
+     sem_unlink() is specified in the POSIX Realtime Extension
      (1003.1b-1993/1003.1i-1995).
 
 Darwin				 June 8, 2000				Darwin

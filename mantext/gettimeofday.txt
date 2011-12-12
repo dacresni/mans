@@ -1,30 +1,30 @@
 mdoc warning: Extraneous .Ef (#56)
 GETTIMEOFDAY(2) 	    BSD System Calls Manual	       GETTIMEOFDAY(2)
 
-NNAAMMEE
-     ggeettttiimmeeooffddaayy, sseettttiimmeeooffddaayy -- get/set date and time
+NAME
+     gettimeofday, settimeofday -- get/set date and time
 
-SSYYNNOOPPSSIISS
-     ##iinncclluuddee <<ssyyss//ttiimmee..hh>>
+SYNOPSIS
+     #include <sys/time.h>
 
-     _i_n_t
-     ggeettttiimmeeooffddaayy(_s_t_r_u_c_t _t_i_m_e_v_a_l _*_r_e_s_t_r_i_c_t _t_p, _v_o_i_d _*_r_e_s_t_r_i_c_t _t_z_p);
+     int
+     gettimeofday(struct timeval *restrict tp, void *restrict tzp);
 
-     _i_n_t
-     sseettttiimmeeooffddaayy(_c_o_n_s_t _s_t_r_u_c_t _t_i_m_e_v_a_l _*_t_p, _c_o_n_s_t _s_t_r_u_c_t _t_i_m_e_z_o_n_e _*_t_z_p);
+     int
+     settimeofday(const struct timeval *tp, const struct timezone *tzp);
 
-DDEESSCCRRIIPPTTIIOONN
+DESCRIPTION
      The system's notion of the current Greenwich time and the current time
-     zone is obtained with the ggeettttiimmeeooffddaayy() call, and set with the
-     sseettttiimmeeooffddaayy() call.  The time is expressed in seconds and microseconds
+     zone is obtained with the gettimeofday() call, and set with the
+     settimeofday() call.  The time is expressed in seconds and microseconds
      since midnight (0 hour), January 1, 1970.	The resolution of the system
      clock is hardware dependent, and the time may be updated continuously or
-     in ``ticks.''  If _t_p is NULL and _t_z_p is non-NULL, ggeettttiimmeeooffddaayy() will
-     populate the timezone struct in _t_z_p.  If _t_p is non-NULL and _t_z_p is NULL,
-     then only the timeval struct in _t_p is populated. If both _t_p and _t_z_p are
+     in ``ticks.''  If tp is NULL and tzp is non-NULL, gettimeofday() will
+     populate the timezone struct in tzp.  If tp is non-NULL and tzp is NULL,
+     then only the timeval struct in tp is populated. If both tp and tzp are
      NULL, nothing is returned.
 
-     The structures pointed to by _t_p and _t_z_p are defined in <_s_y_s_/_t_i_m_e_._h> as:
+     The structures pointed to by tp and tzp are defined in <sys/time.h> as:
 
      struct timeval {
 	     time_t	  tv_sec;   /* seconds since Jan. 1, 1970 */
@@ -37,11 +37,11 @@ DDEESSCCRRIIPPTTIIOONN
      };
 
 
-     The _t_i_m_e_v_a_l structure specifies a time value in seconds and microseconds.
-     The values in _t_i_m_e_v_a_l are opaque types whose length may vary on different
+     The timeval structure specifies a time value in seconds and microseconds.
+     The values in timeval are opaque types whose length may vary on different
      machines; depending on them to have any given length may lead to errors.
 
-     The _t_i_m_e_z_o_n_e structure indicates the local time zone (measured in minutes
+     The timezone structure indicates the local time zone (measured in minutes
      of time westward from Greenwich), and a flag that, if nonzero, indicates
      that Daylight Saving time applies locally during the appropriate part of
      the year.
@@ -53,30 +53,30 @@ DDEESSCCRRIIPPTTIIOONN
      be adjusted backwards using the adjtime(2) system call even when the sys-
      tem is secure.
 
-RREETTUURRNN
+RETURN
      A 0 return value indicates that the call succeeded.  A -1 return value
      indicates an error occurred, and in this case an error code is stored
-     into the global variable _e_r_r_n_o.
+     into the global variable errno.
 
-EERRRROORRSS
-     The following error codes may be set in _e_r_r_n_o:
+ERRORS
+     The following error codes may be set in errno:
 
      [EFAULT]  An argument address referenced invalid memory.
 
      [EPERM]   A user other than the super-user attempted to set the time.
 
-LLEEGGAACCYY SSYYNNOOPPSSIISS
-     ##iinncclluuddee <<ssyyss//ttiimmee..hh>>
+LEGACY SYNOPSIS
+     #include <sys/time.h>
 
-     _i_n_t
-     ggeettttiimmeeooffddaayy(_s_t_r_u_c_t _t_i_m_e_v_a_l _*_t_p, _s_t_r_u_c_t _t_i_m_e_z_o_n_e _*_t_z_p);
+     int
+     gettimeofday(struct timeval *tp, struct timezone *tzp);
 
-     The type of _t_z_p has changed.
+     The type of tzp has changed.
 
-SSEEEE AALLSSOO
+SEE ALSO
      date(1), adjtime(2), ctime(3), compat(5), timed(8)
 
-HHIISSTTOORRYY
-     The ggeettttiimmeeooffddaayy() function call appeared in 4.2BSD.
+HISTORY
+     The gettimeofday() function call appeared in 4.2BSD.
 
 4th Berkeley Distribution	August 5, 2008	     4th Berkeley Distribution

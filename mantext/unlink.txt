@@ -1,16 +1,16 @@
 UNLINK(2)		    BSD System Calls Manual		     UNLINK(2)
 
-NNAAMMEE
-     uunnlliinnkk -- remove directory entry
+NAME
+     unlink -- remove directory entry
 
-SSYYNNOOPPSSIISS
-     ##iinncclluuddee <<uunniissttdd..hh>>
+SYNOPSIS
+     #include <unistd.h>
 
-     _i_n_t
-     uunnlliinnkk(_c_o_n_s_t _c_h_a_r _*_p_a_t_h);
+     int
+     unlink(const char *path);
 
-DDEESSCCRRIIPPTTIIOONN
-     The uunnlliinnkk() function removes the link named by _p_a_t_h from its directory
+DESCRIPTION
+     The unlink() function removes the link named by path from its directory
      and decrements the link count of the file which was referenced by the
      link.  If that decrement reduces the link count of the file to zero, and
      no process has the file open, then all resources associated with the file
@@ -18,12 +18,12 @@ DDEESSCCRRIIPPTTIIOONN
      link is removed, the link is removed, but the removal of the file is
      delayed until all references to it have been closed.
 
-RREETTUURRNN VVAALLUUEESS
+RETURN VALUES
      Upon successful completion, a value of 0 is returned.  Otherwise, a value
-     of -1 is returned and _e_r_r_n_o is set to indicate the error.
+     of -1 is returned and errno is set to indicate the error.
 
-EERRRROORRSS
-     The uunnlliinnkk() system call will fail if:
+ERRORS
+     The unlink() system call will fail if:
 
      [EACCES]		Search permission is denied for a component of the
 			path prefix.
@@ -34,11 +34,11 @@ EERRRROORRSS
      [EBUSY]		The entry to be unlinked is the mount point for a
 			mounted file system.
 
-     [EBUSY]		The file named by the _p_a_t_h argument cannot be unlinked
+     [EBUSY]		The file named by the path argument cannot be unlinked
 			because it is being used by the system or by another
 			process.
 
-     [EFAULT]		_P_a_t_h points outside the process's allocated address
+     [EFAULT]		Path points outside the process's allocated address
 			space.
 
      [EIO]		An I/O error occurs while deleting the directory entry
@@ -65,10 +65,10 @@ EERRRROORRSS
 
      [EROFS]		The named file resides on a read-only file system.
 
-SSEEEE AALLSSOO
+SEE ALSO
      close(2), link(2), rmdir(2), symlink(7)
 
-HHIISSTTOORRYY
-     An uunnlliinnkk() function call appeared in Version 6 AT&T UNIX.
+HISTORY
+     An unlink() function call appeared in Version 6 AT&T UNIX.
 
 4th Berkeley Distribution	 June 4, 1993	     4th Berkeley Distribution

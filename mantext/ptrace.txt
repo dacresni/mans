@@ -1,29 +1,29 @@
 PTRACE(2)		    BSD System Calls Manual		     PTRACE(2)
 
-NNAAMMEE
-     ppttrraaccee -- process tracing and debugging
+NAME
+     ptrace -- process tracing and debugging
 
-SSYYNNOOPPSSIISS
-     ##iinncclluuddee <<ssyyss//ttyyppeess..hh>>
-     ##iinncclluuddee <<ssyyss//ppttrraaccee..hh>>
+SYNOPSIS
+     #include <sys/types.h>
+     #include <sys/ptrace.h>
 
-     _i_n_t
-     ppttrraaccee(_i_n_t _r_e_q_u_e_s_t, _p_i_d___t _p_i_d, _c_a_d_d_r___t _a_d_d_r, _i_n_t _d_a_t_a);
+     int
+     ptrace(int request, pid_t pid, caddr_t addr, int data);
 
-DDEESSCCRRIIPPTTIIOONN
-     ppttrraaccee() provides tracing and debugging facilities.  It allows one
-     process (the _t_r_a_c_i_n_g process) to control another (the _t_r_a_c_e_d process).
+DESCRIPTION
+     ptrace() provides tracing and debugging facilities.  It allows one
+     process (the tracing process) to control another (the traced process).
      Most of the time, the traced process runs normally, but when it receives
      a signal (see sigaction(2)), it stops.  The tracing process is expected
      to notice this via wait(2) or the delivery of a SIGCHLD signal, examine
      the state of the stopped process, and cause it to terminate or continue
-     as appropriate.  ppttrraaccee() is the mechanism by which all this happens.
+     as appropriate.  ptrace() is the mechanism by which all this happens.
 
-     The _r_e_q_u_e_s_t argument specifies what operation is being performed; the
+     The request argument specifies what operation is being performed; the
      meaning of the rest of the arguments depends on the operation, but except
-     for one special case noted below, all ppttrraaccee() calls are made by the
-     tracing process, and the _p_i_d argument specifies the process ID of the
-     traced process.  _r_e_q_u_e_s_t can be:
+     for one special case noted below, all ptrace() calls are made by the
+     tracing process, and the pid argument specifies the process ID of the
+     traced process.  request can be:
 
      PT_TRACE_ME   This request is one of two used by the traced process; it
 		   declares that the process expects to be traced by its par-
@@ -31,7 +31,7 @@ DDEESSCCRRIIPPTTIIOONN
 		   process does not expect to trace the child, it will proba-
 		   bly be rather confused by the results; once the traced
 		   process stops, it cannot be made to continue except via
-		   ppttrraaccee().)  When a process has used this request and calls
+		   ptrace().)  When a process has used this request and calls
 		   execve(2) or any of the routines built on it (such as
 		   execv(3)), it will stop before executing the first instruc-
 		   tion of the new image.  Also, any setuid or setgid bits on
@@ -47,10 +47,10 @@ DDEESSCCRRIIPPTTIIOONN
 		   attempt by the parent to trace a process which has set this
 		   flag will result in a segmentation violation in the parent.
 
-     PT_CONTINUE   The traced process continues execution.  _a_d_d_r is an address
+     PT_CONTINUE   The traced process continues execution.  addr is an address
 		   specifying the place where execution is to be resumed (a
 		   new value for the program counter), or (caddr_t)1 to indi-
-		   cate that execution is to pick up where it left off.  _d_a_t_a
+		   cate that execution is to pick up where it left off.  data
 		   provides a signal number to be delivered to the traced
 		   process as it resumes execution, or 0 if no signal is to be
 		   sent.
@@ -65,7 +65,7 @@ DDEESSCCRRIIPPTTIIOONN
      PT_ATTACH	   This request allows a process to gain control of an other-
 		   wise unrelated process and begin tracing it.  It does not
 		   need any cooperation from the to-be-traced process.	In
-		   this case, _p_i_d specifies the process ID of the to-be-traced
+		   this case, pid specifies the process ID of the to-be-traced
 		   process, and the other two arguments are ignored.  This
 		   request requires that the target process must have the same
 		   real UID as the tracing process, and that it must not be
@@ -80,35 +80,35 @@ DDEESSCCRRIIPPTTIIOONN
 		   and after it succeeds, the traced process is no longer
 		   traced and continues execution normally.
 
-EERRRROORRSS
-     Some requests can cause ppttrraaccee() to return -1 as a non-error value; to
-     disambiguate, _e_r_r_n_o can be set to 0 before the call and checked after-
+ERRORS
+     Some requests can cause ptrace() to return -1 as a non-error value; to
+     disambiguate, errno can be set to 0 before the call and checked after-
      wards.  The possible errors are:
 
      [ESRCH]
 	   No process having the specified process ID exists.
 
      [EINVAL]
-	   ++oo   A process attempted to use PT_ATTACH on itself.
-	   ++oo   The _r_e_q_u_e_s_t was not one of the legal requests.
-	   ++oo   The signal number (in _d_a_t_a) to PT_CONTINUE was neither 0 nor a
+	   o   A process attempted to use PT_ATTACH on itself.
+	   o   The request was not one of the legal requests.
+	   o   The signal number (in data) to PT_CONTINUE was neither 0 nor a
 	       legal signal number.
-	   ++oo   PT_GETREGS, PT_SETREGS, PT_GETFPREGS, or PT_SETFPREGS was
+	   o   PT_GETREGS, PT_SETREGS, PT_GETFPREGS, or PT_SETFPREGS was
 	       attempted on a process with no valid register set.  (This is
 	       normally true only of system processes.)
 
      [EBUSY]
-	   ++oo   PT_ATTACH was attempted on a process that was already being
+	   o   PT_ATTACH was attempted on a process that was already being
 	       traced.
-	   ++oo   A request attempted to manipulate a process that was being
+	   o   A request attempted to manipulate a process that was being
 	       traced by some process other than the one making the request.
-	   ++oo   A request (other than PT_ATTACH) specified a process that
+	   o   A request (other than PT_ATTACH) specified a process that
 	       wasn't stopped.
 
      [EPERM]
-	   ++oo   A request (other than PT_ATTACH) attempted to manipulate a
+	   o   A request (other than PT_ATTACH) attempted to manipulate a
 	       process that wasn't being traced at all.
-	   ++oo   An attempt was made to use PT_ATTACH on a process in violation
+	   o   An attempt was made to use PT_ATTACH on a process in violation
 	       of the requirements listed under PT_ATTACH above.
 
 BSD			       November 7, 1994 			   BSD

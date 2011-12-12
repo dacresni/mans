@@ -1,32 +1,32 @@
 AIO_CANCEL(2)		    BSD System Calls Manual		 AIO_CANCEL(2)
 
-NNAAMMEE
-     aaiioo__ccaanncceell -- cancel an outstanding asynchronous I/O operation (REALTIME)
+NAME
+     aio_cancel -- cancel an outstanding asynchronous I/O operation (REALTIME)
 
-LLIIBBRRAARRYY
+LIBRARY
      Standard C Library (libc, -lc)
 
-SSYYNNOOPPSSIISS
-     ##iinncclluuddee <<aaiioo..hh>>
+SYNOPSIS
+     #include <aio.h>
 
-     _i_n_t
-     aaiioo__ccaanncceell(_i_n_t _f_i_l_d_e_s, _s_t_r_u_c_t _a_i_o_c_b _*_a_i_o_c_b_p);
+     int
+     aio_cancel(int fildes, struct aiocb *aiocbp);
 
-DDEESSCCRRIIPPTTIIOONN
-     The aaiioo__ccaanncceell() system call cancels the outstanding asynchronous I/O
-     request for the file descriptor specified in _f_i_l_d_e_s.  If _a_i_o_c_b_p is speci-
+DESCRIPTION
+     The aio_cancel() system call cancels the outstanding asynchronous I/O
+     request for the file descriptor specified in fildes.  If aiocbp is speci-
      fied, only that specific asynchronous I/O request is cancelled.
 
      Normal asynchronous notification occurs for cancelled requests.  Requests
      complete with an error result of ECANCELED.
 
-RREESSTTRRIICCTTIIOONNSS
-     The aaiioo__ccaanncceell() system call does not cancel asynchronous I/O requests
-     for raw disk devices.  The aaiioo__ccaanncceell() system call will always return
+RESTRICTIONS
+     The aio_cancel() system call does not cancel asynchronous I/O requests
+     for raw disk devices.  The aio_cancel() system call will always return
      AIO_NOTCANCELED for file descriptors associated with raw disk devices.
 
-RREETTUURRNN VVAALLUUEESS
-     The aaiioo__ccaanncceell() system call returns -1 to indicate an error, or one of
+RETURN VALUES
+     The aio_cancel() system call returns -1 to indicate an error, or one of
      the following:
 
      [AIO_ALLDONE]
@@ -40,26 +40,26 @@ RREETTUURRNN VVAALLUUEESS
 		   Some requests were not cancelled, status for the requests
 		   should be checked with aio_error(2).
 
-EERRRROORRSS
-     An error return from aaiioo__ccaanncceell() indicates:
+ERRORS
+     An error return from aio_cancel() indicates:
 
-     [EBADF]		The _f_i_l_d_e_s argument is not a valid file descriptor.
+     [EBADF]		The fildes argument is not a valid file descriptor.
 
-SSEEEE AALLSSOO
+SEE ALSO
      aio_error(2), aio_read(2), aio_return(2), aio_suspend(2), aio_write(2),
      aio(4)
 
-SSTTAANNDDAARRDDSS
-     The aaiioo__ccaanncceell() system call is expected to conform to the IEEE Std
+STANDARDS
+     The aio_cancel() system call is expected to conform to the IEEE Std
      1003.1 (``POSIX.1'') standard.
 
-HHIISSTTOORRYY
-     The aaiioo__ccaanncceell() system call first appeared in FreeBSD 3.0.  The first
-     functional implementation of aaiioo__ccaanncceell() appeared in FreeBSD 4.0.
+HISTORY
+     The aio_cancel() system call first appeared in FreeBSD 3.0.  The first
+     functional implementation of aio_cancel() appeared in FreeBSD 4.0.
 
-AAUUTTHHOORRSS
+AUTHORS
      This manual page was originally written by Wes Peters <wes@softweyr.com>.
      Christopher M Sedore <cmsedore@maxwell.syr.edu> updated it when
-     aaiioo__ccaanncceell() was implemented for FreeBSD 4.0.
+     aio_cancel() was implemented for FreeBSD 4.0.
 
 BSD			       January 19, 2000 			   BSD

@@ -1,54 +1,54 @@
 PTHREAD_SIGMASK(2)	    BSD System Calls Manual	    PTHREAD_SIGMASK(2)
 
-NNAAMMEE
-     pptthhrreeaadd__ssiiggmmaasskk -- examine and/or change a thread's signal mask
+NAME
+     pthread_sigmask -- examine and/or change a thread's signal mask
 
-SSYYNNOOPPSSIISS
-     ##iinncclluuddee <<ssiiggnnaall..hh>>
+SYNOPSIS
+     #include <signal.h>
 
-     _i_n_t
-     pptthhrreeaadd__ssiiggmmaasskk(_i_n_t _h_o_w, _c_o_n_s_t _s_i_g_s_e_t___t _*_r_e_s_t_r_i_c_t _s_e_t,
-	 _s_i_g_s_e_t___t _*_r_e_s_t_r_i_c_t _o_s_e_t);
+     int
+     pthread_sigmask(int how, const sigset_t *restrict set,
+	 sigset_t *restrict oset);
 
-DDEESSCCRRIIPPTTIIOONN
-     The pptthhrreeaadd__ssiiggmmaasskk() function examines and/or changes the calling
+DESCRIPTION
+     The pthread_sigmask() function examines and/or changes the calling
      thread's signal mask.
 
-     If _s_e_t is not NULL, it specifies a set of signals to be modified, and _h_o_w
+     If set is not NULL, it specifies a set of signals to be modified, and how
      specifies what to set the signal mask to:
 
-     SIG_BLOCK	  Union of the current mask and _s_e_t.
+     SIG_BLOCK	  Union of the current mask and set.
 
-     SIG_UNBLOCK  Intersection of the current mask and the complement of _s_e_t.
+     SIG_UNBLOCK  Intersection of the current mask and the complement of set.
 
-     SIG_SETMASK  _s_e_t.
+     SIG_SETMASK  set.
 
-     If _o_s_e_t is not NULL, the previous signal mask is stored in the location
-     pointed to by _o_s_e_t.
+     If oset is not NULL, the previous signal mask is stored in the location
+     pointed to by oset.
 
      SIGKILL and SIGSTOP cannot be blocked, and will be silently ignored if
      included in the signal mask.
 
-RREETTUURRNN VVAALLUUEESS
-     If successful, pptthhrreeaadd__ssiiggmmaasskk() returns 0.  Otherwise, an error is
+RETURN VALUES
+     If successful, pthread_sigmask() returns 0.  Otherwise, an error is
      returned.
 
-EERRRROORRSS
-     pptthhrreeaadd__ssiiggmmaasskk() will fail if:
+ERRORS
+     pthread_sigmask() will fail if:
 
-     [EINVAL]		_h_o_w is not one of the defined values.
+     [EINVAL]		how is not one of the defined values.
 
-LLEEGGAACCYY SSYYNNOOPPSSIISS
-     ##iinncclluuddee <<pptthhrreeaadd..hh>>
-     ##iinncclluuddee <<ssiiggnnaall..hh>>
+LEGACY SYNOPSIS
+     #include <pthread.h>
+     #include <signal.h>
 
-     The include file <_p_t_h_r_e_a_d_._h> is necessary.
+     The include file <pthread.h> is necessary.
 
-SSEEEE AALLSSOO
+SEE ALSO
      sigaction(2), sigpending(2), sigprocmask(2), sigsuspend(2), sigsetops(3),
      compat(5)
 
-SSTTAANNDDAARRDDSS
-     pptthhrreeaadd__ssiiggmmaasskk() conforms to ISO/IEC 9945-1:1996 (``POSIX.1'')
+STANDARDS
+     pthread_sigmask() conforms to ISO/IEC 9945-1:1996 (``POSIX.1'')
 
 BSD				April 27, 2000				   BSD

@@ -1,61 +1,61 @@
 MPROTECT(2)		    BSD System Calls Manual		   MPROTECT(2)
 
-NNAAMMEE
-     mmpprrootteecctt -- control the protection of pages
+NAME
+     mprotect -- control the protection of pages
 
-SSYYNNOOPPSSIISS
-     ##iinncclluuddee <<ssyyss//mmmmaann..hh>>
+SYNOPSIS
+     #include <sys/mman.h>
 
-     _i_n_t
-     mmpprrootteecctt(_v_o_i_d _*_a_d_d_r, _s_i_z_e___t _l_e_n, _i_n_t _p_r_o_t);
+     int
+     mprotect(void *addr, size_t len, int prot);
 
-DDEESSCCRRIIPPTTIIOONN
-     The mmpprrootteecctt() system call changes the specified pages to have protection
-     _p_r_o_t.  Not all implementations will guarantee protection on a page basis
+DESCRIPTION
+     The mprotect() system call changes the specified pages to have protection
+     prot.  Not all implementations will guarantee protection on a page basis
      but Mac OS X's current implementation does.
 
      When a program violates the protections of a page, it gets a SIGBUS or
      SIGSEGV signal.
 
-     Currently _p_r_o_t can be one or more of the following:
+     Currently prot can be one or more of the following:
 
      PROT_NONE	 No permissions at all.
      PROT_READ	 The pages can be read.
      PROT_WRITE  The pages can be written.
      PROT_EXEC	 The pages can be executed.
 
-RREETTUURRNN VVAALLUUEESS
+RETURN VALUES
      Upon successful completion, a value of 0 is returned.  Otherwise, a value
-     of -1 is returned and _e_r_r_n_o is set to indicate the error.
+     of -1 is returned and errno is set to indicate the error.
 
-EERRRROORRSS
-     mmpprrootteecctt() will fail if:
+ERRORS
+     mprotect() will fail if:
 
      [EACCES]		The requested protection conflicts with the access
 			permissions of the process on the specified address
 			range.
 
-     [EINVAL]		_a_d_d_r is not a multiple of the page size (i.e.  _a_d_d_r is
+     [EINVAL]		addr is not a multiple of the page size (i.e.  addr is
 			not page-aligned).
 
-     [ENOTSUP]		The combination of accesses requested in _p_r_o_t is not
+     [ENOTSUP]		The combination of accesses requested in prot is not
 			supported.
 
-LLEEGGAACCYY SSYYNNOOPPSSIISS
-     ##iinncclluuddee <<ssyyss//ttyyppeess..hh>>
-     ##iinncclluuddee <<ssyyss//mmmmaann..hh>>
+LEGACY SYNOPSIS
+     #include <sys/types.h>
+     #include <sys/mman.h>
 
-     The include file <_s_y_s_/_t_y_p_e_s_._h> is necessary.
+     The include file <sys/types.h> is necessary.
 
-     _i_n_t
-     mmpprrootteecctt(_c_a_d_d_r___t _a_d_d_r, _s_i_z_e___t _l_e_n, _i_n_t _p_r_o_t);
+     int
+     mprotect(caddr_t addr, size_t len, int prot);
 
-     The type of _a_d_d_r has changed.
+     The type of addr has changed.
 
-SSEEEE AALLSSOO
+SEE ALSO
      madvise(2), mincore(2), msync(2), munmap(2), compat(5)
 
-HHIISSTTOORRYY
-     The mmpprrootteecctt() function first appeared in 4.4BSD.
+HISTORY
+     The mprotect() function first appeared in 4.4BSD.
 
 BSD			       October 16, 2008 			   BSD

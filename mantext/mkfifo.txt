@@ -1,30 +1,30 @@
 MKFIFO(2)		    BSD System Calls Manual		     MKFIFO(2)
 
-NNAAMMEE
-     mmkkffiiffoo -- make a fifo file
+NAME
+     mkfifo -- make a fifo file
 
-SSYYNNOOPPSSIISS
-     ##iinncclluuddee <<ssyyss//ttyyppeess..hh>>
-     ##iinncclluuddee <<ssyyss//ssttaatt..hh>>
+SYNOPSIS
+     #include <sys/types.h>
+     #include <sys/stat.h>
 
-     _i_n_t
-     mmkkffiiffoo(_c_o_n_s_t _c_h_a_r _*_p_a_t_h, _m_o_d_e___t _m_o_d_e);
+     int
+     mkfifo(const char *path, mode_t mode);
 
-DDEESSCCRRIIPPTTIIOONN
-     MMkkffiiffoo() creates a new fifo file with name _p_a_t_h.  The access permissions
-     are specified by _m_o_d_e and restricted by the umask(2) of the calling
+DESCRIPTION
+     Mkfifo() creates a new fifo file with name path.  The access permissions
+     are specified by mode and restricted by the umask(2) of the calling
      process.
 
      The fifo's owner ID is set to the process's effective user ID.  The
      fifo's group ID is set to that of the parent directory in which it is
      created.
 
-RREETTUURRNN VVAALLUUEESS
+RETURN VALUES
      A 0 return value indicates success.  A -1 return value indicates an
-     error, and an error code is stored in _e_r_r_n_o.
+     error, and an error code is stored in errno.
 
-EERRRROORRSS
-     MMkkffiiffoo() will fail and no fifo will be created if:
+ERRORS
+     Mkfifo() will fail and no fifo will be created if:
 
      [ENOTSUP]		The kernel has not been configured to support fifo's.
 
@@ -68,13 +68,13 @@ EERRRROORRSS
      [EIO]		An I/O error occurred while reading from or writing to
 			the file system.
 
-     [EFAULT]		_P_a_t_h points outside the process's allocated address
+     [EFAULT]		Path points outside the process's allocated address
 			space.
 
-SSEEEE AALLSSOO
+SEE ALSO
      chmod(2), stat(2), umask(2)
 
-SSTTAANNDDAARRDDSS
-     The mmkkffiiffoo function call conforms to IEEE Std 1003.1-1988 (``POSIX.1'').
+STANDARDS
+     The mkfifo function call conforms to IEEE Std 1003.1-1988 (``POSIX.1'').
 
 BSD				 June 4, 1993				   BSD

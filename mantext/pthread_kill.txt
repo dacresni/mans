@@ -1,40 +1,40 @@
 PTHREAD_KILL(2) 	    BSD System Calls Manual	       PTHREAD_KILL(2)
 
-NNAAMMEE
-     pptthhrreeaadd__kkiillll -- send a signal to a specified thread
+NAME
+     pthread_kill -- send a signal to a specified thread
 
-SSYYNNOOPPSSIISS
-     ##iinncclluuddee <<ssiiggnnaall..hh>>
+SYNOPSIS
+     #include <signal.h>
 
-     _i_n_t
-     pptthhrreeaadd__kkiillll(_p_t_h_r_e_a_d___t _t_h_r_e_a_d, _i_n_t _s_i_g);
+     int
+     pthread_kill(pthread_t thread, int sig);
 
-DDEESSCCRRIIPPTTIIOONN
-     The pptthhrreeaadd__kkiillll() function sends a signal, specified by _s_i_g, to a
-     thread, specified by _t_h_r_e_a_d.  If _s_i_g is 0, error checking is performed,
+DESCRIPTION
+     The pthread_kill() function sends a signal, specified by sig, to a
+     thread, specified by thread.  If sig is 0, error checking is performed,
      but no signal is actually sent.
 
-RREETTUURRNN VVAALLUUEESS
-     If successful, pptthhrreeaadd__kkiillll() returns 0.  Otherwise, an error number is
+RETURN VALUES
+     If successful, pthread_kill() returns 0.  Otherwise, an error number is
      returned.
 
-EERRRROORRSS
-     pptthhrreeaadd__kkiillll() will fail if:
+ERRORS
+     pthread_kill() will fail if:
 
-     [EINVAL]		_s_i_g is an invalid or unsupported signal number.
+     [EINVAL]		sig is an invalid or unsupported signal number.
 
-     [ESRCH]		_t_h_r_e_a_d is an invalid thread ID.
+     [ESRCH]		thread is an invalid thread ID.
 
-LLEEGGAACCYY SSYYNNOOPPSSIISS
-     ##iinncclluuddee <<pptthhrreeaadd..hh>>
-     ##iinncclluuddee <<ssiiggnnaall..hh>>
+LEGACY SYNOPSIS
+     #include <pthread.h>
+     #include <signal.h>
 
-     The include file <_p_t_h_r_e_a_d_._h> is necessary.
+     The include file <pthread.h> is necessary.
 
-SSEEEE AALLSSOO
+SEE ALSO
      kill(2), pthread_self(3), raise(3), compat(5)
 
-SSTTAANNDDAARRDDSS
-     pptthhrreeaadd__kkiillll() conforms to ISO/IEC 9945-1:1996 (``POSIX.1'')
+STANDARDS
+     pthread_kill() conforms to ISO/IEC 9945-1:1996 (``POSIX.1'')
 
 BSD				 Feb 05, 2002				   BSD

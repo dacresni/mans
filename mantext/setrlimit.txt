@@ -1,23 +1,23 @@
 GETRLIMIT(2)		    BSD System Calls Manual		  GETRLIMIT(2)
 
-NNAAMMEE
-     ggeettrrlliimmiitt, sseettrrlliimmiitt -- control maximum system resource consumption
+NAME
+     getrlimit, setrlimit -- control maximum system resource consumption
 
-SSYYNNOOPPSSIISS
-     ##iinncclluuddee <<ssyyss//rreessoouurrccee..hh>>
+SYNOPSIS
+     #include <sys/resource.h>
 
-     _i_n_t
-     ggeettrrlliimmiitt(_i_n_t _r_e_s_o_u_r_c_e, _s_t_r_u_c_t _r_l_i_m_i_t _*_r_l_p);
+     int
+     getrlimit(int resource, struct rlimit *rlp);
 
-     _i_n_t
-     sseettrrlliimmiitt(_i_n_t _r_e_s_o_u_r_c_e, _c_o_n_s_t _s_t_r_u_c_t _r_l_i_m_i_t _*_r_l_p);
+     int
+     setrlimit(int resource, const struct rlimit *rlp);
 
-DDEESSCCRRIIPPTTIIOONN
+DESCRIPTION
      Limits on the consumption of system resources by the current process and
-     each process it creates may be obtained with the ggeettrrlliimmiitt() call, and
-     set with the sseettrrlliimmiitt() call.
+     each process it creates may be obtained with the getrlimit() call, and
+     set with the setrlimit() call.
 
-     The _r_e_s_o_u_r_c_e parameter is one of the following:
+     The resource parameter is one of the following:
 
      RLIMIT_CORE     The largest size (in bytes) core file that may be cre-
 		     ated.
@@ -55,7 +55,7 @@ DDEESSCCRRIIPPTTIIOONN
      soft limit is exceeded a process may receive a signal (for example, if
      the cpu time or file size is exceeded), but it will be allowed to con-
      tinue execution until it reaches the hard limit (or modifies its resource
-     limit).  The _r_l_i_m_i_t structure is used to specify the hard and soft limits
+     limit).  The rlimit structure is used to specify the hard and soft limits
      on a resource,
 
 	   struct rlimit {
@@ -64,13 +64,13 @@ DDEESSCCRRIIPPTTIIOONN
 	   };
 
      Only the super-user may raise the maximum limits.	Other users may only
-     alter _r_l_i_m___c_u_r within the range from 0 to _r_l_i_m___m_a_x or (irreversibly)
-     lower _r_l_i_m___m_a_x.
+     alter rlim_cur within the range from 0 to rlim_max or (irreversibly)
+     lower rlim_max.
 
      Because this information is stored in the per-process information, this
      system call must be executed directly by the shell if it is to affect all
-     future processes created by the shell; lliimmiitt is thus a built-in command
-     to csh(1) and uulliimmiitt is the sh(1) equivalent.
+     future processes created by the shell; limit is thus a built-in command
+     to csh(1) and ulimit is the sh(1) equivalent.
 
      The system refuses to extend the data or stack space when the limits
      would be exceeded in the normal way: a break call fails if the data space
@@ -84,19 +84,19 @@ DDEESSCCRRIIPPTTIIOONN
      soft cpu time limit is exceeded, a signal SIGXCPU is sent to the offend-
      ing process.
 
-RREETTUURRNN VVAALLUUEESS
+RETURN VALUES
      A 0 return value indicates that the call succeeded, changing or returning
      the resource limit.   A return value of -1 indicates that an error
-     occurred, and an error code is stored in the global location _e_r_r_n_o.
+     occurred, and an error code is stored in the global location errno.
 
-EERRRROORRSS
-     The ggeettrrlliimmiitt() and sseettrrlliimmiitt() system calls will fail if:
+ERRORS
+     The getrlimit() and setrlimit() system calls will fail if:
 
-     [EFAULT]		The address specified for _r_l_p is invalid.
+     [EFAULT]		The address specified for rlp is invalid.
 
-     [EINVAL]		_r_e_s_o_u_r_c_e is invalid.
+     [EINVAL]		resource is invalid.
 
-     The sseettrrlliimmiitt() call will fail if:
+     The setrlimit() call will fail if:
 
      [EINVAL]		The specified limit is invalid (e.g., RLIM_INFINITY or
 			lower than rlim_cur).
@@ -104,23 +104,23 @@ EERRRROORRSS
      [EPERM]		The limit specified would have raised the maximum
 			limit value and the caller is not the super-user.
 
-LLEEGGAACCYY SSYYNNOOPPSSIISS
-     ##iinncclluuddee <<ssyyss//ttyyppeess..hh>>
-     ##iinncclluuddee <<ssyyss//ttiimmee..hh>>
-     ##iinncclluuddee <<ssyyss//rreessoouurrccee..hh>>
+LEGACY SYNOPSIS
+     #include <sys/types.h>
+     #include <sys/time.h>
+     #include <sys/resource.h>
 
-     The include files <_s_y_s_/_t_y_p_e_s_._h> and <_s_y_s_/_t_i_m_e_._h> are necessary.
+     The include files <sys/types.h> and <sys/time.h> are necessary.
 
-CCOOMMPPAATTIIBBIILLIITTYY
-     sseettrrlliimmiitt() now returns with _e_r_r_n_o set to EINVAL in places that histori-
+COMPATIBILITY
+     setrlimit() now returns with errno set to EINVAL in places that histori-
      cally succeeded.  It no longer accepts "rlim_cur = RLIM_INFINITY" for
      RLIM_NOFILE.  Use "rlim_cur = min(OPEN_MAX, rlim_max)".
 
-SSEEEE AALLSSOO
+SEE ALSO
      csh(1), sh(1), quota(2), sigaction(2), sigaltstack(2), sysctl(3),
      compat(5)
 
-HHIISSTTOORRYY
-     The ggeettrrlliimmiitt() function call appeared in 4.2BSD.
+HISTORY
+     The getrlimit() function call appeared in 4.2BSD.
 
 4th Berkeley Distribution	 June 4, 1993	     4th Berkeley Distribution

@@ -12,25 +12,25 @@ mdoc warning: Empty input line #137
 mdoc warning: Empty input line #144
 GETAUDIT(2)		    BSD System Calls Manual		   GETAUDIT(2)
 
-NNAAMMEE
-     ggeettaauuddiitt, ggeettaauuddiitt__aaddddrr -- retrieve audit session state
+NAME
+     getaudit, getaudit_addr -- retrieve audit session state
 
-SSYYNNOOPPSSIISS
-     ##iinncclluuddee <<bbssmm//aauuddiitt..hh>>
+SYNOPSIS
+     #include <bsm/audit.h>
 
-     _i_n_t
-     ggeettaauuddiitt(_a_u_d_i_t_i_n_f_o___t _*_a_u_d_i_t_i_n_f_o);
+     int
+     getaudit(auditinfo_t *auditinfo);
 
-     _i_n_t
-     ggeettaauuddiitt__aaddddrr(_a_u_d_i_t_i_n_f_o___a_d_d_r___t _*_a_u_d_i_t_i_n_f_o___a_d_d_r, _u___i_n_t _l_e_n_g_t_h);
+     int
+     getaudit_addr(auditinfo_addr_t *auditinfo_addr, u_int length);
 
-DDEESSCCRRIIPPTTIIOONN
-     The ggeettaauuddiitt() system call retrieves the active audit session state for
-     the current process via the _a_u_d_i_t_i_n_f_o___t pointed to by _a_u_d_i_t_i_n_f_o.  The
-     ggeettaauuddiitt__aaddddrr() system call retrieves extended state via _a_u_d_i_t_i_n_f_o___a_d_d_r
-     and _l_e_n_g_t_h.
+DESCRIPTION
+     The getaudit() system call retrieves the active audit session state for
+     the current process via the auditinfo_t pointed to by auditinfo.  The
+     getaudit_addr() system call retrieves extended state via auditinfo_addr
+     and length.
 
-     The _a_u_d_i_t_i_n_f_o___t data structure is defined as follows:
+     The auditinfo_t data structure is defined as follows:
 
 	 struct auditinfo {
 	      au_id_t	     ai_auid;	      /* Audit user ID */
@@ -40,10 +40,10 @@ DDEESSCCRRIIPPTTIIOONN
 	 };
 	 typedef struct auditinfo	 auditinfo_t;
 
-     The _a_i___a_u_i_d variable contains the audit identifier which is recorded in
+     The ai_auid variable contains the audit identifier which is recorded in
      the audit log for each event the process caused.
 
-     The _a_u___m_a_s_k___t data structure defines the bit mask for auditing successful
+     The au_mask_t data structure defines the bit mask for auditing successful
      and failed events out of the predefined list of event classes. It is
      defined as follows:
 
@@ -53,7 +53,7 @@ DDEESSCCRRIIPPTTIIOONN
 	 };
 	 typedef struct au_mask  au_mask_t;
 
-     The _a_u___t_e_r_m_i_d___t data structure defines the Terminal ID recorded with
+     The au_termid_t data structure defines the Terminal ID recorded with
      every event caused by the process. It is defined as follows:
 
 	 struct au_tid {
@@ -62,10 +62,10 @@ DDEESSCCRRIIPPTTIIOONN
 	 };
 	 typedef struct au_tid	 au_tid_t;
 
-     The _a_i___a_s_i_d variable contains the audit session ID which is recorded with
+     The ai_asid variable contains the audit session ID which is recorded with
      every event caused by the process.
 
-     The ggeettaauuddiitt__aaddddrr() system call uses the expanded _a_u_d_i_t_i_n_f_o___a_d_d_r___t data
+     The getaudit_addr() system call uses the expanded auditinfo_addr_t data
      structure supports Terminal IDs with larger addresses such as those used
      in IP version 6.  It is defined as follows:
 
@@ -78,7 +78,7 @@ DDEESSCCRRIIPPTTIIOONN
 	 };
 	 typedef struct auditinfo_addr	 auditinfo_addr_t;
 
-     The _a_u___t_i_d___a_d_d_r___t data structure which includes a larger address storage
+     The au_tid_addr_t data structure which includes a larger address storage
      field and an additional field with the type of address stored:
 
 	 struct au_tid_addr {
@@ -91,35 +91,35 @@ DDEESSCCRRIIPPTTIIOONN
      Without appropriate privilege the audit mask fields will be set to all
      ones.
 
-RREETTUURRNN VVAALLUUEESS
-     The ggeettaauuddiitt() and ggeettaauuddiitt__aaddddrr() functions return the value 0 if suc-
-     cessful; otherwise the value -1 is returned and the global variable _e_r_r_n_o
+RETURN VALUES
+     The getaudit() and getaudit_addr() functions return the value 0 if suc-
+     cessful; otherwise the value -1 is returned and the global variable errno
      is set to indicate the error.
 
-EERRRROORRSS
-     The ggeettaauuddiitt() function will fail if:
+ERRORS
+     The getaudit() function will fail if:
 
      [EFAULT]		A failure occurred while data transferred to or from
 			the kernel failed.
 
      [EINVAL]		Illegal argument was passed by a system call.
 
-     [EOVERFLOW]	The _l_e_n_g_t_h argument indicates an overflow condition
+     [EOVERFLOW]	The length argument indicates an overflow condition
 			will occur.
 
-     [ERANGE]		The address is too big and, therefore, ggeettaauuddiitt__aaddddrr()
+     [ERANGE]		The address is too big and, therefore, getaudit_addr()
 			should be used instead.
 
-SSEEEE AALLSSOO
+SEE ALSO
      audit(2), auditon(2), getauid(2), setaudit(2), setauid(2), libbsm(3)
 
-HHIISSTTOORRYY
+HISTORY
      The OpenBSM implementation was created by McAfee Research, the security
      division of McAfee Inc., under contract to Apple Computer Inc. in 2004.
      It was subsequently adopted by the TrustedBSD Project as the foundation
      for the OpenBSM distribution.
 
-AAUUTTHHOORRSS
+AUTHORS
      This software was created by McAfee Research, the security research divi-
      sion of McAfee, Inc., under contract to Apple Computer Inc.  Additional
      authors include Wayne Salamon, Robert Watson, and SPARTA Inc.

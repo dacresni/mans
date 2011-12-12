@@ -1,30 +1,30 @@
 GETLCID(2)		    BSD System Calls Manual		    GETLCID(2)
 
-NNAAMMEE
-     ggeettllcciidd -- get login context
+NAME
+     getlcid -- get login context
 
-SSYYNNOOPPSSIISS
-     ##iinncclluuddee <<ssyyss//llccttxx..hh>>
+SYNOPSIS
+     #include <sys/lctx.h>
 
-     _p_i_d___t
-     ggeettllcciidd(_p_i_d___t _p_i_d);
+     pid_t
+     getlcid(pid_t pid);
 
-DDEESSCCRRIIPPTTIIOONN
-     The login context of the process identified by _p_i_d is returned by
-     ggeettllcciidd().  If _p_i_d is zero, ggeettllcciidd() returns the login context of the
+DESCRIPTION
+     The login context of the process identified by pid is returned by
+     getlcid().  If pid is zero, getlcid() returns the login context of the
      current process.
 
      Login contexts are used for tracking processes that originated from a
-     users login session.  A login context is inherited via ffoorrkk() or by
-     explicit creation using the sseettllcciidd() call.
+     users login session.  A login context is inherited via fork() or by
+     explicit creation using the setlcid() call.
 
-RREETTUURRNN VVAALLUUEESS
-     If successful, ggeettllcciidd() returns a non-negative integer, the Login Con-
-     text ID; otherwise the value -1 is returned and the global variable _e_r_r_n_o
+RETURN VALUES
+     If successful, getlcid() returns a non-negative integer, the Login Con-
+     text ID; otherwise the value -1 is returned and the global variable errno
      is set to indicate the error.
 
-EERRRROORRSS
-     The ggeettllcciidd() function will fail if:
+ERRORS
+     The getlcid() function will fail if:
 
      [EPERM]		Operation not permitted.
 
@@ -32,13 +32,13 @@ EERRRROORRSS
 
      [ENOATTR]		Attribute not found.
 
-SSEEEE AALLSSOO
+SEE ALSO
      setlcid(2)
 
-HHIISSTTOORRYY
-     The ggeettllcciidd manual page first appeared in FreeBSD 6.0.
+HISTORY
+     The getlcid manual page first appeared in FreeBSD 6.0.
 
-AAUUTTHHOORRSS
+AUTHORS
      This manual page was written by Matthew N. Dodd <mdodd@FreeBSD.org>.
 
 BSD				  May 5, 2005				   BSD

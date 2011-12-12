@@ -1,27 +1,27 @@
 GETFSSTAT(2)		    BSD System Calls Manual		  GETFSSTAT(2)
 
-NNAAMMEE
-     ggeettffssssttaatt -- get list of all mounted file systems
+NAME
+     getfsstat -- get list of all mounted file systems
 
-SSYYNNOOPPSSIISS
-     ##iinncclluuddee <<ssyyss//ppaarraamm..hh>>
-     ##iinncclluuddee <<ssyyss//uuccrreedd..hh>>
-     ##iinncclluuddee <<ssyyss//mmoouunntt..hh>>
+SYNOPSIS
+     #include <sys/param.h>
+     #include <sys/ucred.h>
+     #include <sys/mount.h>
 
-     _i_n_t
-     ggeettffssssttaatt(_s_t_r_u_c_t _s_t_a_t_f_s _*_b_u_f, _i_n_t _b_u_f_s_i_z_e, _i_n_t _f_l_a_g_s);
+     int
+     getfsstat(struct statfs *buf, int bufsize, int flags);
 
-TTRRAANNSSIITTIIIIOONNAALL SSYYNNOOPPSSIISS ((NNOOWW DDEEPPRREECCAATTEEDD))
-     _i_n_t
-     ggeettffssssttaatt6644(_s_t_r_u_c_t _s_t_a_t_f_s_6_4 _*_b_u_f, _i_n_t _b_u_f_s_i_z_e, _i_n_t _f_l_a_g_s);
+TRANSITIIONAL SYNOPSIS (NOW DEPRECATED)
+     int
+     getfsstat64(struct statfs64 *buf, int bufsize, int flags);
 
-DDEESSCCRRIIPPTTIIOONN
-     The ggeettffssssttaatt() function returns information about all mounted file sys-
-     tems.  The _b_u_f argument is a pointer to an array of statfs structures.
+DESCRIPTION
+     The getfsstat() function returns information about all mounted file sys-
+     tems.  The buf argument is a pointer to an array of statfs structures.
 
-     As of Mac OS X 10.6, the default size of the _i_n_o___t type is 64 bits (the
+     As of Mac OS X 10.6, the default size of the ino_t type is 64 bits (the
      macro _DARWIN_FEATURE_64_BIT_INODE will be defined).  While there is no
-     _i_n_o___t type used in the statfs structure, the changes to ggeettffssssttaatt() are
+     ino_t type used in the statfs structure, the changes to getfsstat() are
      grouped together with the 64-bit inode changes.  The string fields in the
      statfs structure are larger and the variant symbol _getfsstat$INODE64
      will be automatically used.  The statfs structure is defined as:
@@ -51,17 +51,17 @@ DDEESSCCRRIIPPTTIIOONN
 	 uint32_t    f_reserved[8];  /* For future use */
      };
 
-     (In 10.5, 64-bit _i_n_o___t, larger statfs structure and variant symbol were
+     (In 10.5, 64-bit ino_t, larger statfs structure and variant symbol were
      available if the macro _DARWIN_USE_64_BIT_INODE is defined before any
      header files are included; this macro is optional in 10.6.)
 
      If the macro _DARWIN_NO_64_BIT_INODE is defined before any header files
      are included, or if the deployment target is less than 10.6, the legacy
-     statfs structure will be in effect.  The _i_n_o___t type will be 32 bits (the
+     statfs structure will be in effect.  The ino_t type will be 32 bits (the
      _DARWIN_FEATURE_64_BIT_INODE macro will not be defined), the strings in
      the statfs structure will be their smaller legacy size (and long mount
      paths may no longer fit) and the undecorated symbol _getfsstat will be
-     used.  This legacy _s_t_a_t_f_s structure is defined as:
+     used.  This legacy statfs structure is defined as:
 
      #define MFSNAMELEN      15 /* length of fs type name, not inc. nul */
      #define MNAMELEN	     90 /* length of buffer for returned name */
@@ -90,42 +90,42 @@ DDEESSCCRRIIPPTTIIOONN
      };
 
      Fields that are undefined for a particular file system are set to -1.
-     The buffer is filled with an array of _s_t_a_t_f_s structures, one for each
-     mounted file system up to the size specified by _b_u_f_s_i_z_e.
+     The buffer is filled with an array of statfs structures, one for each
+     mounted file system up to the size specified by bufsize.
 
-     If _b_u_f is given as NULL, ggeettffssssttaatt() returns just the number of mounted
+     If buf is given as NULL, getfsstat() returns just the number of mounted
      file systems.
 
-     If _f_l_a_g_s is set to MNT_NOWAIT, ggeettffssssttaatt() will directly return the
+     If flags is set to MNT_NOWAIT, getfsstat() will directly return the
      information retained in the kernel to avoid delays caused by waiting for
      updated information from a file system that is perhaps temporarily unable
      to respond.  Some of the information returned may be out of date, how-
-     ever; if _f_l_a_g_s is set to MNT_WAIT or MNT_DWAIT instead, ggeettffssssttaatt() will
+     ever; if flags is set to MNT_WAIT or MNT_DWAIT instead, getfsstat() will
      request updated information from each mounted filesystem before return-
      ing.
 
-RREETTUURRNN VVAALLUUEESS
-     Upon successful completion, the number of _s_t_a_t_f_s structures is returned.
-     Otherwise, -1 is returned and the global variable _e_r_r_n_o is set to indi-
+RETURN VALUES
+     Upon successful completion, the number of statfs structures is returned.
+     Otherwise, -1 is returned and the global variable errno is set to indi-
      cate the error.
 
-EERRRROORRSS
-     GGeettffssssttaatt() fails if one or more of the following are true:
+ERRORS
+     Getfsstat() fails if one or more of the following are true:
 
-     [EFAULT]		The _b_u_f argument points to an invalid address.
+     [EFAULT]		The buf argument points to an invalid address.
 
      [EIO]		An I/O error occurred while reading from or writing to
 			the file system.
 
-TTRRAANNSSIITTIIOONNAALL DDEESSCCRRIIPPTTIIOONN ((NNOOWW DDEEPPRREECCAATTEEDD))
-     The ggeettffssssttaatt6644() routine is equivalent to the default ggeettffssttaatt() (when
+TRANSITIONAL DESCRIPTION (NOW DEPRECATED)
+     The getfsstat64() routine is equivalent to the default getfstat() (when
      _DARWIN_FEATURE_64_BIT_INODE is defined), so there is no longer any rea-
      son to use it (it will be removed in the future).
 
-SSEEEE AALLSSOO
+SEE ALSO
      statfs(2), fstab(5), mount(8)
 
-HHIISSTTOORRYY
-     The ggeettffssssttaatt() function first appeared in 4.4BSD.
+HISTORY
+     The getfsstat() function first appeared in 4.4BSD.
 
 BSD				 Oct 28, 2008				   BSD

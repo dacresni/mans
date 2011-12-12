@@ -1,31 +1,31 @@
 STATFS(2)		    BSD System Calls Manual		     STATFS(2)
 
-NNAAMMEE
-     ssttaattffss,, ssttaattffss6644,, ffssttaattffss,, ffssttaattffss6644 -- get file system statistics
+NAME
+     statfs, statfs64, fstatfs, fstatfs64 -- get file system statistics
 
-SSYYNNOOPPSSIISS
-     ##iinncclluuddee <<ssyyss//ppaarraamm..hh>>
-     ##iinncclluuddee <<ssyyss//mmoouunntt..hh>>
+SYNOPSIS
+     #include <sys/param.h>
+     #include <sys/mount.h>
 
-     _i_n_t
-     ssttaattffss(_c_o_n_s_t _c_h_a_r _*_p_a_t_h, _s_t_r_u_c_t _s_t_a_t_f_s _*_b_u_f);
+     int
+     statfs(const char *path, struct statfs *buf);
 
-     _i_n_t
-     ffssttaattffss(_i_n_t _f_d, _s_t_r_u_c_t _s_t_a_t_f_s _*_b_u_f);
+     int
+     fstatfs(int fd, struct statfs *buf);
 
-TTRRAANNSSIITTIIIIOONNAALL SSYYNNOOPPSSIISS ((NNOOWW DDEEPPRREECCAATTEEDD))
-     _i_n_t
-     ssttaattffss6644(_c_o_n_s_t _c_h_a_r _*_p_a_t_h, _s_t_r_u_c_t _s_t_a_t_f_s_6_4 _*_b_u_f);
+TRANSITIIONAL SYNOPSIS (NOW DEPRECATED)
+     int
+     statfs64(const char *path, struct statfs64 *buf);
 
-     _i_n_t
-     ffssttaattffss6644(_i_n_t _f_d, _s_t_r_u_c_t _s_t_a_t_f_s_6_4 _*_b_u_f);
+     int
+     fstatfs64(int fd, struct statfs64 *buf);
 
-DDEESSCCRRIIPPTTIIOONN
-     The ssttaattffss() routine returns information about a mounted file system.
-     The _p_a_t_h argument is the path name of any file or directory within the
-     mounted file system.  The _b_u_f argument is a pointer to a _s_t_a_t_f_s struc-
+DESCRIPTION
+     The statfs() routine returns information about a mounted file system.
+     The path argument is the path name of any file or directory within the
+     mounted file system.  The buf argument is a pointer to a statfs struc-
      ture.  When the macro _DARWIN_FEATURE_64_BIT_INODE is not defined (the
-     _i_n_o___t type is 32-bits), that structure is defined as:
+     ino_t type is 32-bits), that structure is defined as:
 
      typedef struct { int32_t val[2]; } fsid_t;
 
@@ -56,10 +56,10 @@ DDEESSCCRRIIPPTTIIOONN
      };
 
      However, when the macro _DARWIN_FEATURE_64_BIT_INODE is defined, the
-     _i_n_o___t type will be 64-bits (force 64-bit inode mode by defining the
+     ino_t type will be 64-bits (force 64-bit inode mode by defining the
      _DARWIN_USE_64_BIT_INODE macro before including header files).  This will
-     cause symbol variants of the _s_t_a_t_f_s family, with the _$_I_N_O_D_E_6_4 suffixes,
-     to be automatically linked in.  In addition, the _s_t_a_t_f_s structure will
+     cause symbol variants of the statfs family, with the $INODE64 suffixes,
+     to be automatically linked in.  In addition, the statfs structure will
      now be defined as:
 
      #define MFSTYPENAMELEN  16 /* length of fs type name including null */
@@ -86,10 +86,10 @@ DDEESSCCRRIIPPTTIIOONN
      };
 
      Fields that are undefined for a particular file system are set to -1.
-     The ffssttaattffss() routine returns the same information about an open file
-     referenced by descriptor _f_d.
+     The fstatfs() routine returns the same information about an open file
+     referenced by descriptor fd.
 
-FFLLAAGGSS
+FLAGS
      These are some of the flags that may be present in the f_flags field.
 
      MNT_RDONLY 	    A read-only filesystem
@@ -130,60 +130,60 @@ FFLLAAGGSS
 
      MNT_MULTILABEL	    MAC support for individual labels
 
-CCAAVVEEAATTSS
+CAVEATS
      In Mac OS X versions before 10.4, f_iosize is 4096. On these older sys-
      tems, use MAXBSIZE instead.
 
-RREETTUURRNN VVAALLUUEESS
+RETURN VALUES
      Upon successful completion, a value of 0 is returned.  Otherwise, -1 is
-     returned and the global variable _e_r_r_n_o is set to indicate the error.
+     returned and the global variable errno is set to indicate the error.
 
-EERRRROORRSS
-     The ssttaattffss() routine fails if one or more of the following are true:
+ERRORS
+     The statfs() routine fails if one or more of the following are true:
 
-     [ENOTDIR]		A component of the path prefix of _P_a_t_h is not a direc-
+     [ENOTDIR]		A component of the path prefix of Path is not a direc-
 			tory.
 
-     [ENAMETOOLONG]	The length of a component of _p_a_t_h exceeds {NAME_MAX}
-			characters, or the length of _p_a_t_h exceeds {PATH_MAX}
+     [ENAMETOOLONG]	The length of a component of path exceeds {NAME_MAX}
+			characters, or the length of path exceeds {PATH_MAX}
 			characters.
 
-     [ENOENT]		The file or directory referred to by _p_a_t_h does not
+     [ENOENT]		The file or directory referred to by path does not
 			exist.
 
      [EACCES]		Search permission is denied for a component of the
-			path prefix of _p_a_t_h.
+			path prefix of path.
 
      [ELOOP]		Too many symbolic links were encountered in translat-
-			ing _p_a_t_h.
+			ing path.
 
-     [EFAULT]		_B_u_f or _p_a_t_h points to an invalid address.
-
-     [EIO]		An I/O error occurred while reading from or writing to
-			the file system.
-
-     The ffssttaattffss() routine fails if one or more of the following are true:
-
-     [EBADF]		_f_d is not a valid open file descriptor.
-
-     [EFAULT]		_B_u_f points to an invalid address.
+     [EFAULT]		Buf or path points to an invalid address.
 
      [EIO]		An I/O error occurred while reading from or writing to
 			the file system.
 
-TTRRAANNSSIITTIIOONNAALL DDEESSCCRRIIPPTTIIOONN ((NNOOWW DDEEPPRREECCAATTEEDD))
-     The _s_t_a_t_f_s_6_4 and _f_s_t_a_t_f_s_6_4 routines are equivalent to their corresponding
+     The fstatfs() routine fails if one or more of the following are true:
+
+     [EBADF]		fd is not a valid open file descriptor.
+
+     [EFAULT]		Buf points to an invalid address.
+
+     [EIO]		An I/O error occurred while reading from or writing to
+			the file system.
+
+TRANSITIONAL DESCRIPTION (NOW DEPRECATED)
+     The statfs64 and fstatfs64 routines are equivalent to their corresponding
      non-64-suffixed routine, when 64-bit inodes are in effect.  They were
      added before there was support for the symbol variants, and so are now
      deprecated.  Instead of using these, set the _DARWIN_USE_64_BIT_INODE
      macro before including header files to force 64-bit inode support.
 
-     The _s_t_a_t_f_s_6_4 structure used by these deprecated routines is the same as
-     the _s_t_a_t_f_s structure when 64-bit inodes are in effect (see above).
+     The statfs64 structure used by these deprecated routines is the same as
+     the statfs structure when 64-bit inodes are in effect (see above).
 
-HHIISSTTOORRYY
-     The ssttaattffss() function first appeared in 4.4BSD. The ssttaattffss6644() and
-     ffssttaattffss6644() first appeared in Max OS X 10.5 (Leopard) and are now depre-
+HISTORY
+     The statfs() function first appeared in 4.4BSD. The statfs64() and
+     fstatfs64() first appeared in Max OS X 10.5 (Leopard) and are now depre-
      cated in favor of the corresponding symbol variants.
 
 BSD				August 14, 2008 			   BSD

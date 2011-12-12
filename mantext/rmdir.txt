@@ -1,23 +1,23 @@
 RMDIR(2)		    BSD System Calls Manual		      RMDIR(2)
 
-NNAAMMEE
-     rrmmddiirr -- remove a directory file
+NAME
+     rmdir -- remove a directory file
 
-SSYYNNOOPPSSIISS
-     ##iinncclluuddee <<uunniissttdd..hh>>
+SYNOPSIS
+     #include <unistd.h>
 
-     _i_n_t
-     rrmmddiirr(_c_o_n_s_t _c_h_a_r _*_p_a_t_h);
+     int
+     rmdir(const char *path);
 
-DDEESSCCRRIIPPTTIIOONN
-     RRmmddiirr() removes a directory file whose name is given by _p_a_t_h.  The direc-
+DESCRIPTION
+     Rmdir() removes a directory file whose name is given by path.  The direc-
      tory must not have any entries other than `.' and `..'.
 
-RREETTUURRNN VVAALLUUEESS
+RETURN VALUES
      A 0 is returned if the remove succeeds; otherwise a -1 is returned and an
-     error code is stored in the global location _e_r_r_n_o.
+     error code is stored in the global location errno.
 
-EERRRROORRSS
+ERRORS
      The named file is removed unless:
 
      [EACCES]		Search permission is denied for a component of the
@@ -29,7 +29,7 @@ EERRRROORRSS
      [EBUSY]		The directory to be removed is the mount point for a
 			mounted file system.
 
-     [EFAULT]		_P_a_t_h points outside the process's allocated address
+     [EFAULT]		Path points outside the process's allocated address
 			space.
 
      [EIO]		An I/O error occurs while deleting the directory entry
@@ -58,10 +58,10 @@ EERRRROORRSS
      [EROFS]		The directory entry to be removed resides on a read-
 			only file system.
 
-SSEEEE AALLSSOO
+SEE ALSO
      mkdir(2), unlink(2)
 
-HHIISSTTOORRYY
-     The rrmmddiirr() function call appeared in 4.2BSD.
+HISTORY
+     The rmdir() function call appeared in 4.2BSD.
 
 4.2 Berkeley Distribution	 June 4, 1993	     4.2 Berkeley Distribution

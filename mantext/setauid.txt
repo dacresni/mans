@@ -1,18 +1,18 @@
 SETAUID(2)		    BSD System Calls Manual		    SETAUID(2)
 
-NNAAMMEE
-     sseettaauuiidd -- set audit indentifier
+NAME
+     setauid -- set audit indentifier
 
-SSYYNNOOPPSSIISS
-     ##iinncclluuddee <<bbssmm//aauuddiitt..hh>>
+SYNOPSIS
+     #include <bsm/audit.h>
 
-     _i_n_t
-     sseettaauuiidd(_a_u___i_d___t _*_a_u_i_d);
+     int
+     setauid(au_id_t *auid);
 
-DDEESSCCRRIIPPTTIIOONN
-     The sseettaauuiidd() system call sets the active audit identifier for the cur-
-     rent process from the _a_u___i_d___t pointed to by _a_u_i_d.	The value of AU_DEFAU-
-     DITID (-1) should not be used for _a_u_i_d.
+DESCRIPTION
+     The setauid() system call sets the active audit identifier for the cur-
+     rent process from the au_id_t pointed to by auid.	The value of AU_DEFAU-
+     DITID (-1) should not be used for auid.
 
      This system call requires an appropriate privilege to complete.
 
@@ -21,34 +21,34 @@ DDEESSCCRRIIPPTTIIOONN
      identifier after initially setting up the audit session with the
      setaudit(2), or setaudit_addr(2) system call.
 
-RREETTUURRNN VVAALLUUEESS
+RETURN VALUES
      Upon successful completion, the value 0 is returned; otherwise the
-     value -1 is returned and the global variable _e_r_r_n_o is set to indicate the
+     value -1 is returned and the global variable errno is set to indicate the
      error.
 
-EERRRROORRSS
-     The sseettaauuiidd() function will fail if:
+ERRORS
+     The setauid() function will fail if:
 
      [EFAULT]		A failure occurred while data transferred to the ker-
 			nel failed.
 
-     [EINVAL]		An invalid value for _a_u_i_d was used.  _a_u_i_d can be any
-			value of type _a_u___i_d___t except AU_DEFAUDITID.
+     [EINVAL]		An invalid value for auid was used.  auid can be any
+			value of type au_id_t except AU_DEFAUDITID.
 
      [EPERM]		The process does not have sufficient permission to
 			complete the operation.
 
-SSEEEE AALLSSOO
+SEE ALSO
      audit(2), auditon(2), getaudit(2), getaudit_addr(2), getauid(2),
      setaudit(2), setaudit_addr(2), libbsm(3)
 
-HHIISSTTOORRYY
+HISTORY
      The OpenBSM implementation was created by McAfee Research, the security
      division of McAfee Inc., under contract to Apple Computer Inc. in 2004.
      It was subsequently adopted by the TrustedBSD Project as the foundation
      for the OpenBSM distribution.
 
-AAUUTTHHOORRSS
+AUTHORS
      This software was created by McAfee Research, the security research divi-
      sion of McAfee, Inc., under contract to Apple Computer Inc.  Additional
      authors include Wayne Salamon, Robert Watson, and SPARTA Inc.

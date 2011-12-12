@@ -1,120 +1,120 @@
 AIO_WRITE(2)		    BSD System Calls Manual		  AIO_WRITE(2)
 
-NNAAMMEE
-     aaiioo__wwrriittee -- asynchronous write to a file (REALTIME)
+NAME
+     aio_write -- asynchronous write to a file (REALTIME)
 
-LLIIBBRRAARRYY
+LIBRARY
      Standard C Library (libc, -lc)
 
-SSYYNNOOPPSSIISS
-     ##iinncclluuddee <<aaiioo..hh>>
+SYNOPSIS
+     #include <aio.h>
 
-     _i_n_t
-     aaiioo__wwrriittee(_s_t_r_u_c_t _a_i_o_c_b _*_a_i_o_c_b_p);
+     int
+     aio_write(struct aiocb *aiocbp);
 
-DDEESSCCRRIIPPTTIIOONN
-     The aaiioo__wwrriittee() system call allows the calling process to write
-     _a_i_o_c_b_p_-_>_a_i_o___n_b_y_t_e_s from the buffer pointed to by _a_i_o_c_b_p_-_>_a_i_o___b_u_f to the
-     descriptor _a_i_o_c_b_p_-_>_a_i_o___f_i_l_d_e_s.  The call returns immediately after the
+DESCRIPTION
+     The aio_write() system call allows the calling process to write
+     aiocbp->aio_nbytes from the buffer pointed to by aiocbp->aio_buf to the
+     descriptor aiocbp->aio_fildes.  The call returns immediately after the
      write request has been enqueued to the descriptor; the write may or may
      not have completed at the time the call returns.  If the request could
      not be enqueued, generally due to invalid arguments, the call returns
      without having enqueued the request.
 
-     If O_APPEND is set for _a_i_o_c_b_p_-_>_a_i_o___f_i_l_d_e_s, aaiioo__wwrriittee() operations append
+     If O_APPEND is set for aiocbp->aio_fildes, aio_write() operations append
      to the file in the same order as the calls were made.  If O_APPEND is not
      set for the file descriptor, the write operation will occur at the abso-
-     lute position from the beginning of the file plus _a_i_o_c_b_p_-_>_a_i_o___o_f_f_s_e_t.
+     lute position from the beginning of the file plus aiocbp->aio_offset.
 
      If _POSIX_PRIORITIZED_IO is defined, and the descriptor supports it, then
      the enqueued operation is submitted at a priority equal to that of the
-     calling process minus _a_i_o_c_b_p_-_>_a_i_o___r_e_q_p_r_i_o.
+     calling process minus aiocbp->aio_reqprio.
 
-     The _a_i_o_c_b_p pointer may be subsequently used as an argument to
-     aaiioo__rreettuurrnn() and aaiioo__eerrrroorr() in order to determine return or error status
+     The aiocbp pointer may be subsequently used as an argument to
+     aio_return() and aio_error() in order to determine return or error status
      for the enqueued operation while it is in progress.
 
-     If the request is successfully enqueued, the value of _a_i_o_c_b_p_-_>_a_i_o___o_f_f_s_e_t
+     If the request is successfully enqueued, the value of aiocbp->aio_offset
      can be modified during the request as context, so this value must not be
      referenced after the request is enqueued.
 
-RREESSTTRRIICCTTIIOONNSS
-     The Asynchronous I/O Control Block structure pointed to by _a_i_o_c_b_p and the
-     buffer that the _a_i_o_c_b_p_-_>_a_i_o___b_u_f member of that structure references must
+RESTRICTIONS
+     The Asynchronous I/O Control Block structure pointed to by aiocbp and the
+     buffer that the aiocbp->aio_buf member of that structure references must
      remain valid until the operation has completed.  For this reason, use of
      auto (stack) variables for these objects is discouraged.
 
-     The asynchronous I/O control buffer _a_i_o_c_b_p should be zeroed before the
-     aaiioo__wwrriittee() system call to avoid passing bogus context information to the
+     The asynchronous I/O control buffer aiocbp should be zeroed before the
+     aio_write() system call to avoid passing bogus context information to the
      kernel.
 
      Modifications of the Asynchronous I/O Control Block structure or the
      buffer contents after the request has been enqueued, but before the
      request has completed, are not allowed.
 
-     If the file offset in _a_i_o_c_b_p_-_>_a_i_o___o_f_f_s_e_t is past the offset maximum  for
-     _a_i_o_c_b_p_-_>_a_i_o___f_i_l_d_e_s, no I/O will occur.
+     If the file offset in aiocbp->aio_offset is past the offset maximum  for
+     aiocbp->aio_fildes, no I/O will occur.
 
-RREETTUURRNN VVAALLUUEESS
-     The aaiioo__wwrriittee() function returns the value 0 if successful; otherwise the
-     value -1 is returned and the global variable _e_r_r_n_o is set to indicate the
+RETURN VALUES
+     The aio_write() function returns the value 0 if successful; otherwise the
+     value -1 is returned and the global variable errno is set to indicate the
      error.
 
-EERRRROORRSS
-     The aaiioo__wwrriittee() system call will fail if:
+ERRORS
+     The aio_write() system call will fail if:
 
      [EAGAIN]		Due to system resource limitations, the request was
 			not queued.
 
-     [ENOSYS]		The aaiioo__wwrriittee() system call is not supported.
+     [ENOSYS]		The aio_write() system call is not supported.
 
      The following conditions may be synchronously detected when the
-     aaiioo__wwrriittee() system call is made, or asynchronously, at any time there-
-     after.  If they are detected at call time, aaiioo__wwrriittee() returns -1 and
-     sets _e_r_r_n_o appropriately; otherwise the aaiioo__rreettuurrnn() system call must be
-     called, and will return -1, and aaiioo__eerrrroorr() must be called to determine
-     the actual value that would have been returned in _e_r_r_n_o.
+     aio_write() system call is made, or asynchronously, at any time there-
+     after.  If they are detected at call time, aio_write() returns -1 and
+     sets errno appropriately; otherwise the aio_return() system call must be
+     called, and will return -1, and aio_error() must be called to determine
+     the actual value that would have been returned in errno.
 
-     [EBADF]		The _a_i_o_c_b_p_-_>_a_i_o___f_i_l_d_e_s argument is invalid, or is not
+     [EBADF]		The aiocbp->aio_fildes argument is invalid, or is not
 			opened for writing.
 
-     [EINVAL]		The offset _a_i_o_c_b_p_-_>_a_i_o___o_f_f_s_e_t is not valid.
+     [EINVAL]		The offset aiocbp->aio_offset is not valid.
 
-     [EINVAL]		The priority specified by _a_i_o_c_b_p_-_>_a_i_o___r_e_q_p_r_i_o is not a
+     [EINVAL]		The priority specified by aiocbp->aio_reqprio is not a
 			valid priority.
 
-     [EINVAL]		The number of bytes specified by _a_i_o_c_b_p_-_>_a_i_o___n_b_y_t_e_s is
+     [EINVAL]		The number of bytes specified by aiocbp->aio_nbytes is
 			not valid.
 
-     [EINVAL]		The constant in _a_i_o_c_b_p_-_>_a_i_o___s_i_g_e_v_e_n_t_._s_i_g_e_v___n_o_t_i_f_y is
+     [EINVAL]		The constant in aiocbp->aio_sigevent.sigev_notify is
 			set to SIGEV_THREAD (SIGEV_THREAD is not supported).
 
      If the request is successfully enqueued, but subsequently canceled or an
-     error occurs, the value returned by the aaiioo__rreettuurrnn() system call is per
-     the write(2) system call, and the value returned by the aaiioo__eerrrroorr() sys-
+     error occurs, the value returned by the aio_return() system call is per
+     the write(2) system call, and the value returned by the aio_error() sys-
      tem call is either one of the error returns from the write(2) system
      call, or one of:
 
-     [EBADF]		The _a_i_o_c_b_p_-_>_a_i_o___f_i_l_d_e_s argument is invalid for writ-
+     [EBADF]		The aiocbp->aio_fildes argument is invalid for writ-
 			ing.
 
      [ECANCELED]	The request was explicitly canceled via a call to
-			aaiioo__ccaanncceell().
+			aio_cancel().
 
-SSEEEE AALLSSOO
+SEE ALSO
      aio_cancel(2), aio_error(2), aio_return(2), aio_suspend(2), aio(4)
 
-SSTTAANNDDAARRDDSS
-     The aaiioo__wwrriittee() system call is expected to conform to the IEEE Std 1003.1
+STANDARDS
+     The aio_write() system call is expected to conform to the IEEE Std 1003.1
      (``POSIX.1'') standard.
 
-HHIISSTTOORRYY
-     The aaiioo__wwrriittee() system call first appeared in FreeBSD 3.0.
+HISTORY
+     The aio_write() system call first appeared in FreeBSD 3.0.
 
-AAUUTTHHOORRSS
+AUTHORS
      This manual page was written by Wes Peters <wes@softweyr.com>.
 
-BBUUGGSS
-     Invalid information in _a_i_o_c_b_p_-_>___a_i_o_c_b___p_r_i_v_a_t_e may confuse the kernel.
+BUGS
+     Invalid information in aiocbp->_aiocb_private may confuse the kernel.
 
 BSD			      September 18, 2008			   BSD

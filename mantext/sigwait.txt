@@ -1,43 +1,43 @@
 SIGWAIT(2)		    BSD System Calls Manual		    SIGWAIT(2)
 
-NNAAMMEE
-     ssiiggwwaaiitt -- select a set of signals
+NAME
+     sigwait -- select a set of signals
 
-SSYYNNOOPPSSIISS
-     ##iinncclluuddee <<ssiiggnnaall..hh>>
+SYNOPSIS
+     #include <signal.h>
 
-     _i_n_t
-     ssiiggwwaaiitt(_c_o_n_s_t _s_i_g_s_e_t___t _*_r_e_s_t_r_i_c_t _s_e_t, _i_n_t _*_r_e_s_t_r_i_c_t _s_i_g);
+     int
+     sigwait(const sigset_t *restrict set, int *restrict sig);
 
-DDEESSCCRRIIPPTTIIOONN
-     The ssiiggwwaaiitt() function selects a set of signals, specified by _s_e_t.  If
-     none of the selected signals are pending, ssiiggwwaaiitt() waits until one or
-     more of the selected signals has been generated.  Then ssiiggwwaaiitt() atomi-
+DESCRIPTION
+     The sigwait() function selects a set of signals, specified by set.  If
+     none of the selected signals are pending, sigwait() waits until one or
+     more of the selected signals has been generated.  Then sigwait() atomi-
      cally clears one of the selected signals from the set of pending signals
-     for the process and sets the location pointed to by _s_i_g to the signal
+     for the process and sets the location pointed to by sig to the signal
      number that was cleared.
 
-     The signals specified by _s_e_t should be blocked, but not ignored, at the
-     time of the call to ssiiggwwaaiitt().
+     The signals specified by set should be blocked, but not ignored, at the
+     time of the call to sigwait().
 
-     Processes which call ssiiggwwaaiitt() on ignored signals will wait indefinitely.
+     Processes which call sigwait() on ignored signals will wait indefinitely.
      Ignored signals are dropped immediately by the system, before delivery to
      a waiting process.
 
-RREETTUURRNN VVAALLUUEESS
-     If successful, ssiiggwwaaiitt() returns 0 and sets the location pointed to by
-     _s_i_g to the cleared signal number.	Otherwise, an error number is
+RETURN VALUES
+     If successful, sigwait() returns 0 and sets the location pointed to by
+     sig to the cleared signal number.	Otherwise, an error number is
      returned.
 
-EERRRROORRSS
-     ssiiggwwaaiitt() will fail if:
+ERRORS
+     sigwait() will fail if:
 
-     [EINVAL]		_s_e_t specifies one or more invalid signal numbers.
+     [EINVAL]		set specifies one or more invalid signal numbers.
 
-SSEEEE AALLSSOO
+SEE ALSO
      pthread_sigmask(2), sigaction(2), sigpending(2), sigsuspend(2), pause(3)
 
-SSTTAANNDDAARRDDSS
-     ssiiggwwaaiitt() conforms to ISO/IEC 9945-1:1996 (``POSIX.1'')
+STANDARDS
+     sigwait() conforms to ISO/IEC 9945-1:1996 (``POSIX.1'')
 
 BSD				April 27, 2000				   BSD

@@ -1,21 +1,21 @@
 MUNMAP(2)		    BSD System Calls Manual		     MUNMAP(2)
 
-NNAAMMEE
-     mmuunnmmaapp -- remove a mapping
+NAME
+     munmap -- remove a mapping
 
-SSYYNNOOPPSSIISS
-     ##iinncclluuddee <<ssyyss//mmmmaann..hh>>
+SYNOPSIS
+     #include <sys/mman.h>
 
-     _i_n_t
-     mmuunnmmaapp(_v_o_i_d _*_a_d_d_r, _s_i_z_e___t _l_e_n);
+     int
+     munmap(void *addr, size_t len);
 
-DDEESSCCRRIIPPTTIIOONN
-     The mmuunnmmaapp() system call deletes the mappings for the specified address
+DESCRIPTION
+     The munmap() system call deletes the mappings for the specified address
      range, causing further references to addresses within the range to gener-
      ate invalid memory references.
 
-DDIIRRTTYY PPAAGGEE HHAANNDDLLIINNGG
-     How mmuunnmmaapp() handles a dirty page, depends on what type of memory is
+DIRTY PAGE HANDLING
+     How munmap() handles a dirty page, depends on what type of memory is
      being unmapped:
 
      [Anonymous]	If the memory is anonymous memory and if the last ref-
@@ -39,37 +39,37 @@ DDIIRRTTYY PPAAGGEE HHAANNDDLLIINNGG
      if need be. The memory will continue to persist until the last reference
      goes away (except for System V shared memory in which case, see above).
 
-RREETTUURRNN VVAALLUUEESS
-     Upon successful completion, mmuunnmmaapp returns zero.  Otherwise, a value of
-     -1 is returned and _e_r_r_n_o is set to indicate the error.
+RETURN VALUES
+     Upon successful completion, munmap returns zero.  Otherwise, a value of
+     -1 is returned and errno is set to indicate the error.
 
-EERRRROORRSS
-     MMuunnmmaapp() will fail if:
+ERRORS
+     Munmap() will fail if:
 
-     [EINVAL]		The _a_d_d_r parameter was not page aligned (i.e., a mul-
+     [EINVAL]		The addr parameter was not page aligned (i.e., a mul-
 			tiple of the page size).
 
-     [EINVAL]		The _l_e_n parameter was negative or zero.
+     [EINVAL]		The len parameter was negative or zero.
 
      [EINVAL]		Some part of the region being unmapped is not part of
 			the currently valid address space.
 
-LLEEGGAACCYY SSYYNNOOPPSSIISS
-     ##iinncclluuddee <<ssyyss//ttyyppeess..hh>>
-     ##iinncclluuddee <<ssyyss//mmmmaann..hh>>
+LEGACY SYNOPSIS
+     #include <sys/types.h>
+     #include <sys/mman.h>
 
-     The include file <_s_y_s_/_t_y_p_e_s_._h> is necessary.
+     The include file <sys/types.h> is necessary.
 
-     _i_n_t
-     mmuunnmmaapp(_c_a_d_d_r___t _a_d_d_r, _s_i_z_e___t _l_e_n);
+     int
+     munmap(caddr_t addr, size_t len);
 
-     The type of _a_d_d_r has changed.
+     The type of addr has changed.
 
-SSEEEE AALLSSOO
+SEE ALSO
      getpagesize(3), msync(2), munmap(2), mprotect(2), madvise(2), mincore(2),
      compat(5)
 
-HHIISSTTOORRYY
-     The mmuunnmmaapp() function first appeared in 4.4BSD.
+HISTORY
+     The munmap() function first appeared in 4.4BSD.
 
 BSD			       October 16, 2008 			   BSD

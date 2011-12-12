@@ -1,30 +1,30 @@
 FHOPEN(2)		    BSD System Calls Manual		     FHOPEN(2)
 
-NNAAMMEE
-     ffhhooppeenn -- open a file by file handle
+NAME
+     fhopen -- open a file by file handle
 
-SSYYNNOOPPSSIISS
-     ##iinncclluuddee <<ssyyss//ttyyppeess..hh>>
-     ##iinncclluuddee <<ssyyss//mmoouunntt..hh>>
+SYNOPSIS
+     #include <sys/types.h>
+     #include <sys/mount.h>
 
-     _i_n_t
-     ffhhooppeenn(_c_o_n_s_t _s_t_r_u_c_t _f_h_a_n_d_l_e _*_f_h_p, _i_n_t _f_l_a_g_s);
+     int
+     fhopen(const struct fhandle *fhp, int flags);
 
-DDEESSCCRRIIPPTTIIOONN
+DESCRIPTION
      The file specified by the given file handle is opened for reading and/or
-     writing, as specified by the argument _f_l_a_g_s; the file descriptor is
+     writing, as specified by the argument flags; the file descriptor is
      returned to the calling process.
 
      This system call is restricted to the super-user and is used by an NFS
      server's rpc.lockd(8) daemon to open a file in order to perform locking
      operations on it.
 
-RREETTUURRNN VVAALLUUEESS
+RETURN VALUES
      Upon successful completion, a value of 0 is returned.  Otherwise, -1 is
-     returned and the global variable _e_r_r_n_o is set to indicate the error.
+     returned and the global variable errno is set to indicate the error.
 
-EERRRROORRSS
-     ffhhooppeenn() fails if one or more of the following are true:
+ERRORS
+     fhopen() fails if one or more of the following are true:
 
      [ESTALE]		The file handle no longer refers to a valid, NFS-
 			exported object.
@@ -34,9 +34,9 @@ EERRRROORRSS
      [EINVAL]		There was a problem with the value of one of the argu-
 			ments.
 
-     [EFAULT]		_f_h_p points to an invalid address.
+     [EFAULT]		fhp points to an invalid address.
 
-SSEEEE AALLSSOO
+SEE ALSO
      rpc.lockd(8)
 
 BSD				January 9, 2007 			   BSD

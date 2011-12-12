@@ -1,25 +1,25 @@
 CHMOD(2)		    BSD System Calls Manual		      CHMOD(2)
 
-NNAAMMEE
-     cchhmmoodd, ffcchhmmoodd -- change mode of file
+NAME
+     chmod, fchmod -- change mode of file
 
-SSYYNNOOPPSSIISS
-     ##iinncclluuddee <<ssyyss//ttyyppeess..hh>>
-     ##iinncclluuddee <<ssyyss//ssttaatt..hh>>
+SYNOPSIS
+     #include <sys/types.h>
+     #include <sys/stat.h>
 
-     _i_n_t
-     cchhmmoodd(_c_o_n_s_t _c_h_a_r _*_p_a_t_h, _m_o_d_e___t _m_o_d_e);
+     int
+     chmod(const char *path, mode_t mode);
 
-     _i_n_t
-     ffcchhmmoodd(_i_n_t _f_i_l_d_e_s, _m_o_d_e___t _m_o_d_e);
+     int
+     fchmod(int fildes, mode_t mode);
 
-DDEESSCCRRIIPPTTIIOONN
-     The function cchhmmoodd() sets the file permission bits of the file specified
-     by the pathname _p_a_t_h to _m_o_d_e.  FFcchhmmoodd() sets the permission bits of the
-     specified file descriptor _f_i_l_d_e_s.	CChhmmoodd() verifies that the process
-     owner (user) either owns the file specified by _p_a_t_h (or _f_i_l_d_e_s), or is
-     the super-user.  A mode is created from _o_r_'_d permission bit masks defined
-     in <_s_y_s_/_s_t_a_t_._h>:
+DESCRIPTION
+     The function chmod() sets the file permission bits of the file specified
+     by the pathname path to mode.  Fchmod() sets the permission bits of the
+     specified file descriptor fildes.	Chmod() verifies that the process
+     owner (user) either owns the file specified by path (or fildes), or is
+     the super-user.  A mode is created from or'd permission bit masks defined
+     in <sys/stat.h>:
 	   #define S_IRWXU 0000700    /* RWX mask for owner */
 	   #define S_IRUSR 0000400    /* R for owner */
 	   #define S_IWUSR 0000200    /* W for owner */
@@ -39,7 +39,7 @@ DDEESSCCRRIIPPTTIIOONN
 	   #define S_ISGID 0002000    /* set group id on execution */
 	   #define S_ISVTX 0001000    /* save swapped text even after use */
 
-     The ISVTX (the _s_t_i_c_k_y _b_i_t) indicates to the system which executable files
+     The ISVTX (the sticky bit) indicates to the system which executable files
      are shareable (the default) and the system maintains the program text of
      the files in the swap area. The sticky bit may only be set by the super
      user on shareable executable files.
@@ -56,17 +56,17 @@ DDEESSCCRRIIPPTTIIOONN
      from remaining set-user-id (set-group-id) if they are modified, at the
      expense of a degree of compatibility.
 
-RREETTUURRNN VVAALLUUEESS
+RETURN VALUES
      Upon successful completion, a value of 0 is returned.  Otherwise, a value
-     of -1 is returned and _e_r_r_n_o is set to indicate the error.
+     of -1 is returned and errno is set to indicate the error.
 
-EERRRROORRSS
-     The cchhmmoodd() system call will fail and the file mode will be unchanged if:
+ERRORS
+     The chmod() system call will fail and the file mode will be unchanged if:
 
      [EACCES]		Search permission is denied for a component of the
 			path prefix.
 
-     [EFAULT]		_P_a_t_h points outside the process's allocated address
+     [EFAULT]		Path points outside the process's allocated address
 			space.
 
      [EINTR]		Its execution was interrupted by a signal.
@@ -91,13 +91,13 @@ EERRRROORRSS
 
      [EROFS]		The named file resides on a read-only file system.
 
-     ffcchhmmoodd() will fail if:
+     fchmod() will fail if:
 
-     [EBADF]		_f_i_l_d_e_s is not a valid file descriptor.
+     [EBADF]		fildes is not a valid file descriptor.
 
-     [EINVAL]		_f_i_l_d_e_s refers to a socket, not to a file.
+     [EINVAL]		fildes refers to a socket, not to a file.
 
-     [EINVAL]		_m_o_d_e is not a valid file mode.
+     [EINVAL]		mode is not a valid file mode.
 
      [EINTR]		Its execution was interrupted by a signal.
 
@@ -109,20 +109,20 @@ EERRRROORRSS
 
      [EROFS]		The file resides on a read-only file system.
 
-LLEEGGAACCYY SSYYNNOOPPSSIISS
-     ##iinncclluuddee <<ssyyss//ttyyppeess..hh>>
-     ##iinncclluuddee <<ssyyss//ssttaatt..hh>>
+LEGACY SYNOPSIS
+     #include <sys/types.h>
+     #include <sys/stat.h>
 
-     The include file <_s_y_s_/_t_y_p_e_s_._h> is necessary.
+     The include file <sys/types.h> is necessary.
 
-SSEEEE AALLSSOO
+SEE ALSO
      chmod(1), chown(2), open(2), stat(2), compat(5), sticky(8)
 
-SSTTAANNDDAARRDDSS
-     The cchhmmoodd() function is expected to conform to IEEE Std 1003.1-1988
+STANDARDS
+     The chmod() function is expected to conform to IEEE Std 1003.1-1988
      (``POSIX.1'').
 
-HHIISSTTOORRYY
-     The ffcchhmmoodd() function call appeared in 4.2BSD.
+HISTORY
+     The fchmod() function call appeared in 4.2BSD.
 
 4th Berkeley Distribution	 June 4, 1993	     4th Berkeley Distribution

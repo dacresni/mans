@@ -1,20 +1,20 @@
 SHMCTL(2)		    BSD System Calls Manual		     SHMCTL(2)
 
-NNAAMMEE
-     sshhmmccttll -- shared memory control operations
+NAME
+     shmctl -- shared memory control operations
 
-SSYYNNOOPPSSIISS
-     ##iinncclluuddee <<ssyyss//sshhmm..hh>>
+SYNOPSIS
+     #include <sys/shm.h>
 
-     _i_n_t
-     sshhmmccttll(_i_n_t _s_h_m_i_d, _i_n_t _c_m_d, _s_t_r_u_c_t _s_h_m_i_d___d_s _*_b_u_f);
+     int
+     shmctl(int shmid, int cmd, struct shmid_ds *buf);
 
-DDEESSCCRRIIPPTTIIOONN
-     The sshhmmccttll() system call performs some control operations on the shared
-     memory area specified by _s_h_m_i_d.  Each shared memory segment has a data
-     structure associated with it, parts of which may be altered by sshhmmccttll()
-     and parts of which determine the actions of sshhmmccttll().  This structure is
-     defined as follows in <_s_y_s_/_s_h_m_._h>:
+DESCRIPTION
+     The shmctl() system call performs some control operations on the shared
+     memory area specified by shmid.  Each shared memory segment has a data
+     structure associated with it, parts of which may be altered by shmctl()
+     and parts of which determine the actions of shmctl().  This structure is
+     defined as follows in <sys/shm.h>:
 
      struct shmid_ds {
 	 struct ipc_perm  shm_perm;	/* operation permissions */
@@ -29,7 +29,7 @@ DDEESSCCRRIIPPTTIIOONN
      };
 
      The ipc_perm structure used inside the shmid_ds structure is defined in
-     <_s_y_s_/_i_p_c_._h> and looks like this:
+     <sys/ipc.h> and looks like this:
 
      struct ipc_perm {
        uid_t	       uid;   /* Owner's user ID */
@@ -41,65 +41,65 @@ DDEESSCCRRIIPPTTIIOONN
        key_t	       _key;  /* Reserved for internal use */
      };
 
-     The operation to be performed by sshhmmccttll() is specified in _c_m_d and is one
+     The operation to be performed by shmctl() is specified in cmd and is one
      of:
 
      IPC_STAT	Gather information about the shared memory segment and place
-		it in the structure pointed to by _b_u_f.
+		it in the structure pointed to by buf.
 
-     IPC_SET	Set the value of the _s_h_m___p_e_r_m_._u_i_d, _s_h_m___p_e_r_m_._g_i_d and
-		_s_h_m___p_e_r_m_._m_o_d_e fields in the structure associated with _s_h_m_i_d.
+     IPC_SET	Set the value of the shm_perm.uid, shm_perm.gid and
+		shm_perm.mode fields in the structure associated with shmid.
 		The values are taken from the corresponding fields in the
-		structure pointed to by _b_u_f.  This operation can only be exe-
+		structure pointed to by buf.  This operation can only be exe-
 		cuted by the super-user, or a process that has an effective
-		user id equal to either _s_h_m___p_e_r_m_._c_u_i_d or _s_h_m___p_e_r_m_._u_i_d in the
+		user id equal to either shm_perm.cuid or shm_perm.uid in the
 		data structure associated with the shared memory segment.
 
-     IPC_RMID	Remove the shared memory segment specified by _s_h_m_i_d and
+     IPC_RMID	Remove the shared memory segment specified by shmid and
 		destroy the data associated with it. Only the super-user or a
-		process with an effective uid equal to the _s_h_m___p_e_r_m_._c_u_i_d or
-		_s_h_m___p_e_r_m_._u_i_d values in the data structure associated with the
+		process with an effective uid equal to the shm_perm.cuid or
+		shm_perm.uid values in the data structure associated with the
 		queue can do this.
 
      The read and write permissions on a shared memory identifier are deter-
-     mined by the _s_h_m___p_e_r_m_._m_o_d_e field in the same way as is done with files
-     (see chmod(2) ), but the effective uid can match either the _s_h_m___p_e_r_m_._c_u_i_d
-     field or the _s_h_m___p_e_r_m_._u_i_d field, and the effective gid can match either
-     _s_h_m___p_e_r_m_._c_g_i_d or _s_h_m___p_e_r_m_._g_i_d.
+     mined by the shm_perm.mode field in the same way as is done with files
+     (see chmod(2) ), but the effective uid can match either the shm_perm.cuid
+     field or the shm_perm.uid field, and the effective gid can match either
+     shm_perm.cgid or shm_perm.gid.
 
-RREETTUURRNN VVAALLUUEESS
+RETURN VALUES
      Upon successful completion, a value of 0 is returned.  Otherwise, -1 is
-     returned and the global variable _e_r_r_n_o is set to indicate the error.
+     returned and the global variable errno is set to indicate the error.
 
-EERRRROORRSS
-     sshhmmccttll() will fail if:
+ERRORS
+     shmctl() will fail if:
 
      [EACCES]		The command is IPC_STAT and the caller has no read
 			permission for this shared memory segment.
 
-     [EFAULT]		_b_u_f specifies an invalid address.
+     [EFAULT]		buf specifies an invalid address.
 
-     [EINVAL]		_s_h_m_i_d is not a valid shared memory segment identifier.
-			_c_m_d is not a valid command.
+     [EINVAL]		shmid is not a valid shared memory segment identifier.
+			cmd is not a valid command.
 
-     [EPERM]		_c_m_d is equal to IPC_SET or IPC_RMID and the caller is
+     [EPERM]		cmd is equal to IPC_SET or IPC_RMID and the caller is
 			not the super-user,nor does the effective uid match
-			either the _s_h_m___p_e_r_m_._u_i_d or _s_h_m___p_e_r_m_._c_u_i_d fields of the
+			either the shm_perm.uid or shm_perm.cuid fields of the
 			data structure associated with the shared memory seg-
 			ment.  An attempt is made to increase the value of
-			_s_h_m___q_b_y_t_e_s through IPC_SET but the caller is not the
+			shm_qbytes through IPC_SET but the caller is not the
 			super-user.
 
-LLEEGGAACCYY SSYYNNOOPPSSIISS
-     ##iinncclluuddee <<ssyyss//ttyyppeess..hh>>
-     ##iinncclluuddee <<ssyyss//iippcc..hh>>
-     ##iinncclluuddee <<ssyyss//sshhmm..hh>>
+LEGACY SYNOPSIS
+     #include <sys/types.h>
+     #include <sys/ipc.h>
+     #include <sys/shm.h>
 
      All of these include files are necessary.
 
-LLEEGGAACCYY DDEESSCCRRIIPPTTIIOONN
+LEGACY DESCRIPTION
      The ipc_perm structure used inside the shmid_ds structure, as defined in
-     <_s_y_s_/_i_p_c_._h>, looks like this:
+     <sys/ipc.h>, looks like this:
 
      struct ipc_perm {
 	 __uint16_t cuid;  /* Creator's user id */
@@ -119,7 +119,7 @@ LLEEGGAACCYY DDEESSCCRRIIPPTTIIOONN
      If the user has a UID that is out of this range (e.g., "nobody"), soft-
      ware using the LEGACY API will not behave as expected.
 
-SSEEEE AALLSSOO
+SEE ALSO
      shmat(2), shmdt(2), shmget(2), compat(5)
 
 BSD				August 17, 1995 			   BSD

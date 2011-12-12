@@ -1,48 +1,48 @@
 AIO_ERROR(2)		    BSD System Calls Manual		  AIO_ERROR(2)
 
-NNAAMMEE
-     aaiioo__eerrrroorr -- retrieve error status of asynchronous I/O operation (REAL-
+NAME
+     aio_error -- retrieve error status of asynchronous I/O operation (REAL-
      TIME)
 
-LLIIBBRRAARRYY
+LIBRARY
      Standard C Library (libc, -lc)
 
-SSYYNNOOPPSSIISS
-     ##iinncclluuddee <<aaiioo..hh>>
+SYNOPSIS
+     #include <aio.h>
 
-     _i_n_t
-     aaiioo__eerrrroorr(_c_o_n_s_t _s_t_r_u_c_t _a_i_o_c_b _*_a_i_o_c_b_p);
+     int
+     aio_error(const struct aiocb *aiocbp);
 
-DDEESSCCRRIIPPTTIIOONN
-     The aaiioo__eerrrroorr() system call returns the error status of the asynchronous
-     I/O request associated with the structure pointed to by _a_i_o_c_b_p.
+DESCRIPTION
+     The aio_error() system call returns the error status of the asynchronous
+     I/O request associated with the structure pointed to by aiocbp.
 
-RREETTUURRNN VVAALLUUEESS
-     If the asynchronous I/O request has completed successfully, aaiioo__eerrrroorr()
+RETURN VALUES
+     If the asynchronous I/O request has completed successfully, aio_error()
      returns 0.  If the request has not yet completed, EINPROGRESS is
      returned.	If the request has completed unsuccessfully, the error status
      is returned as described in read(2), write(2), or fsync(2) is returned.
-     On failure, aaiioo__eerrrroorr() returns -1 and sets errno to indicate the error
+     On failure, aio_error() returns -1 and sets errno to indicate the error
      condition.
 
-EERRRROORRSS
-     The aaiioo__eerrrroorr() system call will fail if:
+ERRORS
+     The aio_error() system call will fail if:
 
-     [EINVAL]		The _a_i_o_c_b_p argument does not reference an outstanding
+     [EINVAL]		The aiocbp argument does not reference an outstanding
 			asynchronous I/O request.
 
-SSEEEE AALLSSOO
+SEE ALSO
      aio_cancel(2), aio_read(2), aio_return(2), aio_suspend(2), aio_write(2),
      fsync(2), read(2), write(2), aio(4)
 
-SSTTAANNDDAARRDDSS
-     The aaiioo__eerrrroorr() system call is expected to conform to the IEEE Std 1003.1
+STANDARDS
+     The aio_error() system call is expected to conform to the IEEE Std 1003.1
      (``POSIX.1'') standard.
 
-HHIISSTTOORRYY
-     The aaiioo__eerrrroorr() system call first appeared in FreeBSD 3.0.
+HISTORY
+     The aio_error() system call first appeared in FreeBSD 3.0.
 
-AAUUTTHHOORRSS
+AUTHORS
      This manual page was written by Wes Peters <wes@softweyr.com>.
 
 BSD				 June 2, 1999				   BSD

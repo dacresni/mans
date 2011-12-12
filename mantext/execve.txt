@@ -1,18 +1,18 @@
 EXECVE(2)		    BSD System Calls Manual		     EXECVE(2)
 
-NNAAMMEE
-     eexxeeccvvee -- execute a file
+NAME
+     execve -- execute a file
 
-SSYYNNOOPPSSIISS
-     ##iinncclluuddee <<uunniissttdd..hh>>
+SYNOPSIS
+     #include <unistd.h>
 
-     _i_n_t
-     eexxeeccvvee(_c_o_n_s_t _c_h_a_r _*_p_a_t_h, _c_h_a_r _*_c_o_n_s_t _a_r_g_v_[_], _c_h_a_r _*_c_o_n_s_t _e_n_v_p_[_]);
+     int
+     execve(const char *path, char *const argv[], char *const envp[]);
 
-DDEESSCCRRIIPPTTIIOONN
-     EExxeeccvvee() transforms the calling process into a new process.  The new
+DESCRIPTION
+     Execve() transforms the calling process into a new process.  The new
      process is constructed from an ordinary file, whose name is pointed to by
-     _p_a_t_h, called the _n_e_w _p_r_o_c_e_s_s _f_i_l_e.  This file is either an executable
+     path, called the new process file.  This file is either an executable
      object file, or a file of data for an interpreter.  An executable object
      file consists of an identifying header, followed by pages of data repre-
      senting the initial program (text) and initialized data pages.  Addi-
@@ -21,34 +21,34 @@ DDEESSCCRRIIPPTTIIOONN
 
      An interpreter file begins with a line of the form:
 
-	   ##!! _i_n_t_e_r_p_r_e_t_e_r [_a_r_g _._._.]
+	   #! interpreter [arg ...]
 
-     When an interpreter file is eexxeeccvvee()'d, the system runs the specified
-     _i_n_t_e_r_p_r_e_t_e_r.  If any optional _a_r_g_s are specified, they become the first
-     (second, ...) argument to the _i_n_t_e_r_p_r_e_t_e_r_. The name of the originally
-     eexxeeccvvee()'d file becomes the subsequent argument; otherwise, the name of
-     the originally eexxeeccvvee()'d file is the first argument.  The original argu-
+     When an interpreter file is execve()'d, the system runs the specified
+     interpreter.  If any optional args are specified, they become the first
+     (second, ...) argument to the interpreter. The name of the originally
+     execve()'d file becomes the subsequent argument; otherwise, the name of
+     the originally execve()'d file is the first argument.  The original argu-
      ments to the invocation of the interpreter are shifted over to become the
      final arguments.  The zeroth argument, normally the name of the
-     eexxeeccvvee()'d file, is left unchanged.
+     execve()'d file, is left unchanged.
 
-     The argument _a_r_g_v is a pointer to a null-terminated array of character
+     The argument argv is a pointer to a null-terminated array of character
      pointers to null-terminated character strings.  These strings construct
      the argument list to be made available to the new process.  At least one
      argument must be present in the array; by custom, the first element
      should be the name of the executed program (for example, the last compo-
-     nent of _p_a_t_h).
+     nent of path).
 
-     The argument _e_n_v_p is also a pointer to a null-terminated array of charac-
+     The argument envp is also a pointer to a null-terminated array of charac-
      ter pointers to null-terminated strings.  A pointer to this array is nor-
-     mally stored in the global variable _e_n_v_i_r_o_n_. These strings pass informa-
+     mally stored in the global variable environ. These strings pass informa-
      tion to the new process that is not directly an argument to the command
      (see environ(7)).
 
      File descriptors open in the calling process image remain open in the new
      process image, except for those for which the close-on-exec flag is set
      (see close(2) and fcntl(2)).  Descriptors that remain open are unaffected
-     by eexxeeccvvee().
+     by execve().
 
      Signals set to be ignored in the calling process are set to be ignored in
      the new process. Signals which are set to be caught in the calling
@@ -86,25 +86,25 @@ DDEESSCCRRIIPPTTIIOONN
 	   file mode mask	see umask(2)
 	   signal mask		see sigaction(2), sigsetmask(2)
 
-     When a program is executed as a result of an eexxeeccvvee() call, it is entered
+     When a program is executed as a result of an execve() call, it is entered
      as follows:
 
 	   main(argc, argv, envp)
 	   int argc;
 	   char **argv, **envp;
 
-     where _a_r_g_c is the number of elements in _a_r_g_v (the ``arg count'') and _a_r_g_v
+     where argc is the number of elements in argv (the ``arg count'') and argv
      points to the array of character pointers to the arguments themselves.
 
-RREETTUURRNN VVAALLUUEESS
-     As the eexxeeccvvee() function overlays the current process image  with a new
+RETURN VALUES
+     As the execve() function overlays the current process image  with a new
      process image, the successful call has no process to return to.  If
-     eexxeeccvvee() does return to the calling process, an error has occurred; the
-     return value will be -1 and the global variable _e_r_r_n_o is set to indicate
+     execve() does return to the calling process, an error has occurred; the
+     return value will be -1 and the global variable errno is set to indicate
      the error.
 
-EERRRROORRSS
-     EExxeeccvvee() will fail and return to the calling process if:
+ERRORS
+     Execve() will fail and return to the calling process if:
 
      [E2BIG]		The number of bytes in the new process's argument list
 			is larger than the system-imposed limit.  This limit
@@ -119,12 +119,12 @@ EERRRROORRSS
      [EACCES]		The new process file mode denies execute permission.
 
      [EACCES]		The new process file is on a filesystem mounted with
-			execution disabled (MNT_NOEXEC in <_s_y_s_/_m_o_u_n_t_._h>).
+			execution disabled (MNT_NOEXEC in <sys/mount.h>).
 
      [EFAULT]		The new process file is not as long as indicated by
 			the size values in its header.
 
-     [EFAULT]		_P_a_t_h, _a_r_g_v, or _e_n_v_p point to an illegal address.
+     [EFAULT]		Path, argv, or envp point to an illegal address.
 
      [EIO]		An I/O error occurred while reading from the file sys-
 			tem.
@@ -152,15 +152,15 @@ EERRRROORRSS
 			file that is currently open for writing or reading by
 			some process.
 
-CCAAVVEEAATT
-     If a program is _s_e_t_u_i_d to a non-super-user, but is executed when the real
-     _u_i_d is ``root'', then the program has some of the powers of a super-user
+CAVEAT
+     If a program is setuid to a non-super-user, but is executed when the real
+     uid is ``root'', then the program has some of the powers of a super-user
      as well.
 
-SSEEEE AALLSSOO
+SEE ALSO
      exit(2), fork(2), execl(3), sysctl(3), environ(7)
 
-HHIISSTTOORRYY
-     The eexxeeccvvee() function call appeared in 4.2BSD.
+HISTORY
+     The execve() function call appeared in 4.2BSD.
 
 4th Berkeley Distribution      January 24, 1994      4th Berkeley Distribution

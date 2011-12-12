@@ -1,36 +1,36 @@
 SIGPAUSE(2)		    BSD System Calls Manual		   SIGPAUSE(2)
 
-NNAAMMEE
-     ssiiggppaauussee -- atomically release blocked signals and wait for interrupt
+NAME
+     sigpause -- atomically release blocked signals and wait for interrupt
 
-LLIIBBRRAARRYY
+LIBRARY
      Standard C Library (libc, -lc)
 
-SSYYNNOOPPSSIISS
-     ##iinncclluuddee <<ssiiggnnaall..hh>>
+SYNOPSIS
+     #include <signal.h>
 
-     _i_n_t
-     ssiiggppaauussee(_i_n_t _s_i_g);
+     int
+     sigpause(int sig);
 
-DDEESSCCRRIIPPTTIIOONN
-     TThhiiss iinntteerrffaaccee iiss mmaaddee oobbssoolleettee bbyy sigsuspend(2).
+DESCRIPTION
+     This interface is made obsolete by sigsuspend(2).
 
-     SSiiggppaauussee() assigns _s_i_g to the set of masked signals and then waits for a
-     signal to arrive; on return the set of masked signals is restored.  _S_i_g
-     is usually 0, indicating that no signals are to be blocked.  SSiiggppaauussee()
-     always terminates by being interrupted, returning -1 with _e_r_r_n_o set to
+     Sigpause() assigns sig to the set of masked signals and then waits for a
+     signal to arrive; on return the set of masked signals is restored.  Sig
+     is usually 0, indicating that no signals are to be blocked.  Sigpause()
+     always terminates by being interrupted, returning -1 with errno set to
      EINTR.
 
-CCOOMMPPAATTIIBBIILLIITTYY
-     ssiiggppaauussee() now takes a signal value and not a mask.  This often appears
-     as a hang in sigpause$UNIX2003 or with ssiiggppaauussee() returning with _e_r_r_n_o
-     set to EINVAL.  Use ssiiggssuussppeenndd() with signal masks.
+COMPATIBILITY
+     sigpause() now takes a signal value and not a mask.  This often appears
+     as a hang in sigpause$UNIX2003 or with sigpause() returning with errno
+     set to EINVAL.  Use sigsuspend() with signal masks.
 
-SSEEEE AALLSSOO
+SEE ALSO
      kill(2), sigaction(2), sigblock(2), sigprocmask(2), sigsuspend(2),
      sigvec(2)
 
-HHIISSTTOORRYY
-     The ssiiggppaauussee() function call appeared in 4.2BSD and has been deprecated.
+HISTORY
+     The sigpause() function call appeared in 4.2BSD and has been deprecated.
 
 BSD				 June 2, 1993				   BSD

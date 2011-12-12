@@ -1,45 +1,45 @@
 SHM_UNLINK(2)		    BSD System Calls Manual		 SHM_UNLINK(2)
 
-NNAAMMEE
-     sshhmm__uunnlliinnkk -- remove shared memory object
+NAME
+     shm_unlink -- remove shared memory object
 
-SSYYNNOOPPSSIISS
-     ##iinncclluuddee <<ssyyss//mmmmaann..hh>>
+SYNOPSIS
+     #include <sys/mman.h>
 
-     _i_n_t
-     sshhmm__uunnlliinnkk(_c_o_n_s_t _c_h_a_r _*_n_a_m_e);
+     int
+     shm_unlink(const char *name);
 
-DDEESSCCRRIIPPTTIIOONN
-     The sshhmm__uunnlliinnkk() function disassociates the shared memory object speci-
-     fied by _n_a_m_e from that name.  The resources associated with the shared
+DESCRIPTION
+     The shm_unlink() function disassociates the shared memory object speci-
+     fied by name from that name.  The resources associated with the shared
      memory object remain intact until the last file descriptor reference is
      removed, e.g., by close(2) or munmap(2), at which point the resources are
      reclaimed (if no references exist at the time of the call to
-     sshhmm__uunnlliinnkk(), the resources are reclaimed immediately).  The name can
+     shm_unlink(), the resources are reclaimed immediately).  The name can
      only be reused when it is bound to a new shared memory object with a call
      to shm_open(2) with the O_CREAT flag.
 
-RREETTUURRNN VVAALLUUEESS
+RETURN VALUES
      Upon successful completion, a value of 0 is returned.  Otherwise, a value
-     of -1 is returned and _e_r_r_n_o is set to indicate the error, and the named
+     of -1 is returned and errno is set to indicate the error, and the named
      shared memory object will remain unchanged.
 
-EERRRROORRSS
-     The sshhmm__uunnlliinnkk() succeeds unless:
+ERRORS
+     The shm_unlink() succeeds unless:
 
      [EACCES]		Permission is denied to be remove the object.
 
-     [ENAMETOOLONG]	_n_a_m_e exceeded the name size limit.  This is currently
-			PSHMNAMLEN characters (defined in <_s_y_s_/_p_o_s_i_x___s_h_m_._h>),
+     [ENAMETOOLONG]	name exceeded the name size limit.  This is currently
+			PSHMNAMLEN characters (defined in <sys/posix_shm.h>),
 			but this may change in the future.
 
      [ENOENT]		The named object does not exist.
 
-SSEEEE AALLSSOO
+SEE ALSO
      close(2), mmap(2), munmap(2), shm_open(2), shmat(2), shmctl(2)
 
-HHIISSTTOORRYY
-     sshhmm__ooppeenn() is specified in the POSIX Realtime Extension
+HISTORY
+     shm_open() is specified in the POSIX Realtime Extension
      (1003.1b-1993/1003.1i-1995).
 
 Darwin				August 31, 2006 			Darwin

@@ -1,40 +1,40 @@
 CONNECT(2)		    BSD System Calls Manual		    CONNECT(2)
 
-NNAAMMEE
-     ccoonnnneecctt -- initiate a connection on a socket
+NAME
+     connect -- initiate a connection on a socket
 
-SSYYNNOOPPSSIISS
-     ##iinncclluuddee <<ssyyss//ttyyppeess..hh>>
-     ##iinncclluuddee <<ssyyss//ssoocckkeett..hh>>
+SYNOPSIS
+     #include <sys/types.h>
+     #include <sys/socket.h>
 
-     _i_n_t
-     ccoonnnneecctt(_i_n_t _s_o_c_k_e_t, _c_o_n_s_t _s_t_r_u_c_t _s_o_c_k_a_d_d_r _*_a_d_d_r_e_s_s,
-	 _s_o_c_k_l_e_n___t _a_d_d_r_e_s_s___l_e_n);
+     int
+     connect(int socket, const struct sockaddr *address,
+	 socklen_t address_len);
 
-DDEESSCCRRIIPPTTIIOONN
-     The parameter _s_o_c_k_e_t is a socket.	If it is of type SOCK_DGRAM, this call
+DESCRIPTION
+     The parameter socket is a socket.	If it is of type SOCK_DGRAM, this call
      specifies the peer with which the socket is to be associated; this
      address is that to which datagrams are to be sent, and the only address
      from which datagrams are to be received.  If the socket is of type
      SOCK_STREAM, this call attempts to make a connection to another socket.
-     The other socket is specified by _a_d_d_r_e_s_s, which is an address in the com-
+     The other socket is specified by address, which is an address in the com-
      munications space of the socket.
 
-     Each communications space interprets the _a_d_d_r_e_s_s parameter in its own
-     way.  Generally, stream sockets may successfully ccoonnnneecctt() only once;
-     datagram sockets may use ccoonnnneecctt() multiple times to change their associ-
+     Each communications space interprets the address parameter in its own
+     way.  Generally, stream sockets may successfully connect() only once;
+     datagram sockets may use connect() multiple times to change their associ-
      ation.  Datagram sockets may dissolve the association by connecting to an
      invalid address, such as a null address or an address with the address
      family set to AF_UNSPEC (the error EAFNOSUPPORT will be harmlessly
      returned).
 
-RREETTUURRNN VVAALLUUEESS
+RETURN VALUES
      Upon successful completion, a value of 0 is returned.  Otherwise, a value
-     of -1 is returned and the global integer variable _e_r_r_n_o is set to indi-
+     of -1 is returned and the global integer variable errno is set to indi-
      cate the error.
 
-EERRRROORRSS
-     The ccoonnnneecctt() system call will fail if:
+ERRORS
+     The connect() system call will fail if:
 
      [EACCES]		The destination address is a broadcast address and the
 			socket option SO_BROADCAST is not set.
@@ -50,13 +50,13 @@ EERRRROORRSS
      [EALREADY] 	The socket is non-blocking and a previous connection
 			attempt has not yet been completed.
 
-     [EBADF]		_s_o_c_k_e_t is not a valid descriptor.
+     [EBADF]		socket is not a valid descriptor.
 
      [ECONNREFUSED]	The attempt to connect was ignored (because the target
 			is not listening for connections) or explicitly
 			rejected.
 
-     [EFAULT]		The _a_d_d_r_e_s_s parameter specifies an area outside the
+     [EFAULT]		The address parameter specifies an area outside the
 			process address space.
 
      [EHOSTUNREACH]	The target host cannot be reached (e.g., down, discon-
@@ -68,7 +68,7 @@ EERRRROORRSS
 
      [EINTR]		Its execution was interrupted by a signal.
 
-     [EINVAL]		An invalid argument was detected (e.g., _a_d_d_r_e_s_s___l_e_n is
+     [EINVAL]		An invalid argument was detected (e.g., address_len is
 			not valid for the address family, the specified
 			address family is invalid).
 
@@ -81,11 +81,11 @@ EERRRROORRSS
      [ENOBUFS]		The system call was unable to allocate a needed memory
 			buffer.
 
-     [ENOTSOCK] 	_s_o_c_k_e_t is not a file descriptor for a socket.
+     [ENOTSOCK] 	socket is not a file descriptor for a socket.
 
-     [EOPNOTSUPP]	Because _s_o_c_k_e_t is listening, no connection is allowed.
+     [EOPNOTSUPP]	Because socket is listening, no connection is allowed.
 
-     [EPROTOTYPE]	_a_d_d_r_e_s_s has a different type than the socket that is
+     [EPROTOTYPE]	address has a different type than the socket that is
 			bound to the specified peer address.
 
      [ETIMEDOUT]	Connection establishment timed out without establish-
@@ -116,16 +116,16 @@ EERRRROORRSS
 
      [ENOTDIR]		A component of the path prefix is not a directory.
 
-LLEEGGAACCYY SSYYNNOOPPSSIISS
-     ##iinncclluuddee <<ssyyss//ttyyppeess..hh>>
-     ##iinncclluuddee <<ssyyss//ssoocckkeett..hh>>
+LEGACY SYNOPSIS
+     #include <sys/types.h>
+     #include <sys/socket.h>
 
-     The include file <_s_y_s_/_t_y_p_e_s_._h> is necessary.
+     The include file <sys/types.h> is necessary.
 
-SSEEEE AALLSSOO
+SEE ALSO
      accept(2), getsockname(2), select(2), socket(2), compat(5)
 
-HHIISSTTOORRYY
-     The ccoonnnneecctt() function call appeared in 4.2BSD.
+HISTORY
+     The connect() function call appeared in 4.2BSD.
 
 4.2 Berkeley Distribution	 June 4, 1993	     4.2 Berkeley Distribution

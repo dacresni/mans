@@ -1,26 +1,26 @@
 OPEN(2) 		    BSD System Calls Manual		       OPEN(2)
 
-NNAAMMEE
-     ooppeenn -- open or create a file for reading or writing
+NAME
+     open -- open or create a file for reading or writing
 
-SSYYNNOOPPSSIISS
-     ##iinncclluuddee <<ffccnnttll..hh>>
+SYNOPSIS
+     #include <fcntl.h>
 
-     _i_n_t
-     ooppeenn(_c_o_n_s_t _c_h_a_r _*_p_a_t_h, _i_n_t _o_f_l_a_g, _._._.);
+     int
+     open(const char *path, int oflag, ...);
 
-DDEESSCCRRIIPPTTIIOONN
-     The file name specified by _p_a_t_h is opened for reading and/or writing, as
-     specified by the argument _o_f_l_a_g; the file descriptor is returned to the
+DESCRIPTION
+     The file name specified by path is opened for reading and/or writing, as
+     specified by the argument oflag; the file descriptor is returned to the
      calling process.
 
-     The _o_f_l_a_g argument may indicate that the file is to be created if it does
-     not exist (by specifying the O_CREAT flag).  In this case, ooppeenn requires
-     a third argument _m_o_d_e___t _m_o_d_e; the file is created with mode _m_o_d_e as
+     The oflag argument may indicate that the file is to be created if it does
+     not exist (by specifying the O_CREAT flag).  In this case, open requires
+     a third argument mode_t mode; the file is created with mode mode as
      described in chmod(2) and modified by the process' umask value (see
      umask(2)).
 
-     The flags specified are formed by _o_r'ing the following values:
+     The flags specified are formed by or'ing the following values:
 
 	   O_RDONLY	   open for reading only
 	   O_WRONLY	   open for writing only
@@ -39,15 +39,15 @@ DDEESSCCRRIIPPTTIIOONN
      Opening a file with O_APPEND set causes each write on the file to be
      appended to the end.  If O_TRUNC is specified and the file exists, the
      file is truncated to zero length.	If O_EXCL is set with O_CREAT and the
-     file already exists, ooppeenn() returns an error.  This may be used to imple-
+     file already exists, open() returns an error.  This may be used to imple-
      ment a simple exclusive-access locking mechanism.	If O_EXCL is set and
-     the last component of the pathname is a symbolic link, ooppeenn() will fail
+     the last component of the pathname is a symbolic link, open() will fail
      even if the symbolic link points to a non-existent name.
 
      If the O_NONBLOCK flag is specified, do not wait for the device or file
-     to be ready or available.	If the ooppeenn() call would result in the process
+     to be ready or available.	If the open() call would result in the process
      being blocked for some reason (e.g., waiting for carrier on a dialup
-     line), ooppeenn() returns immediately.  This flag also has the effect of mak-
+     line), open() returns immediately.  This flag also has the effect of mak-
      ing all subsequent I/O on the open file non-blocking.
 
      When opening a file, a lock with flock(2) semantics can be obtained by
@@ -55,18 +55,18 @@ DDEESSCCRRIIPPTTIIOONN
      If creating a file with O_CREAT, the request for the lock will never fail
      (provided that the underlying filesystem supports locking).
 
-     If O_NOFOLLOW is used in the mask and the target file passed to ooppeenn() is
-     a symbolic link then the ooppeenn() will fail.
+     If O_NOFOLLOW is used in the mask and the target file passed to open() is
+     a symbolic link then the open() will fail.
 
-     If O_SYMLINK is used in the mask and the target file passed to ooppeenn() is
-     a symbolic link then the ooppeenn() will be for the symbolic link itself, not
+     If O_SYMLINK is used in the mask and the target file passed to open() is
+     a symbolic link then the open() will be for the symbolic link itself, not
      what it links to.
 
      The O_EVTONLY flag is only intended for monitoring a file for changes
      (e.g. kqueue). Note: when this flag is used, the opened file will not
      prevent an unmount of the volume that contains the file.
 
-     If successful, ooppeenn() returns a non-negative integer, termed a file
+     If successful, open() returns a non-negative integer, termed a file
      descriptor.  It returns -1 on failure.  The file pointer (used to mark
      the current position within the file) is set to the beginning of the
      file.
@@ -81,12 +81,12 @@ DDEESSCCRRIIPPTTIIOONN
      held open simultaneously by one process.  Getdtablesize(2) returns the
      current system limit.
 
-RREETTUURRNN VVAALLUUEESS
-     If successful, ooppeenn() returns a non-negative integer, termed a file
-     descriptor.  It returns -1 on failure, and sets _e_r_r_n_o to indicate the
+RETURN VALUES
+     If successful, open() returns a non-negative integer, termed a file
+     descriptor.  It returns -1 on failure, and sets errno to indicate the
      error.
 
-EERRRROORRSS
+ERRORS
      The named file is opened unless:
 
      [EACCES]		Search permission is denied for a component of the
@@ -101,7 +101,7 @@ EERRRROORRSS
 
      [EACCES]		O_TRUNC is specified and write permission is denied.
 
-     [EAGAIN]		_p_a_t_h specifies the slave side of a locked pseudo-ter-
+     [EAGAIN]		path specifies the slave side of a locked pseudo-ter-
 			minal device.
 
      [EDQUOT]		O_CREAT is specified, the file does not exist, and the
@@ -116,12 +116,12 @@ EERRRROORRSS
 
      [EEXIST]		O_CREAT and O_EXCL are specified and the file exists.
 
-     [EFAULT]		_P_a_t_h points outside the process's allocated address
+     [EFAULT]		Path points outside the process's allocated address
 			space.
 
-     [EINTR]		The ooppeenn() operation is interrupted by a signal.
+     [EINTR]		The open() operation is interrupted by a signal.
 
-     [EINVAL]		The value of _o_f_l_a_g is not valid.
+     [EINVAL]		The value of oflag is not valid.
 
      [EIO]		An I/O error occurs while making the directory entry
 			or allocating the inode for O_CREAT.
@@ -181,19 +181,19 @@ EERRRROORRSS
 			the file is to be modified.
 
      [ETXTBSY]		The file is a pure procedure (shared text) file that
-			is being executed and the ooppeenn() call requests write
+			is being executed and the open() call requests write
 			access.
 
-CCOOMMPPAATTIIBBIILLIITTYY
-     ooppeenn() on a terminal device (i.e., /dev/console) will now make that
+COMPATIBILITY
+     open() on a terminal device (i.e., /dev/console) will now make that
      device a controlling terminal for the process.  Use the O_NOCTTY flag to
      open a terminal device without changing your controlling terminal.
 
-SSEEEE AALLSSOO
+SEE ALSO
      chmod(2), close(2), dup(2), getdtablesize(2), lseek(2), read(2),
      umask(2), write(2)
 
-HHIISSTTOORRYY
-     An ooppeenn() function call appeared in Version 6 AT&T UNIX.
+HISTORY
+     An open() function call appeared in Version 6 AT&T UNIX.
 
 4th Berkeley Distribution	October 7, 2008      4th Berkeley Distribution

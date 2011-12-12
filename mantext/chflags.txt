@@ -1,23 +1,23 @@
 CHFLAGS(2)		    BSD System Calls Manual		    CHFLAGS(2)
 
-NNAAMMEE
-     cchhffllaaggss, ffcchhffllaaggss -- set file flags
+NAME
+     chflags, fchflags -- set file flags
 
-SSYYNNOOPPSSIISS
-     ##iinncclluuddee <<ssyyss//ssttaatt..hh>>
-     ##iinncclluuddee <<uunniissttdd..hh>>
+SYNOPSIS
+     #include <sys/stat.h>
+     #include <unistd.h>
 
-     _i_n_t
-     cchhffllaaggss(_c_o_n_s_t _c_h_a_r _*_p_a_t_h, _u___i_n_t _f_l_a_g_s);
+     int
+     chflags(const char *path, u_int flags);
 
-     _i_n_t
-     ffcchhffllaaggss(_i_n_t _f_d, _u___i_n_t _f_l_a_g_s);
+     int
+     fchflags(int fd, u_int flags);
 
-DDEESSCCRRIIPPTTIIOONN
-     The file whose name is given by _p_a_t_h or referenced by the descriptor _f_d
-     has its flags changed to _f_l_a_g_s.
+DESCRIPTION
+     The file whose name is given by path or referenced by the descriptor fd
+     has its flags changed to flags.
 
-     The flags specified are formed by _o_r'ing the following values
+     The flags specified are formed by or'ing the following values
 
 	   UF_NODUMP	  Do not dump the file.
 	   UF_IMMUTABLE   The file may not be changed.
@@ -39,12 +39,12 @@ DDEESSCCRRIIPPTTIIOONN
      mally may only be unset when the system is in single-user mode.  (See
      init(8) for details.)
 
-RREETTUURRNN VVAALLUUEESS
+RETURN VALUES
      Upon successful completion, a value of 0 is returned.  Otherwise, -1 is
-     returned and the global variable _e_r_r_n_o is set to indicate the error.
+     returned and the global variable errno is set to indicate the error.
 
-EERRRROORRSS
-     CChhffllaaggss() will fail if:
+ERRORS
+     Chflags() will fail if:
 
      [ENOTDIR]		A component of the path prefix is not a directory.
 
@@ -65,7 +65,7 @@ EERRRROORRSS
 
      [EROFS]		The named file resides on a read-only file system.
 
-     [EFAULT]		_P_a_t_h points outside the process's allocated address
+     [EFAULT]		Path points outside the process's allocated address
 			space.
 
      [EIO]		An I/O error occurred while reading from or writing to
@@ -73,11 +73,11 @@ EERRRROORRSS
 
      [ENOTSUP]		The operation isn't supported by the filesystem.
 
-     FFcchhffllaaggss() will fail if:
+     Fchflags() will fail if:
 
      [EBADF]		The descriptor is not valid.
 
-     [EINVAL]		_f_d refers to a socket, not to a file.
+     [EINVAL]		fd refers to a socket, not to a file.
 
      [EPERM]		The effective user ID does not match the owner of the
 			file and the effective user ID is not the super-user.
@@ -89,10 +89,10 @@ EERRRROORRSS
 
      [ENOTSUP]		The operation isn't supported by the filesystem.
 
-SSEEEE AALLSSOO
+SEE ALSO
      chflags(1), fflagstostr(3), lchflags(3), strtofflags(3), init(8)
 
-HHIISSTTOORRYY
-     The cchhffllaaggss() and ffcchhffllaaggss functions first appeared in 4.4BSD.
+HISTORY
+     The chflags() and fchflags functions first appeared in 4.4BSD.
 
 BSD				 June 9, 1993				   BSD

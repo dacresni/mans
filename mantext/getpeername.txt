@@ -1,39 +1,39 @@
 GETPEERNAME(2)		    BSD System Calls Manual		GETPEERNAME(2)
 
-NNAAMMEE
-     ggeettppeeeerrnnaammee -- get address of connected peer
+NAME
+     getpeername -- get address of connected peer
 
-SSYYNNOOPPSSIISS
-     ##iinncclluuddee <<ssyyss//ssoocckkeett..hh>>
+SYNOPSIS
+     #include <sys/socket.h>
 
-     _i_n_t
-     ggeettppeeeerrnnaammee(_i_n_t _s_o_c_k_e_t, _s_t_r_u_c_t _s_o_c_k_a_d_d_r _*_r_e_s_t_r_i_c_t _a_d_d_r_e_s_s,
-	 _s_o_c_k_l_e_n___t _*_r_e_s_t_r_i_c_t _a_d_d_r_e_s_s___l_e_n);
+     int
+     getpeername(int socket, struct sockaddr *restrict address,
+	 socklen_t *restrict address_len);
 
-DDEESSCCRRIIPPTTIIOONN
-     The ggeettppeeeerrnnaammee() function returns the address of the peer connected to
+DESCRIPTION
+     The getpeername() function returns the address of the peer connected to
      the specified socket.
 
-     The _a_d_d_r_e_s_s___l_e_n parameter should be initialized to indicate the amount of
-     space pointed to by _a_d_d_r_e_s_s.  On return it contains the actual size of
+     The address_len parameter should be initialized to indicate the amount of
+     space pointed to by address.  On return it contains the actual size of
      the address returned (in bytes).
 
      The address is truncated if the buffer provided is too small.
 
-RREETTUURRNN VVAALLUUEESS
-     The ggeettppeeeerrnnaammee() function returns the value 0 if successful; otherwise
-     the value -1 is returned and the global variable _e_r_r_n_o is set to indicate
+RETURN VALUES
+     The getpeername() function returns the value 0 if successful; otherwise
+     the value -1 is returned and the global variable errno is set to indicate
      the error.
 
-EERRRROORRSS
+ERRORS
      The call succeeds unless:
 
-     [EBADF]		The argument _s_o_c_k_e_t is not a valid descriptor.
+     [EBADF]		The argument socket is not a valid descriptor.
 
-     [EFAULT]		The _a_d_d_r_e_s_s parameter points to memory not in a valid
+     [EFAULT]		The address parameter points to memory not in a valid
 			part of the process address space.
 
-     [EINVAL]		_s_o_c_k_e_t has been shut down.
+     [EINVAL]		socket has been shut down.
 
      [ENOBUFS]		Insufficient resources were available in the system to
 			perform the operation.
@@ -41,16 +41,16 @@ EERRRROORRSS
      [ENOTCONN] 	Either the socket is not connected or it has not had
 			the peer pre-specified.
 
-     [ENOTSOCK] 	The argument _s_o_c_k_e_t refers to something other than a
+     [ENOTSOCK] 	The argument socket refers to something other than a
 			socket (e.g., a file).
 
-     [EOPNOTSUPP]	ggeettppeeeerrnnaammee() is not supported for the protocol in use
-			by _s_o_c_k_e_t.
+     [EOPNOTSUPP]	getpeername() is not supported for the protocol in use
+			by socket.
 
-SSEEEE AALLSSOO
+SEE ALSO
      accept(2), bind(2), getsockname(2), socket(2)
 
-HHIISSTTOORRYY
-     The ggeettppeeeerrnnaammee() function call appeared in 4.2BSD.
+HISTORY
+     The getpeername() function call appeared in 4.2BSD.
 
 4.2 Berkeley Distribution	 June 4, 1993	     4.2 Berkeley Distribution

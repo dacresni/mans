@@ -1,35 +1,35 @@
 GETPRIORITY(2)		    BSD System Calls Manual		GETPRIORITY(2)
 
-NNAAMMEE
-     ggeettpprriioorriittyy, sseettpprriioorriittyy -- get/set program scheduling priority
+NAME
+     getpriority, setpriority -- get/set program scheduling priority
 
-SSYYNNOOPPSSIISS
-     ##iinncclluuddee <<ssyyss//rreessoouurrccee..hh>>
+SYNOPSIS
+     #include <sys/resource.h>
 
-     _i_n_t
-     ggeettpprriioorriittyy(_i_n_t _w_h_i_c_h, _i_d___t _w_h_o);
+     int
+     getpriority(int which, id_t who);
 
-     _i_n_t
-     sseettpprriioorriittyy(_i_n_t _w_h_i_c_h, _i_d___t _w_h_o, _i_n_t _p_r_i_o);
+     int
+     setpriority(int which, id_t who, int prio);
 
-DDEESSCCRRIIPPTTIIOONN
+DESCRIPTION
      The scheduling priority of the process, process group, or user as indi-
-     cated by _w_h_i_c_h and _w_h_o is obtained with the ggeettpprriioorriittyy() call and set
-     with the sseettpprriioorriittyy() call.  Additionally, the current thread can be set
-     to background state.  _W_h_i_c_h is one of PRIO_PROCESS, PRIO_PGRP, PRIO_USER,
-     or PRIO_DARWIN_THREAD, and _w_h_o is interpreted relative to _w_h_i_c_h (a
+     cated by which and who is obtained with the getpriority() call and set
+     with the setpriority() call.  Additionally, the current thread can be set
+     to background state.  Which is one of PRIO_PROCESS, PRIO_PGRP, PRIO_USER,
+     or PRIO_DARWIN_THREAD, and who is interpreted relative to which (a
      process identifier for PRIO_PROCESS, process group identifier for
-     PRIO_PGRP, and a user ID for PRIO_USER).  A zero value of _w_h_o denotes the
+     PRIO_PGRP, and a user ID for PRIO_USER).  A zero value of who denotes the
      current process, process group, user, thread (for PRIO_DARWIN_THREAD).
-     _p_r_i_o is a value in the range -20 to 20.  The default priority is 0; lower
-     priorities cause more favorable scheduling.  For PRIO_DARWIN_THREAD, _p_r_i_o
+     prio is a value in the range -20 to 20.  The default priority is 0; lower
+     priorities cause more favorable scheduling.  For PRIO_DARWIN_THREAD, prio
      is either 0 (to remove current thread from background status) or
      PRIO_DARWIN_BG (to set current thread into background state).
 
-     The ggeettpprriioorriittyy() call returns the highest priority (lowest numerical
+     The getpriority() call returns the highest priority (lowest numerical
      value) enjoyed by any of the specified processes or for PRIO_DAR-
      WIN_THREAD returns 0 when current thread is not in background state or 1
-     when the current thread is in background state.  The sseettpprriioorriittyy() call
+     when the current thread is in background state.  The setpriority() call
      sets the priorities of all of the specified processes to the specified
      value.  When setting a thread into background state the scheduling prior-
      ity is set to lowest value, disk and network IO are throttled.  Network
@@ -38,26 +38,26 @@ DDEESSCCRRIIPPTTIIOONN
      the super-user may lower priorities, but any thread can set itself into
      background state.
 
-RREETTUURRNN VVAALLUUEESS
-     Since ggeettpprriioorriittyy() can legitimately return the value -1, it is necessary
-     to clear the external variable _e_r_r_n_o prior to the call, then check it
+RETURN VALUES
+     Since getpriority() can legitimately return the value -1, it is necessary
+     to clear the external variable errno prior to the call, then check it
      afterward to determine if a -1 is an error or a legitimate value.	The
-     sseettpprriioorriittyy() call returns 0 if there is no error, or -1 if there is.
+     setpriority() call returns 0 if there is no error, or -1 if there is.
 
-EERRRROORRSS
-     GGeettpprriioorriittyy() and sseettpprriioorriittyy() will fail if:
+ERRORS
+     Getpriority() and setpriority() will fail if:
 
-     [EINVAL]		_W_h_i_c_h is not one of PRIO_PROCESS, PRIO_PGRP,
+     [EINVAL]		Which is not one of PRIO_PROCESS, PRIO_PGRP,
 			PRIO_USER, or PRIO_DARWIN_THREAD.
 
-     [EINVAL]		_W_h_o is not a valid process, process group, or user ID.
+     [EINVAL]		Who is not a valid process, process group, or user ID.
 
-     [EINVAL]		_W_h_o is not 0 when _w_h_i_c_h is PRIO_DARWIN_THREAD.
+     [EINVAL]		Who is not 0 when which is PRIO_DARWIN_THREAD.
 
-     [ESRCH]		No process can be located using the _w_h_i_c_h and _w_h_o val-
+     [ESRCH]		No process can be located using the which and who val-
 			ues specified.
 
-     In addition to the errors indicated above, sseettpprriioorriittyy() will fail if:
+     In addition to the errors indicated above, setpriority() will fail if:
 
      [EACCES]		A non super-user attempts to lower a process priority.
 
@@ -65,24 +65,24 @@ EERRRROORRSS
 			real user ID matches the effective user ID of the
 			caller.
 
-LLEEGGAACCYY SSYYNNOOPPSSIISS
-     ##iinncclluuddee <<ssyyss//ttyyppeess..hh>>
-     ##iinncclluuddee <<ssyyss//rreessoouurrccee..hh>>
+LEGACY SYNOPSIS
+     #include <sys/types.h>
+     #include <sys/resource.h>
 
-     The include file <_s_y_s_/_t_y_p_e_s_._h> is necessary.
+     The include file <sys/types.h> is necessary.
 
-     _i_n_t
-     ggeettpprriioorriittyy(_i_n_t _w_h_i_c_h, _i_n_t _w_h_o);
+     int
+     getpriority(int which, int who);
 
-     _i_n_t
-     sseettpprriioorriittyy(_i_n_t _w_h_i_c_h, _i_n_t _w_h_o, _i_n_t _v_a_l_u_e);
+     int
+     setpriority(int which, int who, int value);
 
-     The type of _w_h_o has changed.
+     The type of who has changed.
 
-SSEEEE AALLSSOO
+SEE ALSO
      nice(1), fork(2), compat(5), renice(8)
 
-HHIISSTTOORRYY
-     The ggeettpprriioorriittyy() function call appeared in 4.2BSD.
+HISTORY
+     The getpriority() function call appeared in 4.2BSD.
 
 4th Berkeley Distribution	 June 4, 1993	     4th Berkeley Distribution

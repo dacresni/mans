@@ -1,114 +1,114 @@
 MADVISE(2)		    BSD System Calls Manual		    MADVISE(2)
 
-NNAAMMEE
-     mmaaddvviissee, ppoossiixx__mmaaddvviissee -- give advice about use of memory
+NAME
+     madvise, posix_madvise -- give advice about use of memory
 
-SSYYNNOOPPSSIISS
-     ##iinncclluuddee <<ssyyss//mmmmaann..hh>>
+SYNOPSIS
+     #include <sys/mman.h>
 
-     _i_n_t
-     mmaaddvviissee(_v_o_i_d _*_a_d_d_r, _s_i_z_e___t _l_e_n, _i_n_t _a_d_v_i_c_e);
+     int
+     madvise(void *addr, size_t len, int advice);
 
-     _i_n_t
-     ppoossiixx__mmaaddvviissee(_v_o_i_d _*_a_d_d_r, _s_i_z_e___t _l_e_n, _i_n_t _a_d_v_i_c_e);
+     int
+     posix_madvise(void *addr, size_t len, int advice);
 
-DDEESSCCRRIIPPTTIIOONN
-     The mmaaddvviissee() system call allows a process that has knowledge of its mem-
+DESCRIPTION
+     The madvise() system call allows a process that has knowledge of its mem-
      ory behavior to describe it to the system.  The advice passed in may be
      used by the system to alter its virtual memory paging strategy.  This
      advice may improve application and system performance.  The behavior
-     specified in _a_d_v_i_c_e can only be one of the following values:
+     specified in advice can only be one of the following values:
 
      MADV_NORMAL      Indicates that the application has no advice to give on
 		      its behavior in the specified address range.  This is
 		      the system default behavior.  This is used with
-		      mmaaddvviissee() system call.
+		      madvise() system call.
 
      POSIX_MADV_NORMAL
-		      Same as MADV_NORMAL but used with ppoossiixx__mmaaddvviissee() system
+		      Same as MADV_NORMAL but used with posix_madvise() system
 		      call.
 
      MADV_SEQUENTIAL  Indicates that the application expects to access this
 		      address range in a sequential manner.  This is used with
-		      mmaaddvviissee() system call.
+		      madvise() system call.
 
      POSIX_MADV_SEQUENTIAL
-		      Same as MADV_SEQUENTIAL but used with ppoossiixx__mmaaddvviissee()
+		      Same as MADV_SEQUENTIAL but used with posix_madvise()
 		      system call.
 
      MADV_RANDOM      Indicates that the application expects to access this
 		      address range in a random manner.  This is used with
-		      mmaaddvviissee() system call.
+		      madvise() system call.
 
      POSIX_MADV_RANDOM
-		      Same as MADV_RANDOM but used with ppoossiixx__mmaaddvviissee() system
+		      Same as MADV_RANDOM but used with posix_madvise() system
 		      call.
 
      MADV_WILLNEED    Indicates that the application expects to access this
-		      address range soon.  This is used with mmaaddvviissee() system
+		      address range soon.  This is used with madvise() system
 		      call.
 
      POSIX_MADV_WILLNEED
-		      Same as MADV_WILLNEED but used with ppoossiixx__mmaaddvviissee() sys-
+		      Same as MADV_WILLNEED but used with posix_madvise() sys-
 		      tem call.
 
      MADV_DONTNEED    Indicates that the application is not expecting to
 		      access this address range soon.  This is used with
-		      mmaaddvviissee() system call.
+		      madvise() system call.
 
      POSIX_MADV_DONTNEED
-		      Same as MADV_DONTNEED but used with ppoossiixx__mmaaddvviissee() sys-
+		      Same as MADV_DONTNEED but used with posix_madvise() sys-
 		      tem call.
 
      MADV_FREE	      Indicates that the application will not need the infor-
 		      mation contained in this address range, so the pages may
 		      be reused right away.  The address range will remain
-		      valid.  This is used with mmaaddvviissee() system call.
+		      valid.  This is used with madvise() system call.
 
      MADV_ZERO_WIRED_PAGES
 		      Indicates that the application would like the wired
 		      pages in this address range to be zeroed out if the
 		      address range is dellocated without first unwiring the
 		      pages (i.e. a munmap(2) without a preceding munlock(2)
-		      or the application quits).  This is used with mmaaddvviissee()
+		      or the application quits).  This is used with madvise()
 		      system call.
 
-     The ppoossiixx__mmaaddvviissee() behaves same as mmaaddvviissee() except that it uses values
-     with POSIX_ prefix for the _a_d_v_i_c_e system call argument.
+     The posix_madvise() behaves same as madvise() except that it uses values
+     with POSIX_ prefix for the advice system call argument.
 
-RREETTUURRNN VVAALLUUEESS
+RETURN VALUES
      Upon successful completion, a value of 0 is returned.  Otherwise, a value
-     of -1 is returned and _e_r_r_n_o is set to indicate the error.
+     of -1 is returned and errno is set to indicate the error.
 
-EERRRROORRSS
-     mmaaddvviissee() fails if one or more of the following are true:
+ERRORS
+     madvise() fails if one or more of the following are true:
 
-     [EINVAL]		The value of _a_d_v_i_c_e is incorrect.
+     [EINVAL]		The value of advice is incorrect.
 
      [EINVAL]		The address range includes unallocated regions.
 
-     [ENOMEM]		The virtual address range specified by the _a_d_d_r and
-			_l_e_n are outside the range allowed for the address
+     [ENOMEM]		The virtual address range specified by the addr and
+			len are outside the range allowed for the address
 			space.
 
-LLEEGGAACCYY SSYYNNOOPPSSIISS
-     ##iinncclluuddee <<ssyyss//ttyyppeess..hh>>
-     ##iinncclluuddee <<ssyyss//mmmmaann..hh>>
+LEGACY SYNOPSIS
+     #include <sys/types.h>
+     #include <sys/mman.h>
 
-     _i_n_t
-     mmaaddvviissee(_c_a_d_d_r___t _a_d_d_r, _s_i_z_e___t _l_e_n, _i_n_t _a_d_v_i_c_e);
+     int
+     madvise(caddr_t addr, size_t len, int advice);
 
-     _i_n_t
-     ppoossiixx__mmaaddvviissee(_c_a_d_d_r___t _a_d_d_r, _s_i_z_e___t _l_e_n, _i_n_t _a_d_v_i_c_e);
+     int
+     posix_madvise(caddr_t addr, size_t len, int advice);
 
-     The include file <_s_y_s_/_t_y_p_e_s_._h> is necessary.  The type of _a_d_d_r has
+     The include file <sys/types.h> is necessary.  The type of addr has
      changed.
 
-SSEEEE AALLSSOO
+SEE ALSO
      mincore(2), minherit(2), mprotect(2), msync(2), munmap(2), compat(5)
 
-HHIISSTTOORRYY
-     The mmaaddvviissee function first appeared in 4.4BSD.  The ppoossiixx__mmaaddvviissee func-
+HISTORY
+     The madvise function first appeared in 4.4BSD.  The posix_madvise func-
      tion is part of IEEE 1003.1-2001 and was first implemented in Mac OS X
      10.2.
 

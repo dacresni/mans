@@ -1,31 +1,31 @@
 SEMGET(2)		    BSD System Calls Manual		     SEMGET(2)
 
-NNAAMMEE
-     sseemmggeett -- obtain a semaphore id
+NAME
+     semget -- obtain a semaphore id
 
-SSYYNNOOPPSSIISS
-     ##iinncclluuddee <<ssyyss//sseemm..hh>>
+SYNOPSIS
+     #include <sys/sem.h>
 
-     _i_n_t
-     sseemmggeett(_k_e_y___t _k_e_y, _i_n_t _n_s_e_m_s, _i_n_t _s_e_m_f_l_g);
+     int
+     semget(key_t key, int nsems, int semflg);
 
-DDEESSCCRRIIPPTTIIOONN
-     Based on the values of _k_e_y and _s_e_m_f_l_g, sseemmggeett() returns the identifier of
+DESCRIPTION
+     Based on the values of key and semflg, semget() returns the identifier of
      a newly created or previously existing set of semaphores.	The key is
      analogous to a filename: it provides a handle that names an IPC object.
      There are three ways to specify a key:
 
-     ++oo	 IPC_PRIVATE may be specified, in which case a new IPC object will be
+     o	 IPC_PRIVATE may be specified, in which case a new IPC object will be
 	 created.
 
-     ++oo	 An integer constant may be specified.	If no IPC object corresponding
-	 to _k_e_y is specified and the IPC_CREAT bit is set in _s_e_m_f_l_g, a new one
+     o	 An integer constant may be specified.	If no IPC object corresponding
+	 to key is specified and the IPC_CREAT bit is set in semflg, a new one
 	 will be created.
 
-     ++oo	 The ftok(3) function may be used to generate a key from a pathname.
+     o	 The ftok(3) function may be used to generate a key from a pathname.
 
-     The mode of a newly created IPC object is determined by _O_R'ing the fol-
-     lowing constants into the _s_e_m_f_l_g argument:
+     The mode of a newly created IPC object is determined by OR'ing the fol-
+     lowing constants into the semflg argument:
 
      SEM_R	   Read access for user.
 
@@ -39,44 +39,44 @@ DDEESSCCRRIIPPTTIIOONN
 
      (SEM_A>>6)    Alter access for other.
 
-     If a new set of semaphores is being created, _n_s_e_m_s is used to indicate
-     the number of semaphores the set should contain.  Otherwise, _n_s_e_m_s may be
+     If a new set of semaphores is being created, nsems is used to indicate
+     the number of semaphores the set should contain.  Otherwise, nsems may be
      specified as 0.
 
-RREETTUURRNN VVAALLUUEESS
-     The sseemmggeett() system call returns the id of a semaphore set if successful;
-     otherwise, -1 is returned and _e_r_r_n_o is set to indicate the error.
+RETURN VALUES
+     The semget() system call returns the id of a semaphore set if successful;
+     otherwise, -1 is returned and errno is set to indicate the error.
 
-EERRRROORRSS
-     The sseemmggeett() system call will fail if:
+ERRORS
+     The semget() system call will fail if:
 
      [EACCES]		Access permission failure.
 
      [EEXIST]		IPC_CREAT and IPC_EXCL were specified, and a semaphore
-			set corresponding to _k_e_y already exists.
+			set corresponding to key already exists.
 
      [EINVAL]		The number of semaphores requested is either less than
 			1 or greater than the system imposed maximum per set.
 
      [EINVAL]		A semaphore identifier exists for the argument key,
 			but the number of semaphores in the set associated
-			with it is less than _n_s_e_m_s, and _n_s_e_m_s is non-zero.
+			with it is less than nsems, and nsems is non-zero.
 
-     [ENOENT]		No semaphore set was found corresponding to _k_e_y, and
+     [ENOENT]		No semaphore set was found corresponding to key, and
 			IPC_CREAT was not specified.
 
      [ENOSPC]		Insufficiently many semaphores are available.
 
-     [ENOSPC]		The kernel could not allocate a _s_t_r_u_c_t _s_e_m_i_d___d_s.
+     [ENOSPC]		The kernel could not allocate a struct semid_ds.
 
-LLEEGGAACCYY SSYYNNOOPPSSIISS
-     ##iinncclluuddee <<ssyyss//ttyyppeess..hh>>
-     ##iinncclluuddee <<ssyyss//iippcc..hh>>
-     ##iinncclluuddee <<ssyyss//sseemm..hh>>
+LEGACY SYNOPSIS
+     #include <sys/types.h>
+     #include <sys/ipc.h>
+     #include <sys/sem.h>
 
-     The include files <_s_y_s_/_t_y_p_e_s_._h> and <_s_y_s_/_i_p_c_._h> are necessary.
+     The include files <sys/types.h> and <sys/ipc.h> are necessary.
 
-SSEEEE AALLSSOO
+SEE ALSO
      semctl(2), semop(2), ftok(3), compat(5)
 
 BSD			      September 12, 1995			   BSD

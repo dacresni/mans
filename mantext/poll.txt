@@ -1,19 +1,19 @@
 POLL(2) 		    BSD System Calls Manual		       POLL(2)
 
-NNAAMMEE
-     ppoollll -- synchronous I/O multiplexing
+NAME
+     poll -- synchronous I/O multiplexing
 
-SSYYNNOOPPSSIISS
-     ##iinncclluuddee <<ppoollll..hh>>
+SYNOPSIS
+     #include <poll.h>
 
-     _i_n_t
-     ppoollll(_s_t_r_u_c_t _p_o_l_l_f_d _f_d_s_[_], _n_f_d_s___t _n_f_d_s, _i_n_t _t_i_m_e_o_u_t);
+     int
+     poll(struct pollfd fds[], nfds_t nfds, int timeout);
 
-DDEESSCCRRIIPPTTIIOONN
-     PPoollll() examines a set of file descriptors to see if some of them are
-     ready for I/O or if certain events have occurred on them.	The _f_d_s argu-
+DESCRIPTION
+     Poll() examines a set of file descriptors to see if some of them are
+     ready for I/O or if certain events have occurred on them.	The fds argu-
      ment is a pointer to an array of pollfd structures, as defined in
-     <_p_o_l_l_._h> (shown below).  The _n_f_d_s argument specifies the size of the _f_d_s
+     <poll.h> (shown below).  The nfds argument specifies the size of the fds
      array.
 
      struct pollfd {
@@ -22,7 +22,7 @@ DDEESSCCRRIIPPTTIIOONN
 	 short	revents;  /* events returned */
      };
 
-     The fields of _s_t_r_u_c_t _p_o_l_l_f_d are as follows:
+     The fields of struct pollfd are as follows:
 
      fd 	    File descriptor to poll.
 
@@ -30,16 +30,16 @@ DDEESSCCRRIIPPTTIIOONN
 
      revents	    Events which may occur or have occurred.  (See below.)
 
-     The event bitmasks in _e_v_e_n_t_s and _r_e_v_e_n_t_s have the following bits:
+     The event bitmasks in events and revents have the following bits:
 
      POLLERR	    An exceptional condition has occurred on the device or
 		    socket.  This flag is output only, and ignored if present
-		    in the input _e_v_e_n_t_s bitmask.
+		    in the input events bitmask.
 
      POLLHUP	    The device or socket has been disconnected.  This flag is
-		    output only, and ignored if present in the input _e_v_e_n_t_s
+		    output only, and ignored if present in the input events
 		    bitmask.  Note that POLLHUP and POLLOUT are mutually
-		    exclusive and should never be present in the _r_e_v_e_n_t_s bit-
+		    exclusive and should never be present in the revents bit-
 		    mask at the same time.
 
      POLLIN	    Data other than high priority data may be read without
@@ -47,7 +47,7 @@ DDEESSCCRRIIPPTTIIOONN
 		    ).
 
      POLLNVAL	    The file descriptor is not open.  This flag is output
-		    only, and ignored if present in the input _e_v_e_n_t_s bitmask.
+		    only, and ignored if present in the input events bitmask.
 
      POLLOUT	    Normal data may be written without blocking.  This is
 		    equivalent to POLLWRNORM.
@@ -65,41 +65,41 @@ DDEESSCCRRIIPPTTIIOONN
      The distinction between normal, priority, and high-priority data is spe-
      cific to particular file types or devices.
 
-     If _t_i_m_e_o_u_t is greater than zero, it specifies a maximum interval (in mil-
-     liseconds) to wait for any file descriptor to become ready.  If _t_i_m_e_o_u_t
-     is zero, then ppoollll() will return without blocking. If the value of
-     _t_i_m_e_o_u_t is -1, the poll blocks indefinitely.
+     If timeout is greater than zero, it specifies a maximum interval (in mil-
+     liseconds) to wait for any file descriptor to become ready.  If timeout
+     is zero, then poll() will return without blocking. If the value of
+     timeout is -1, the poll blocks indefinitely.
 
-RREETTUURRNN VVAALLUUEESS
-     PPoollll() returns the number of descriptors that are ready for I/O, or -1 if
-     an error occurred.  If the time limit expires, ppoollll() returns 0.  If
-     ppoollll() returns with an error, including one due to an interrupted call,
-     the _f_d_s array will be unmodified and the global variable _e_r_r_n_o will be
+RETURN VALUES
+     Poll() returns the number of descriptors that are ready for I/O, or -1 if
+     an error occurred.  If the time limit expires, poll() returns 0.  If
+     poll() returns with an error, including one due to an interrupted call,
+     the fds array will be unmodified and the global variable errno will be
      set to indicate the error.
 
-EERRRROORRSS
-     PPoollll() will fail if:
+ERRORS
+     Poll() will fail if:
 
      [EAGAIN]		Allocation of internal data structures fails.  A sub-
 			sequent request may succeed.
 
-     [EFAULT]		_F_d_s points outside the process's allocated address
+     [EFAULT]		Fds points outside the process's allocated address
 			space.
 
      [EINTR]		A signal is delivered before the time limit expires
 			and before any of the selected events occurs.
 
-     [EINVAL]		The _n_f_d_s argument is greater than OPEN_MAX or the
-			_t_i_m_e_o_u_t argument is less than -1.
+     [EINVAL]		The nfds argument is greater than OPEN_MAX or the
+			timeout argument is less than -1.
 
-BBUUGGSS
-     The ppoollll() system call currently does not support devices.
+BUGS
+     The poll() system call currently does not support devices.
 
-SSEEEE AALLSSOO
+SEE ALSO
      accept(2), connect(2), kevent(2), read(2), recv(2), select(2), send(2),
      write(2)
 
-HHIISSTTOORRYY
-     The ppoollll() function call appeared in AT&T System V UNIX.
+HISTORY
+     The poll() function call appeared in AT&T System V UNIX.
 
 BSD			       February 27, 2005			   BSD

@@ -1,71 +1,71 @@
 ACCEPT(2)		    BSD System Calls Manual		     ACCEPT(2)
 
-NNAAMMEE
-     aacccceepptt -- accept a connection on a socket
+NAME
+     accept -- accept a connection on a socket
 
-SSYYNNOOPPSSIISS
-     ##iinncclluuddee <<ssyyss//ssoocckkeett..hh>>
+SYNOPSIS
+     #include <sys/socket.h>
 
-     _i_n_t
-     aacccceepptt(_i_n_t _s_o_c_k_e_t, _s_t_r_u_c_t _s_o_c_k_a_d_d_r _*_r_e_s_t_r_i_c_t _a_d_d_r_e_s_s,
-	 _s_o_c_k_l_e_n___t _*_r_e_s_t_r_i_c_t _a_d_d_r_e_s_s___l_e_n);
+     int
+     accept(int socket, struct sockaddr *restrict address,
+	 socklen_t *restrict address_len);
 
-DDEESSCCRRIIPPTTIIOONN
-     The argument _s_o_c_k_e_t is a socket that has been created with socket(2),
+DESCRIPTION
+     The argument socket is a socket that has been created with socket(2),
      bound to an address with bind(2), and is listening for connections after
-     a listen(2).  aacccceepptt() extracts the first connection request on the queue
+     a listen(2).  accept() extracts the first connection request on the queue
      of pending connections, creates a new socket with the same properties of
-     _s_o_c_k_e_t, and allocates a new file descriptor for the socket.  If no pend-
+     socket, and allocates a new file descriptor for the socket.  If no pend-
      ing connections are present on the queue, and the socket is not marked as
-     non-blocking, aacccceepptt() blocks the caller until a connection is present.
+     non-blocking, accept() blocks the caller until a connection is present.
      If the socket is marked non-blocking and no pending connections are
-     present on the queue, aacccceepptt() returns an error as described below.  The
+     present on the queue, accept() returns an error as described below.  The
      accepted socket may not be used to accept more connections.  The original
-     socket _s_o_c_k_e_t_, remains open.
+     socket socket, remains open.
 
-     The argument _a_d_d_r_e_s_s is a result parameter that is filled in with the
+     The argument address is a result parameter that is filled in with the
      address of the connecting entity, as known to the communications layer.
-     The exact format of the _a_d_d_r_e_s_s parameter is determined by the domain in
-     which the communication is occurring.  The _a_d_d_r_e_s_s___l_e_n is a value-result
+     The exact format of the address parameter is determined by the domain in
+     which the communication is occurring.  The address_len is a value-result
      parameter; it should initially contain the amount of space pointed to by
-     _a_d_d_r_e_s_s; on return it will contain the actual length (in bytes) of the
+     address; on return it will contain the actual length (in bytes) of the
      address returned.	This call is used with connection-based socket types,
      currently with SOCK_STREAM.
 
      It is possible to select(2) a socket for the purposes of doing an
-     aacccceepptt() by selecting it for read.
+     accept() by selecting it for read.
 
      For certain protocols which require an explicit confirmation, such as ISO
-     or DATAKIT, aacccceepptt() can be thought of as merely dequeuing the next con-
+     or DATAKIT, accept() can be thought of as merely dequeuing the next con-
      nection request and not implying confirmation.  Confirmation can be
      implied by a normal read or write on the new file descriptor, and rejec-
      tion can be implied by closing the new socket.
 
      One can obtain user connection request data without confirming the con-
-     nection by issuing a recvmsg(2) call with an _m_s_g___i_o_v_l_e_n of 0 and a non-
-     zero _m_s_g___c_o_n_t_r_o_l_l_e_n, or by issuing a getsockopt(2) request.  Similarly,
+     nection by issuing a recvmsg(2) call with an msg_iovlen of 0 and a non-
+     zero msg_controllen, or by issuing a getsockopt(2) request.  Similarly,
      one can provide user connection rejection information by issuing a
      sendmsg(2) call with providing only the control information, or by call-
      ing setsockopt(2).
 
-RREETTUURRNN VVAALLUUEESS
-     The call returns -1 on error and the global variable _e_r_r_n_o is set to
+RETURN VALUES
+     The call returns -1 on error and the global variable errno is set to
      indicate the error.  If it succeeds, it returns a non-negative integer
      that is a descriptor for the accepted socket.
 
-EERRRROORRSS
-     The aacccceepptt() system call will fail if:
+ERRORS
+     The accept() system call will fail if:
 
-     [EBADF]		_s_o_c_k_e_t is not a valid file descriptor.
+     [EBADF]		socket is not a valid file descriptor.
 
-     [ECONNABORTED]	The connection to _s_o_c_k_e_t has been aborted.
+     [ECONNABORTED]	The connection to socket has been aborted.
 
-     [EFAULT]		The _a_d_d_r_e_s_s parameter is not in a writable part of the
+     [EFAULT]		The address parameter is not in a writable part of the
 			user address space.
 
-     [EINTR]		The aacccceepptt() system call was terminated by a signal.
+     [EINTR]		The accept() system call was terminated by a signal.
 
-     [EINVAL]		_s_o_c_k_e_t is unwilling to accept connections.
+     [EINVAL]		socket is unwilling to accept connections.
 
      [EMFILE]		The per-process descriptor table is full.
 
@@ -74,24 +74,24 @@ EERRRROORRSS
      [ENOMEM]		Insufficient memory was available to complete the
 			operation.
 
-     [ENOTSOCK] 	_s_o_c_k_e_t references a file type other than a socket.
+     [ENOTSOCK] 	socket references a file type other than a socket.
 
-     [EOPNOTSUPP]	_s_o_c_k_e_t is not of type SOCK_STREAM and thus does not
+     [EOPNOTSUPP]	socket is not of type SOCK_STREAM and thus does not
 			accept connections.
 
-     [EWOULDBLOCK]	_s_o_c_k_e_t is marked as non-blocking and no connections
+     [EWOULDBLOCK]	socket is marked as non-blocking and no connections
 			are present to be accepted.
 
-LLEEGGAACCYY SSYYNNOOPPSSIISS
-     ##iinncclluuddee <<ssyyss//ttyyppeess..hh>>
-     ##iinncclluuddee <<ssyyss//ssoocckkeett..hh>>
+LEGACY SYNOPSIS
+     #include <sys/types.h>
+     #include <sys/socket.h>
 
-     The include file <_s_y_s_/_t_y_p_e_s_._h> is necessary.
+     The include file <sys/types.h> is necessary.
 
-SSEEEE AALLSSOO
+SEE ALSO
      bind(2), connect(2), listen(2), select(2), socket(2), compat(5)
 
-HHIISSTTOORRYY
-     The aacccceepptt() function appeared in 4.2BSD.
+HISTORY
+     The accept() function appeared in 4.2BSD.
 
 4.2 Berkeley Distribution      December 11, 1993     4.2 Berkeley Distribution

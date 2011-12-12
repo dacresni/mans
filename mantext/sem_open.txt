@@ -1,35 +1,35 @@
 SEM_OPEN(2)		    BSD System Calls Manual		   SEM_OPEN(2)
 
-NNAAMMEE
-     sseemm__ooppeenn -- initialize and open a named semaphore
+NAME
+     sem_open -- initialize and open a named semaphore
 
-SSYYNNOOPPSSIISS
-     ##iinncclluuddee <<sseemmaapphhoorree..hh>>
+SYNOPSIS
+     #include <semaphore.h>
 
-     _s_e_m___t _*
-     sseemm__ooppeenn(_c_o_n_s_t _c_h_a_r _*_n_a_m_e, _i_n_t _o_f_l_a_g, _._._.);
+     sem_t *
+     sem_open(const char *name, int oflag, ...);
 
      The parameters "mode_t mode" and "unsigned int value" are optional.
 
-DDEESSCCRRIIPPTTIIOONN
-     The named semaphore named _n_a_m_e is initialized and opened as specified by
-     the argument _o_f_l_a_g and a semaphore descriptor is returned to the calling
+DESCRIPTION
+     The named semaphore named name is initialized and opened as specified by
+     the argument oflag and a semaphore descriptor is returned to the calling
      process.
 
-     The value of _o_f_l_a_g is formed by _o_r'ing the following values:
+     The value of oflag is formed by or'ing the following values:
 
 	   O_CREAT	   create the semaphore if it does not exist
 	   O_EXCL	   error if create and semaphore exists
 
-     If O_CREAT is specified, sseemm__ooppeenn() requires an additional two arguments.
-     _m_o_d_e specifies the permissions for the semaphore as described in chmod(2)
+     If O_CREAT is specified, sem_open() requires an additional two arguments.
+     mode specifies the permissions for the semaphore as described in chmod(2)
      and modified by the process' umask value (see umask(2)).  The semaphore
-     is created with an initial _v_a_l_u_e, which must be less than or equal to
+     is created with an initial value, which must be less than or equal to
      SEM_VALUE_MAX.
 
-     If O_EXCL is specified and the semaphore exists, sseemm__ooppeenn() fails.  The
+     If O_EXCL is specified and the semaphore exists, sem_open() fails.  The
      check for the existence of the semaphore and the creation of the sema-
-     phore are atomic with respect to all processes calling sseemm__ooppeenn() with
+     phore are atomic with respect to all processes calling sem_open() with
      O_CREAT and O_EXCL set.
 
      When a new semaphore is created, it is given the user ID and group ID
@@ -38,16 +38,16 @@ DDEESSCCRRIIPPTTIIOONN
      object in this implementation.
 
      The returned semaphore descriptor is available to the calling process
-     until it is closed with sseemm__cclloossee(), or until the caller exits or execs.
+     until it is closed with sem_close(), or until the caller exits or execs.
 
-     If a process makes repeated calls to sseemm__ooppeenn(), with the same _n_a_m_e argu-
+     If a process makes repeated calls to sem_open(), with the same name argu-
      ment, the same descriptor is returned for each successful call, unless
-     sseemm__uunnlliinnkk() has been called on the semaphore in the interim.
+     sem_unlink() has been called on the semaphore in the interim.
 
-     If sseemm__ooppeenn() fails for any reason, it will return a value of SEM_FAILED
-     and sets _e_r_r_n_o.  On success, it returns a semaphore descriptor.
+     If sem_open() fails for any reason, it will return a value of SEM_FAILED
+     and sets errno.  On success, it returns a semaphore descriptor.
 
-EERRRROORRSS
+ERRORS
      The named semaphore is opened unless:
 
      [EACCES]		The required permissions (for reading and/or writing)
@@ -58,15 +58,15 @@ EERRRROORRSS
      [EEXIST]		O_CREAT and O_EXCL were specified and the semaphore
 			exists.
 
-     [EINTR]		The sseemm__ooppeenn() operation was interrupted by a signal.
+     [EINTR]		The sem_open() operation was interrupted by a signal.
 
-     [EINVAL]		The sshhmm__ooppeenn() operation is not supported; or O_CREAT
-			is specified and _v_a_l_u_e exceeds SEM_VALUE_MAX.
+     [EINVAL]		The shm_open() operation is not supported; or O_CREAT
+			is specified and value exceeds SEM_VALUE_MAX.
 
      [EMFILE]		The process has already reached its limit for sema-
 			phores or file descriptors in use.
 
-     [ENAMETOOLONG]	_n_a_m_e exceeded SEM_NAME_LEN characters.
+     [ENAMETOOLONG]	name exceeded SEM_NAME_LEN characters.
 
      [ENFILE]		Too many semaphores or file descriptors are open on
 			the system.
@@ -78,12 +78,12 @@ EERRRROORRSS
 			there is insufficient space available to create the
 			semaphore.
 
-SSEEEE AALLSSOO
+SEE ALSO
      sem_close(2), sem_post(2), sem_trywait(2), sem_unlink(2), sem_wait(2),
      semctl(2), semget(2), semop(2), umask(2)
 
-HHIISSTTOORRYY
-     sseemm__ooppeenn() is specified in the POSIX Realtime Extension
+HISTORY
+     sem_open() is specified in the POSIX Realtime Extension
      (1003.1b-1993/1003.1i-1995).
 
 Darwin				 June 8, 2000				Darwin

@@ -1,31 +1,31 @@
 SYMLINK(2)		    BSD System Calls Manual		    SYMLINK(2)
 
-NNAAMMEE
-     ssyymmlliinnkk -- make symbolic link to a file
+NAME
+     symlink -- make symbolic link to a file
 
-SSYYNNOOPPSSIISS
-     ##iinncclluuddee <<uunniissttdd..hh>>
+SYNOPSIS
+     #include <unistd.h>
 
-     _i_n_t
-     ssyymmlliinnkk(_c_o_n_s_t _c_h_a_r _*_p_a_t_h_1, _c_o_n_s_t _c_h_a_r _*_p_a_t_h_2);
+     int
+     symlink(const char *path1, const char *path2);
 
-DDEESSCCRRIIPPTTIIOONN
-     A symbolic link _p_a_t_h_2 is created to _p_a_t_h_1 (_p_a_t_h_2 is the name of the file
-     created, _p_a_t_h_1 is the string used in creating the symbolic link).	Either
+DESCRIPTION
+     A symbolic link path2 is created to path1 (path2 is the name of the file
+     created, path1 is the string used in creating the symbolic link).	Either
      name may be an arbitrary path name; the files need not be on the same
      file system.
 
-RREETTUURRNN VVAALLUUEESS
+RETURN VALUES
      Upon successful completion, a zero value is returned.  If an error
-     occurs, the error code is stored in _e_r_r_n_o and a -1 value is returned.
+     occurs, the error code is stored in errno and a -1 value is returned.
 
-EERRRROORRSS
+ERRORS
      The symbolic link succeeds unless:
 
      [EACCES]		Write permission is denied in the directory where the
 			symbolic link is being created.
 
-     [EACCES]		A component of the _p_a_t_h_2 path prefix denies search
+     [EACCES]		A component of the path2 path prefix denies search
 			permission.
 
      [EDQUOT]		The directory in which the entry for the new symbolic
@@ -40,17 +40,17 @@ EERRRROORRSS
      [EDQUOT]		The user's quota of inodes on the file system on which
 			the symbolic link is being created has been exhausted.
 
-     [EEXIST]		_P_a_t_h_2 already exists.
+     [EEXIST]		Path2 already exists.
 
-     [EFAULT]		_P_a_t_h_1 or _p_a_t_h_2 points outside the process's allocated
+     [EFAULT]		Path1 or path2 points outside the process's allocated
 			address space.
 
      [EIO]		An I/O error occurs while making the directory entry
 			or allocating the inode.
 
      [EIO]		An I/O error occurs while making the directory entry
-			for _p_a_t_h_2, or allocating the inode for _p_a_t_h_2, or writ-
-			ing out the link contents of _p_a_t_h_2.
+			for path2, or allocating the inode for path2, or writ-
+			ing out the link contents of path2.
 
      [ELOOP]		Too many symbolic links are encountered in translating
 			the pathname.  This is taken to be indicative of a
@@ -60,8 +60,8 @@ EERRRROORRSS
 			ters, or an entire path name exceeds {PATH_MAX} char-
 			acters.
 
-     [ENOENT]		A component of _p_a_t_h_2 does not name an existing file or
-			_p_a_t_h_2 is an empty string.
+     [ENOENT]		A component of path2 does not name an existing file or
+			path2 is an empty string.
 
      [ENOSPC]		The directory in which the entry for the new symbolic
 			link is being placed cannot be extended because there
@@ -75,15 +75,15 @@ EERRRROORRSS
      [ENOSPC]		There are no free inodes on the file system on which
 			the symbolic link is being created.
 
-     [ENOTDIR]		A component of the _p_a_t_h_2 prefix is not a directory.
+     [ENOTDIR]		A component of the path2 prefix is not a directory.
 
-     [EROFS]		The file _p_a_t_h_2 would reside on a read-only file sys-
+     [EROFS]		The file path2 would reside on a read-only file sys-
 			tem.
 
-SSEEEE AALLSSOO
+SEE ALSO
      ln(1), link(2), unlink(2), symlink(7)
 
-HHIISSTTOORRYY
-     The ssyymmlliinnkk() function call appeared in 4.2BSD.
+HISTORY
+     The symlink() function call appeared in 4.2BSD.
 
 4.2 Berkeley Distribution	 June 4, 1993	     4.2 Berkeley Distribution

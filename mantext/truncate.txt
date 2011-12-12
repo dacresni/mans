@@ -1,55 +1,55 @@
 TRUNCATE(2)		    BSD System Calls Manual		   TRUNCATE(2)
 
-NNAAMMEE
-     ffttrruunnccaattee, ttrruunnccaattee -- truncate or extend a file to a specified length
+NAME
+     ftruncate, truncate -- truncate or extend a file to a specified length
 
-SSYYNNOOPPSSIISS
-     ##iinncclluuddee <<uunniissttdd..hh>>
+SYNOPSIS
+     #include <unistd.h>
 
-     _i_n_t
-     ffttrruunnccaattee(_i_n_t _f_i_l_d_e_s, _o_f_f___t _l_e_n_g_t_h);
+     int
+     ftruncate(int fildes, off_t length);
 
-     _i_n_t
-     ttrruunnccaattee(_c_o_n_s_t _c_h_a_r _*_p_a_t_h, _o_f_f___t _l_e_n_g_t_h);
+     int
+     truncate(const char *path, off_t length);
 
-DDEESSCCRRIIPPTTIIOONN
-     ffttrruunnccaattee() and ttrruunnccaattee() cause the file named by _p_a_t_h, or referenced by
-     _f_i_l_d_e_s, to be truncated (or extended) to _l_e_n_g_t_h bytes in size. If the
-     file size exceeds _l_e_n_g_t_h, any extra data is discarded. If the file size
-     is smaller than _l_e_n_g_t_h, the file is extended and filled with zeros to the
-     indicated length.	The ffttrruunnccaattee() form requires the file to be open for
+DESCRIPTION
+     ftruncate() and truncate() cause the file named by path, or referenced by
+     fildes, to be truncated (or extended) to length bytes in size. If the
+     file size exceeds length, any extra data is discarded. If the file size
+     is smaller than length, the file is extended and filled with zeros to the
+     indicated length.	The ftruncate() form requires the file to be open for
      writing.
 
-     Note: ffttrruunnccaattee() and ttrruunnccaattee() do not modify the current file offset
+     Note: ftruncate() and truncate() do not modify the current file offset
      for any open file descriptions associated with the file.
 
-RREETTUURRNN VVAALLUUEESS
+RETURN VALUES
      A value of 0 is returned if the call succeeds.  If the call fails a -1 is
-     returned, and the global variable _e_r_r_n_o specifies the error.
+     returned, and the global variable errno specifies the error.
 
-EERRRROORRSS
-     The ffttrruunnccaattee() system call will fail if:
+ERRORS
+     The ftruncate() system call will fail if:
 
-     [EBADF]		_f_i_l_d_e_s is not a valid descriptor open for writing.
+     [EBADF]		fildes is not a valid descriptor open for writing.
 
-     [EFBIG]		The file is a regular file and _l_e_n_g_t_h is greater than
+     [EFBIG]		The file is a regular file and length is greater than
 			the offset maximum established in the open file
-			description associated with _f_i_l_d_e_s.
+			description associated with fildes.
 
-     [EINVAL]		_f_i_l_d_e_s references a socket, not a file.
+     [EINVAL]		fildes references a socket, not a file.
 
-     [EINVAL]		_f_i_l_d_e_s is not open for writing.
+     [EINVAL]		fildes is not open for writing.
 
      [EROFS]		The named file resides on a read-only file system.
 
-     The ttrruunnccaattee() system call will fail if:
+     The truncate() system call will fail if:
 
      [EACCES]		Search permission is denied for a component of the
 			path prefix.
 
      [EACCES]		The named file is not writable by the user.
 
-     [EFAULT]		_P_a_t_h points outside the process's allocated address
+     [EFAULT]		Path points outside the process's allocated address
 			space.
 
      [EISDIR]		The named file is a directory.
@@ -71,28 +71,28 @@ EERRRROORRSS
      [ETXTBSY]		The file is a pure procedure (shared text) file that
 			is being executed.
 
-     The ffttrruunnccaattee() and ttrruunnccaattee() system calls will fail if:
+     The ftruncate() and truncate() system calls will fail if:
 
      [EFBIG]		The length argument was greater than the maximum file
 			size.
 
      [EINTR]		A signal is caught during execution.
 
-     [EINVAL]		The _l_e_n_g_t_h argument is less than 0.
+     [EINVAL]		The length argument is less than 0.
 
      [EIO]		An I/O error occurred while reading from or writing to
 			a file system.
 
-SSEEEE AALLSSOO
+SEE ALSO
      open(2)
 
-BBUUGGSS
+BUGS
      These calls should be generalized to allow ranges of bytes in a file to
      be discarded.
 
-     Use of ttrruunnccaattee() to extend a file is not portable.
+     Use of truncate() to extend a file is not portable.
 
-HHIISSTTOORRYY
-     The ttrruunnccaattee() and ffttrruunnccaattee() function calls appeared in 4.2BSD.
+HISTORY
+     The truncate() and ftruncate() function calls appeared in 4.2BSD.
 
 4.2 Berkeley Distribution	 June 4, 1993	     4.2 Berkeley Distribution

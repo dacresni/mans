@@ -1,53 +1,53 @@
 STAT(2) 		    BSD System Calls Manual		       STAT(2)
 
-NNAAMMEE
-     ffssttaatt, ffssttaatt6644, llssttaatt, llssttaatt6644, ssttaatt, ssttaatt6644 -- get file status
+NAME
+     fstat, fstat64, lstat, lstat64, stat, stat64 -- get file status
 
-SSYYNNOOPPSSIISS
-     ##iinncclluuddee <<ssyyss//ssttaatt..hh>>
+SYNOPSIS
+     #include <sys/stat.h>
 
-     _i_n_t
-     ffssttaatt(_i_n_t _f_i_l_d_e_s, _s_t_r_u_c_t _s_t_a_t _*_b_u_f);
+     int
+     fstat(int fildes, struct stat *buf);
 
-     _i_n_t
-     llssttaatt(_c_o_n_s_t _c_h_a_r _*_r_e_s_t_r_i_c_t _p_a_t_h, _s_t_r_u_c_t _s_t_a_t _*_r_e_s_t_r_i_c_t _b_u_f);
+     int
+     lstat(const char *restrict path, struct stat *restrict buf);
 
-     _i_n_t
-     ssttaatt(_c_o_n_s_t _c_h_a_r _*_r_e_s_t_r_i_c_t _p_a_t_h, _s_t_r_u_c_t _s_t_a_t _*_r_e_s_t_r_i_c_t _b_u_f);
+     int
+     stat(const char *restrict path, struct stat *restrict buf);
 
-TTRRAANNSSIITTIIIIOONNAALL SSYYNNOOPPSSIISS ((NNOOWW DDEEPPRREECCAATTEEDD))
-     _i_n_t
-     ffssttaatt6644(_i_n_t _f_i_l_d_e_s, _s_t_r_u_c_t _s_t_a_t_6_4 _*_b_u_f);
+TRANSITIIONAL SYNOPSIS (NOW DEPRECATED)
+     int
+     fstat64(int fildes, struct stat64 *buf);
 
-     _i_n_t
-     llssttaatt6644(_c_o_n_s_t _c_h_a_r _*_r_e_s_t_r_i_c_t _p_a_t_h, _s_t_r_u_c_t _s_t_a_t_6_4 _*_r_e_s_t_r_i_c_t _b_u_f);
+     int
+     lstat64(const char *restrict path, struct stat64 *restrict buf);
 
-     _i_n_t
-     ssttaatt6644(_c_o_n_s_t _c_h_a_r _*_r_e_s_t_r_i_c_t _p_a_t_h, _s_t_r_u_c_t _s_t_a_t_6_4 _*_r_e_s_t_r_i_c_t _b_u_f);
+     int
+     stat64(const char *restrict path, struct stat64 *restrict buf);
 
-DDEESSCCRRIIPPTTIIOONN
-     The ssttaatt() function obtains information about the file pointed to by
-     _p_a_t_h.  Read, write or execute permission of the named file is not
+DESCRIPTION
+     The stat() function obtains information about the file pointed to by
+     path.  Read, write or execute permission of the named file is not
      required, but all directories listed in the path name leading to the file
      must be searchable.
 
-     The llssttaatt() function is like ssttaatt() except in the case where the named
-     file is a symbolic link; llssttaatt() returns information about the link,
-     while ssttaatt() returns information about the file the link references.
+     The lstat() function is like stat() except in the case where the named
+     file is a symbolic link; lstat() returns information about the link,
+     while stat() returns information about the file the link references.
      Unlike other filesystem objects, symbolic links may not have an owner,
      group, access mode, times, etc.  Instead, these attributes may be taken
      from the directory that contains the link.  In this case, the only
-     attributes returned from an llssttaatt() that refer to the symbolic link
+     attributes returned from an lstat() that refer to the symbolic link
      itself are the file type (S_IFLNK), size, blocks, and link count (always
      1).
 
-     The ffssttaatt() obtains the same information about an open file known by the
-     file descriptor _f_i_l_d_e_s.
+     The fstat() obtains the same information about an open file known by the
+     file descriptor fildes.
 
-     The _b_u_f argument is a pointer to a _s_t_a_t structure as defined by
-     <_s_y_s_/_s_t_a_t_._h> and into which information is placed concerning the file.
-     When the macro _DARWIN_FEATURE_64_BIT_INODE is not defined (the _i_n_o___t
-     type is 32-bits), the _s_t_a_t structure is defined as:
+     The buf argument is a pointer to a stat structure as defined by
+     <sys/stat.h> and into which information is placed concerning the file.
+     When the macro _DARWIN_FEATURE_64_BIT_INODE is not defined (the ino_t
+     type is 32-bits), the stat structure is defined as:
 
      struct stat { /* when _DARWIN_FEATURE_64_BIT_INODE is NOT defined */
 	 dev_t	  st_dev;    /* device inode resides on */
@@ -68,10 +68,10 @@ DDEESSCCRRIIPPTTIIOONN
      };
 
      However, when the macro _DARWIN_FEATURE_64_BIT_INODE is defined, the
-     _i_n_o___t type will be 64-bits (force 64-bit inode mode by defining the
+     ino_t type will be 64-bits (force 64-bit inode mode by defining the
      _DARWIN_USE_64_BIT_INODE macro before including header files).  This will
-     cause symbol variants of the _s_t_a_t family, with the _$_I_N_O_D_E_6_4 suffixes, to
-     be automatically linked in.  In addition, the _s_t_a_t structure will now be
+     cause symbol variants of the stat family, with the $INODE64 suffixes, to
+     be automatically linked in.  In addition, the stat structure will now be
      defined as:
 
      struct stat { /* when _DARWIN_FEATURE_64_BIT_INODE is defined */
@@ -95,7 +95,7 @@ DDEESSCCRRIIPPTTIIOONN
 	 int64_t	 st_qspare[2];	   /* RESERVED: DO NOT USE! */
      };
 
-     The time-related fields of _s_t_r_u_c_t _s_t_a_t are as follows:
+     The time-related fields of struct stat are as follows:
 
      st_atime	      Time when file data last accessed.  Changed by the
 		      mknod(2), utimes(2) and read(2) system calls.
@@ -111,7 +111,7 @@ DDEESSCCRRIIPPTTIIOONN
      st_birthtime     Time of file creation. Only set once when the file is
 		      created. This field is only available in the 64 bit
 		      inode variants. On filesystems where birthtime is not
-		      available, this field holds the _c_t_i_m_e instead.
+		      available, this field holds the ctime instead.
 
      The size-related fields of the structures are as follows:
 
@@ -121,7 +121,7 @@ DDEESSCCRRIIPPTTIIOONN
 		    512-byte units.  As short symbolic links are stored in the
 		    inode, this number may be zero.
 
-     The status information word _s_t___m_o_d_e has the following bits:
+     The status information word st_mode has the following bits:
 
      #define S_IFMT 0170000	      /* type of file */
      #define	    S_IFIFO  0010000  /* named pipe (fifo) */
@@ -139,35 +139,35 @@ DDEESSCCRRIIPPTTIIOONN
      #define S_IWUSR 0000200  /* write permission, owner */
      #define S_IXUSR 0000100  /* execute/search permission, owner */
 
-     For a list of access modes, see <_s_y_s_/_s_t_a_t_._h>, access(2) and chmod(2).
+     For a list of access modes, see <sys/stat.h>, access(2) and chmod(2).
 
-     For a list of the file flags in the _s_t___f_l_a_g_s field, see <_s_y_s_/_s_t_a_t_._h> and
+     For a list of the file flags in the st_flags field, see <sys/stat.h> and
      chflags(2).
 
-RREETTUURRNN VVAALLUUEESS
+RETURN VALUES
      Upon successful completion a value of 0 is returned.  Otherwise, a value
-     of -1 is returned and _e_r_r_n_o is set to indicate the error.
+     of -1 is returned and errno is set to indicate the error.
 
-CCOOMMPPAATTIIBBIILLIITTYY
+COMPATIBILITY
      Previous versions of the system used different types for the st_dev,
      st_uid, st_gid, st_rdev, st_size, st_blksize and st_blocks fields.
 
-EERRRROORRSS
-     The ffssttaatt() system call will fail if:
+ERRORS
+     The fstat() system call will fail if:
 
-     [EBADF]		_f_i_l_d_e_s is not a valid open file descriptor.
+     [EBADF]		fildes is not a valid open file descriptor.
 
-     [EFAULT]		_S_b points to an invalid address.
+     [EFAULT]		Sb points to an invalid address.
 
      [EIO]		An I/O error occurs while reading from or writing to
 			the file system.
 
-     The llssttaatt() and ssttaatt() system calls will fail if:
+     The lstat() and stat() system calls will fail if:
 
      [EACCES]		Search permission is denied for a component of the
 			path prefix.
 
-     [EFAULT]		_S_b or _n_a_m_e points to an invalid address.
+     [EFAULT]		Sb or name points to an invalid address.
 
      [EIO]		An I/O error occurs while reading from or writing to
 			the file system.
@@ -184,44 +184,44 @@ EERRRROORRSS
 
      [ENOTDIR]		A component of the path prefix is not a directory.
 
-     The ffssttaatt(), llssttaatt(), and ssttaatt() system calls will fail if:
+     The fstat(), lstat(), and stat() system calls will fail if:
 
      [EOVERFLOW]	The file size in bytes or the number of blocks allo-
 			cated to the file or the file serial number cannot be
 			represented correctly in the structure pointed to by
-			_b_u_f.
+			buf.
 
-CCAAVVEEAATTSS
-     The file generation number, _s_t___g_e_n, is only available to the super-user.
-     The fields in the stat structure currently marked _s_t___s_p_a_r_e_1, _s_t___s_p_a_r_e_2,
-     and _s_t___s_p_a_r_e_3 are present in preparation for inode time stamps expanding
+CAVEATS
+     The file generation number, st_gen, is only available to the super-user.
+     The fields in the stat structure currently marked st_spare1, st_spare2,
+     and st_spare3 are present in preparation for inode time stamps expanding
      to 64 bits.  This, however, can break certain programs that depend on the
      time stamps being contiguous (in calls to utimes(2)).
 
-TTRRAANNSSIITTIIOONNAALL DDEESSCCRRIIPPTTIIOONN ((NNOOWW DDEEPPRREECCAATTEEDD))
-     The _f_s_t_a_t_6_4, _l_s_t_a_t_6_4 and _s_t_a_t_6_4 routines are equivalent to their corre-
+TRANSITIONAL DESCRIPTION (NOW DEPRECATED)
+     The fstat64, lstat64 and stat64 routines are equivalent to their corre-
      sponding non-64-suffixed routine, when 64-bit inodes are in effect.  They
      were added before there was support for the symbol variants, and so are
      now deprecated.  Instead of using these, set the _DARWIN_USE_64_BIT_INODE
      macro before including header files to force 64-bit inode support.
 
-     The _s_t_a_t_6_4 structure used by these deprecated routines is the same as the
-     _s_t_a_t structure when 64-bit inodes are in effect (see above).
+     The stat64 structure used by these deprecated routines is the same as the
+     stat structure when 64-bit inodes are in effect (see above).
 
-SSEEEE AALLSSOO
+SEE ALSO
      chflags(2), chmod(2), chown(2), utimes(2), compat(5), symlink(7)
 
-BBUUGGSS
+BUGS
      Applying fstat to a socket (and thus to a pipe) returns a zero'd buffer,
      except for the blocksize field, and a unique device and inode number.
 
-SSTTAANNDDAARRDDSS
-     The ssttaatt() and ffssttaatt() function calls are expected to conform to IEEE Std
+STANDARDS
+     The stat() and fstat() function calls are expected to conform to IEEE Std
      1003.1-1988 (``POSIX.1'').
 
-HHIISSTTOORRYY
-     An llssttaatt() function call appeared in 4.2BSD.  The ssttaatt6644(), ffssttaatt6644(),
-     and llssttaatt6644() system calls first appeared in Mac OS X 10.5 (Leopard) and
+HISTORY
+     An lstat() function call appeared in 4.2BSD.  The stat64(), fstat64(),
+     and lstat64() system calls first appeared in Mac OS X 10.5 (Leopard) and
      are now deprecated in favor of the corresponding symbol variants.
 
 4th Berkeley Distribution	 May 15, 2008	     4th Berkeley Distribution

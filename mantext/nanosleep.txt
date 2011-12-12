@@ -1,54 +1,54 @@
 NANOSLEEP(2)		    BSD System Calls Manual		  NANOSLEEP(2)
 
-NNAAMMEE
-     nnaannoosslleeeepp -- suspend thread execution for an interval measured in
+NAME
+     nanosleep -- suspend thread execution for an interval measured in
      nanoseconds
 
-LLIIBBRRAARRYY
+LIBRARY
      Standard C Library (libc, -lc)
 
-SSYYNNOOPPSSIISS
-     ##iinncclluuddee <<ttiimmee..hh>>
+SYNOPSIS
+     #include <time.h>
 
-     _i_n_t
-     nnaannoosslleeeepp(_c_o_n_s_t _s_t_r_u_c_t _t_i_m_e_s_p_e_c _*_r_q_t_p, _s_t_r_u_c_t _t_i_m_e_s_p_e_c _*_r_m_t_p);
+     int
+     nanosleep(const struct timespec *rqtp, struct timespec *rmtp);
 
-DDEESSCCRRIIPPTTIIOONN
-     The nnaannoosslleeeepp() function causes the calling thread to sleep for the
-     amount of time specified in _r_q_t_p (the actual time slept may be longer,
+DESCRIPTION
+     The nanosleep() function causes the calling thread to sleep for the
+     amount of time specified in rqtp (the actual time slept may be longer,
      due to system latencies and possible limitations in the timer resolution
-     of the hardware).	An unmasked signal will cause nnaannoosslleeeepp() to terminate
+     of the hardware).	An unmasked signal will cause nanosleep() to terminate
      the sleep early, regardless of the SA_RESTART value on the interrupting
      signal.
 
-RREETTUURRNN VVAALLUUEESS
-     If nnaannoosslleeeepp() returns because the requested time has elapsed, the value
+RETURN VALUES
+     If nanosleep() returns because the requested time has elapsed, the value
      returned will be zero.
 
-     If nnaannoosslleeeepp() returns due to the delivery of a signal, the value
-     returned will be the -1, and the global variable _e_r_r_n_o will be set to
-     indicate the interruption.  If _r_m_t_p is non-NULL, the timespec structure
+     If nanosleep() returns due to the delivery of a signal, the value
+     returned will be the -1, and the global variable errno will be set to
+     indicate the interruption.  If rmtp is non-NULL, the timespec structure
      it references is updated to contain the unslept amount (the request time
      minus the time actually slept).
 
-EERRRROORRSS
-     The nnaannoosslleeeepp() call fails if:
+ERRORS
+     The nanosleep() call fails if:
 
-     [EFAULT]		Either _r_q_t_p or _r_m_t_p points to memory that is not a
+     [EFAULT]		Either rqtp or rmtp points to memory that is not a
 			valid part of the process address space.
 
-     [EINTR]		nnaannoosslleeeepp() was interrupted by the delivery of a sig-
+     [EINTR]		nanosleep() was interrupted by the delivery of a sig-
 			nal.
 
-     [EINVAL]		_r_q_t_p specified a nanosecond value less than zero or
+     [EINVAL]		rqtp specified a nanosecond value less than zero or
 			greater than or equal to 1000 million.
 
-     [ENOSYS]		nnaannoosslleeeepp() is not supported by this implementation.
+     [ENOSYS]		nanosleep() is not supported by this implementation.
 
-SSEEEE AALLSSOO
+SEE ALSO
      sigsuspend(2), sleep(3)
 
-SSTTAANNDDAARRDDSS
-     The nnaannoosslleeeepp() function conforms to IEEE Std 1003.1b-1993 (``POSIX.1'').
+STANDARDS
+     The nanosleep() function conforms to IEEE Std 1003.1b-1993 (``POSIX.1'').
 
 BSD				April 17, 1997				   BSD

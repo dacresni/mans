@@ -1,37 +1,37 @@
 GETPID(2)		    BSD System Calls Manual		     GETPID(2)
 
-NNAAMMEE
-     ggeettppiidd, ggeettppppiidd -- get parent or calling process identification
+NAME
+     getpid, getppid -- get parent or calling process identification
 
-SSYYNNOOPPSSIISS
-     ##iinncclluuddee <<uunniissttdd..hh>>
+SYNOPSIS
+     #include <unistd.h>
 
-     _p_i_d___t
-     ggeettppiidd(_v_o_i_d);
+     pid_t
+     getpid(void);
 
-     _p_i_d___t
-     ggeettppppiidd(_v_o_i_d);
+     pid_t
+     getppid(void);
 
-DDEESSCCRRIIPPTTIIOONN
-     GGeettppiidd() returns the process ID of the calling process.  The ID is guar-
+DESCRIPTION
+     Getpid() returns the process ID of the calling process.  The ID is guar-
      anteed to be unique and is useful for constructing temporary file names.
 
-     GGeettppppiidd() returns the process ID of the parent of the calling process.
+     Getppid() returns the process ID of the parent of the calling process.
 
-EERRRROORRSS
-     The ggeettppiidd() and ggeettppppiidd() functions are always successful, and no return
+ERRORS
+     The getpid() and getppid() functions are always successful, and no return
      value is reserved to indicate an error.
 
-LLEEGGAACCYY SSYYNNOOPPSSIISS
-     ##iinncclluuddee <<ssyyss//ttyyppeess..hh>>
-     ##iinncclluuddee <<uunniissttdd..hh>>
+LEGACY SYNOPSIS
+     #include <sys/types.h>
+     #include <unistd.h>
 
-     The include file <_s_y_s_/_t_y_p_e_s_._h> is necessary.
+     The include file <sys/types.h> is necessary.
 
-SSEEEE AALLSSOO
+SEE ALSO
      gethostid(2), compat(5)
 
-SSTTAANNDDAARRDDSS
-     GGeettppiidd() and ggeettppppiidd() conform to IEEE Std 1003.1-1988 (``POSIX.1'').
+STANDARDS
+     Getpid() and getppid() conform to IEEE Std 1003.1-1988 (``POSIX.1'').
 
 4th Berkeley Distribution	 June 4, 1993	     4th Berkeley Distribution

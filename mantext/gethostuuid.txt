@@ -1,37 +1,37 @@
 GETHOSTUUID(2)		 Mac OS X System Calls Manual		GETHOSTUUID(2)
 
-NNAAMMEE
-     ggeetthhoossttuuuuiidd -- return a unique identifier for the current machine
+NAME
+     gethostuuid -- return a unique identifier for the current machine
 
-SSYYNNOOPPSSIISS
-     ##iinncclluuddee <<uunniissttdd..hh>>
+SYNOPSIS
+     #include <unistd.h>
 
-     _i_n_t
-     ggeetthhoossttuuuuiidd(_u_u_i_d___t _i_d, _c_o_n_s_t _s_t_r_u_c_t _t_i_m_e_s_p_e_c _*_w_a_i_t);
+     int
+     gethostuuid(uuid_t id, const struct timespec *wait);
 
-DDEESSCCRRIIPPTTIIOONN
-     The ggeetthhoossttuuuuiidd() function returns a 16-byte _u_u_i_d___t specified by _i_d, that
+DESCRIPTION
+     The gethostuuid() function returns a 16-byte uuid_t specified by id, that
      uniquely identifies the current machine.  Be aware that the hardware
-     identifiers that ggeetthhoossttuuuuiidd() uses to generate the UUID can themselves
+     identifiers that gethostuuid() uses to generate the UUID can themselves
      be modified.
 
-     The _w_a_i_t argument is a pointer to a _s_t_r_u_c_t _t_i_m_e_s_p_e_c that specifies the
-     maximum time to wait for the result.  Setting the _t_v___s_e_c and _t_v___n_s_e_c
+     The wait argument is a pointer to a struct timespec that specifies the
+     maximum time to wait for the result.  Setting the tv_sec and tv_nsec
      fields to zero means to wait indefinitely until it completes.
 
-RREETTUURRNN VVAALLUUEESS
-     The ggeetthhoossttuuuuiidd() function returns zero on success or -1 on error.
+RETURN VALUES
+     The gethostuuid() function returns zero on success or -1 on error.
 
-EERRRROORRSS
-     The ggeetthhoossttuuuuiidd() functions fails if:
+ERRORS
+     The gethostuuid() functions fails if:
 
-     [EFAULT]		_w_a_i_t points to memory that is not a valid part of the
+     [EFAULT]		wait points to memory that is not a valid part of the
 			process address space.
 
-     [EWOULDBLOCK]	The _w_a_i_t timeout expired before the UUID could be
+     [EWOULDBLOCK]	The wait timeout expired before the UUID could be
 			obtained.
 
-SSEEEE AALLSSOO
+SEE ALSO
      uuid(3)
 
 Mac OS X			  Nov 5, 2008			      Mac OS X

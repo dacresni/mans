@@ -1,33 +1,33 @@
 MKDIR(2)		    BSD System Calls Manual		      MKDIR(2)
 
-NNAAMMEE
-     mmkkddiirr -- make a directory file
+NAME
+     mkdir -- make a directory file
 
-SSYYNNOOPPSSIISS
-     ##iinncclluuddee <<ssyyss//ssttaatt..hh>>
+SYNOPSIS
+     #include <sys/stat.h>
 
-     _i_n_t
-     mmkkddiirr(_c_o_n_s_t _c_h_a_r _*_p_a_t_h, _m_o_d_e___t _m_o_d_e);
+     int
+     mkdir(const char *path, mode_t mode);
 
-DDEESSCCRRIIPPTTIIOONN
-     The directory _p_a_t_h is created with the access permissions specified by
-     _m_o_d_e and restricted by the umask(2) of the calling process. See chmod(2)
-     for the possible permission bit masks for _m_o_d_e.
+DESCRIPTION
+     The directory path is created with the access permissions specified by
+     mode and restricted by the umask(2) of the calling process. See chmod(2)
+     for the possible permission bit masks for mode.
 
      The directory's owner ID is set to the process's effective user ID.  The
      directory's group ID is set to that of the parent directory in which it
      is created.
 
-     Note: the behavior of mmkkddiirr() is undefined when mode bits other than the
-     low 9 bits are used. Use chmod(2) after mmkkddiirr() to explicitly set the
+     Note: the behavior of mkdir() is undefined when mode bits other than the
+     low 9 bits are used. Use chmod(2) after mkdir() to explicitly set the
      other bits (See example below).
 
-RREETTUURRNN VVAALLUUEESS
+RETURN VALUES
      A 0 return value indicates success.  A -1 return value indicates an
-     error, and an error code is stored in _e_r_r_n_o.
+     error, and an error code is stored in errno.
 
-EERRRROORRSS
-     MMkkddiirr() will fail and no directory will be created if:
+ERRORS
+     Mkdir() will fail and no directory will be created if:
 
      [EACCES]		Search permission is denied for a component of the
 			path prefix.
@@ -43,7 +43,7 @@ EERRRROORRSS
 
      [EEXIST]		The named file exists.
 
-     [EFAULT]		_P_a_t_h points outside the process's allocated address
+     [EFAULT]		Path points outside the process's allocated address
 			space.
 
      [EIO]		An I/O error occurred while making the directory entry
@@ -77,7 +77,7 @@ EERRRROORRSS
      [EROFS]		The parent directory resides on a read-only file sys-
 			tem.
 
-EEXXAAMMPPLLEE
+EXAMPLE
 	   int main (int argc, const char * argv[])
 	   {
 		   /* The behavior of mkdir is undefined for anything other than the "permission" bits */
@@ -90,16 +90,16 @@ EEXXAAMMPPLLEE
 	   }
 
 
-LLEEGGAACCYY SSYYNNOOPPSSIISS
-     ##iinncclluuddee <<ssyyss//ttyyppeess..hh>>
-     ##iinncclluuddee <<ssyyss//ssttaatt..hh>>
+LEGACY SYNOPSIS
+     #include <sys/types.h>
+     #include <sys/stat.h>
 
-     The include file <_s_y_s_/_t_y_p_e_s_._h> is necessary.
+     The include file <sys/types.h> is necessary.
 
-SSEEEE AALLSSOO
+SEE ALSO
      chmod(2), stat(2), umask(2), compat(5)
 
-SSTTAANNDDAARRDDSS
-     The mmkkddiirr() function conforms to IEEE Std 1003.1-1988 (``POSIX.1'').
+STANDARDS
+     The mkdir() function conforms to IEEE Std 1003.1-1988 (``POSIX.1'').
 
 4.2 Berkeley Distribution      December 11, 1993     4.2 Berkeley Distribution

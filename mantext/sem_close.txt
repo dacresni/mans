@@ -1,31 +1,31 @@
 SEM_CLOSE(2)		    BSD System Calls Manual		  SEM_CLOSE(2)
 
-NNAAMMEE
-     sseemm__cclloossee -- close a named semaphore
+NAME
+     sem_close -- close a named semaphore
 
-SSYYNNOOPPSSIISS
-     ##iinncclluuddee <<sseemmaapphhoorree..hh>>
+SYNOPSIS
+     #include <semaphore.h>
 
-     _i_n_t
-     sseemm__cclloossee(_s_e_m___t _*_s_e_m);
+     int
+     sem_close(sem_t *sem);
 
-DDEESSCCRRIIPPTTIIOONN
+DESCRIPTION
      The system resources associated with the named semaphore referenced by
-     _s_e_m are deallocated and the descriptor is invalidated.
+     sem are deallocated and the descriptor is invalidated.
 
-     If successful, sseemm__cclloossee() will return 0.	Otherwise, -1 is returned and
-     _e_r_r_n_o is set.
+     If successful, sem_close() will return 0.	Otherwise, -1 is returned and
+     errno is set.
 
-EERRRROORRSS
-     sseemm__cclloossee() succeeds unless:
+ERRORS
+     sem_close() succeeds unless:
 
-     [EINVAL]		_s_e_m is not a valid semaphore descriptor.
+     [EINVAL]		sem is not a valid semaphore descriptor.
 
-SSEEEE AALLSSOO
+SEE ALSO
      sem_init(2), sem_open(2), sem_unlink(2), semctl(2), semget(2), semop(2)
 
-HHIISSTTOORRYY
-     sseemm__cclloossee() is specified in the POSIX Realtime Extension
+HISTORY
+     sem_close() is specified in the POSIX Realtime Extension
      (1003.1b-1993/1003.1i-1995).
 
 Darwin				 June 8, 2000				Darwin

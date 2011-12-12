@@ -1,38 +1,38 @@
 SIGBLOCK(2)		    BSD System Calls Manual		   SIGBLOCK(2)
 
-NNAAMMEE
-     ssiiggbblloocckk -- block signals
+NAME
+     sigblock -- block signals
 
-LLIIBBRRAARRYY
+LIBRARY
      Standard C Library (libc, -lc)
 
-SSYYNNOOPPSSIISS
-     ##iinncclluuddee <<ssiiggnnaall..hh>>
+SYNOPSIS
+     #include <signal.h>
 
-     _i_n_t
-     ssiiggbblloocckk(_i_n_t _m_a_s_k);
+     int
+     sigblock(int mask);
 
-     _i_n_t
-     ssiiggmmaasskk(_s_i_g_n_u_m);
+     int
+     sigmask(signum);
 
-DDEESSCCRRIIPPTTIIOONN
-     TThhiiss iinntteerrffaaccee iiss mmaaddee oobbssoolleettee bbyy sigprocmask(22)..
+DESCRIPTION
+     This interface is made obsolete by sigprocmask(2).
 
-     SSiiggbblloocckk() adds the signals specified in _m_a_s_k to the set of signals cur-
+     Sigblock() adds the signals specified in mask to the set of signals cur-
      rently being blocked from delivery.  Signals are blocked if the corre-
-     sponding bit in _m_a_s_k is a 1; the macro ssiiggmmaasskk() is provided to construct
-     the mask for a given _s_i_g_n_u_m.
+     sponding bit in mask is a 1; the macro sigmask() is provided to construct
+     the mask for a given signum.
 
      It is not possible to block SIGKILL or SIGSTOP; this restriction is
      silently imposed by the system.
 
-RREETTUURRNN VVAALLUUEESS
+RETURN VALUES
      The previous set of masked signals is returned.
 
-SSEEEE AALLSSOO
+SEE ALSO
      kill(2), sigaction(2), sigprocmask(2), sigsetmask(2), sigsetops(3)
 
-HHIISSTTOORRYY
-     The ssiiggbblloocckk() function call appeared in 4.2BSD and has been deprecated.
+HISTORY
+     The sigblock() function call appeared in 4.2BSD and has been deprecated.
 
 BSD				 June 2, 1993				   BSD
