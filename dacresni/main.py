@@ -15,18 +15,18 @@
 # limitations under the License.
 #
 from google.appengine.ext import webapp
-from google.appengine.ext.webapp import util
+#from google.appengine.ext.webapp import util
+import webapp2
 
 
-class MainHandler(webapp.RequestHandler):
+class MainPage(webapp2.RequestHandler):
     def get(self):
-        self.response.out.write('Hello world!')
-
+        self.response.headers['Content-Type'] = 'text/plain'
+        self.response.out.write('Hello, WebApp World!')
 
 def main():
-    application = webapp.WSGIApplication([('/', MainHandler)],
+    application = webapp2.WSGIApplication([('/', MainPage)],
                                          debug=True)
-    util.run_wsgi_app(application)
 
 
 if __name__ == '__main__':
