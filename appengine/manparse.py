@@ -2,8 +2,8 @@
 import re
 
 # the following strings are to regular expressions to find 
-date_string=
-author_pattern=
-headder_pattern=
-function_name_pattern=
+date_string="^.Dd"
+name_pattern="^.Nm"
+headder_pattern="^.Fd"
+function_name_pattern="^.BR"
 
