@@ -1,121 +1,84 @@
-.\" Copyright (c) 2005 Michael Kerrisk
-.\" based on earlier work by faith@cs.unc.edu and
-.\" Mike Battersby <mib@deakin.edu.au>
+.\"	$NetBSD: sigsuspend.2,v 1.4 1995/02/27 12:37:46 cgd Exp $
 .\"
-.\" Permission is granted to make and distribute verbatim copies of this
-.\" manual provided the copyright notice and this permission notice are
-.\" preserved on all copies.
+.\" Copyright (c) 1983, 1991, 1993
+.\"	The Regents of the University of California.  All rights reserved.
 .\"
-.\" Permission is granted to copy and distribute modified versions of this
-.\" manual under the conditions for verbatim copying, provided that the
-.\" entire resulting derived work is distributed under the terms of a
-.\" permission notice identical to this one.
+.\" Redistribution and use in source and binary forms, with or without
+.\" modification, are permitted provided that the following conditions
+.\" are met:
+.\" 1. Redistributions of source code must retain the above copyright
+.\"    notice, this list of conditions and the following disclaimer.
+.\" 2. Redistributions in binary form must reproduce the above copyright
+.\"    notice, this list of conditions and the following disclaimer in the
+.\"    documentation and/or other materials provided with the distribution.
+.\" 3. All advertising materials mentioning features or use of this software
+.\"    must display the following acknowledgement:
+.\"	This product includes software developed by the University of
+.\"	California, Berkeley and its contributors.
+.\" 4. Neither the name of the University nor the names of its contributors
+.\"    may be used to endorse or promote products derived from this software
+.\"    without specific prior written permission.
 .\"
-.\" Since the Linux kernel and libraries are constantly changing, this
-.\" manual page may be incorrect or out-of-date.  The author(s) assume no
-.\" responsibility for errors or omissions, or for damages resulting from
-.\" the use of the information contained herein.  The author(s) may not
-.\" have taken the same level of care in the production of this manual,
-.\" which is licensed free of charge, as they might when working
-.\" professionally.
+.\" THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND
+.\" ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+.\" IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+.\" ARE DISCLAIMED.  IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS BE LIABLE
+.\" FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+.\" DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+.\" OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+.\" HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+.\" LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+.\" OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+.\" SUCH DAMAGE.
 .\"
-.\" Formatted or processed versions of this manual, if unaccompanied by
-.\" the source, must acknowledge the copyright and authors of this work.
+.\"	@(#)sigsuspend.2	8.1 (Berkeley) 6/4/93
 .\"
-.\" 2005-09-15, mtk, Created new page by splitting off from sigaction.2
-.\"
-.TH SIGSUSPEND 2 2008-08-29 "Linux" "Linux Programmer's Manual"
-.SH NAME
-sigsuspend \- wait for a signal
-.SH SYNOPSIS
-.B #include <signal.h>
-.sp
-.BI "int sigsuspend(const sigset_t *" mask );
-.sp
-.in -4n
-Feature Test Macro Requirements for glibc (see
-.BR feature_test_macros (7)):
-.in
-.sp
-.ad l
-.BR sigsuspend ():
-_POSIX_C_SOURCE\ >=\ 1 || _XOPEN_SOURCE || _POSIX_SOURCE
-.ad b
-.SH DESCRIPTION
-.BR sigsuspend ()
-temporarily replaces the signal mask of the calling process with the
-mask given by
-.I mask
-and then suspends the process until delivery of a signal whose
-action is to invoke a signal handler or to terminate a process.
-
-If the signal terminates the process, then
-.BR sigsuspend ()
-does not return.
-If the signal is caught, then
-.BR sigsuspend ()
-returns after the signal handler returns,
-and the signal mask is restored to the state before the call to
-.BR sigsuspend ().
-
-It is not possible to block
-.B SIGKILL
-or
-.BR SIGSTOP ;
-specifying these signals in
-.IR mask ,
-has no effect on the process's signal mask.
-.SH "RETURN VALUE"
-.BR sigsuspend ()
-always returns \-1, normally with the error
-.BR EINTR .
-.SH ERRORS
-.TP
-.B EFAULT
-.I mask
-points to memory which is not a valid part of the process address space.
-.TP
-.B EINTR
-The call was interrupted by a signal.
-.SH "CONFORMING TO"
-POSIX.1-2001.
-.SH NOTES
-.PP
-Normally,
-.BR sigsuspend ()
-is used in conjunction with
-.BR sigprocmask (2)
-in order to prevent delivery of a signal during the execution of a
-critical code section.
-The caller first blocks the signals with
-.BR sigprocmask (2).
-When the critical code has completed, the caller then waits for the
-signals by calling
-.BR sigsuspend ()
-with the signal mask that was returned by
-.BR sigprocmask (2)
-(in the
-.I oldset
-argument).
-.PP
-See
-.BR sigsetops (3)
-for details on manipulating signal sets.
-.SH "SEE ALSO"
-.BR kill (2),
-.BR pause (2),
-.BR sigaction (2),
-.BR signal (2),
-.BR sigprocmask (2),
-.BR sigwaitinfo (2),
-.BR sigsetops (3),
-.BR sigwait (3),
-.BR signal (7)
-.SH COLOPHON
-This page is part of release 3.27 of the Linux
-.I man-pages
-project.
-A description of the project,
-and information about reporting bugs,
-can be found at
-http://www.kernel.org/doc/man-pages/.
+.Dd June 4, 1993
+.Dt SIGSUSPEND 2
+.Os
+.Sh NAME
+.Nm sigsuspend
+.Nd atomically release blocked signals and wait for interrupt
+.Sh SYNOPSIS
+.Fd #include <signal.h>
+.Ft int
+.Fo sigsuspend
+.Fa "const sigset_t *sigmask"
+.Fc
+.Sh DESCRIPTION
+.Fn Sigsuspend
+temporarily changes the blocked signal mask to the set to which
+.Fa sigmask
+points,
+and then waits for a signal to arrive;
+on return the previous set of masked signals is restored.
+The signal mask set
+is usually empty to indicate that all
+signals are to be unblocked for the duration of the call.
+.Pp
+In normal usage, a signal is blocked using
+.Xr sigprocmask 2
+to begin a critical section, variables modified on the occurrence
+of the signal are examined to determine that there is no work
+to be done, and the process pauses awaiting work by using
+.Fn sigsuspend
+with the previous mask returned by
+.Xr sigprocmask .
+.Sh RETURN VALUES
+The
+.Fn sigsuspend
+function
+always terminates by being interrupted, returning -1 with
+.Va errno
+set to
+.Dv EINTR .
+.Sh SEE ALSO
+.Xr sigaction 2 ,
+.Xr sigprocmask 2 ,
+.Xr sigsetops 3
+.Sh STANDARDS
+The
+.Nm sigsuspend
+function call
+conforms to
+.St -p1003.1-88 .

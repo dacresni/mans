@@ -1,5 +1,7 @@
-.\" Copyright (c) 1983, 1991 The Regents of the University of California.
-.\" All rights reserved.
+.\"	$NetBSD: shutdown.2,v 1.5 1995/02/27 12:37:11 cgd Exp $
+.\"
+.\" Copyright (c) 1983, 1991, 1993
+.\"	The Regents of the University of California.  All rights reserved.
 .\"
 .\" Redistribution and use in source and binary forms, with or without
 .\" modification, are permitted provided that the following conditions
@@ -29,80 +31,70 @@
 .\" OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 .\" SUCH DAMAGE.
 .\"
-.\"     $Id: shutdown.2,v 1.1.1.1 1999/03/21 22:52:23 freitag Exp $
+.\"     @(#)shutdown.2	8.1 (Berkeley) 6/4/93
 .\"
-.\" Modified Sat Jul 24 09:57:55 1993 by Rik Faith <faith@cs.unc.edu>
-.\" Modified Tue Oct 22 22:04:51 1996 by Eric S. Raymond <esr@thyrsus.com>
-.\" Modified 1998 by Andi Kleen
-.\"
-.TH SHUTDOWN 2 2008-12-03 "Linux" "Linux Programmer's Manual"
-.SH NAME
-shutdown \- shut down part of a full-duplex connection
-.SH SYNOPSIS
-.B #include <sys/socket.h>
-.sp
-.BI "int shutdown(int " sockfd ", int " how );
-.SH DESCRIPTION
+.Dd June 4, 1993
+.Dt SHUTDOWN 2
+.Os BSD 4.2
+.Sh NAME
+.Nm shutdown
+.Nd shut down part of a full-duplex connection
+.Sh SYNOPSIS
+.Fd #include <sys/socket.h>
+.Ft int
+.Fo shutdown
+.Fa "int socket"
+.Fa "int how"
+.Fc
+.Sh DESCRIPTION
 The
-.BR shutdown ()
-call causes all or part of a full-duplex connection on the socket
-associated with
-.I sockfd
+.Fn shutdown
+call causes all or part of a full-duplex connection on
+the socket associated with
+.Fa socket
 to be shut down.
 If
-.I how
-is
-.BR SHUT_RD ,
-further receptions will be disallowed.
+.Fa how
+is 
+.Dv SHUT_RD ,
+further receives will be disallowed.
 If
-.I how
-is
-.BR SHUT_WR ,
-further transmissions will be disallowed.
+.Fa how
+is 
+.Dv SHUT_WR ,
+further sends will be disallowed.
 If
-.I how
-is
-.BR SHUT_RDWR ,
-further receptions and transmissions will be disallowed.
-.SH "RETURN VALUE"
-On success, zero is returned.
-On error, \-1 is returned, and
-.I errno
-is set appropriately.
-.SH ERRORS
-.TP
-.B EBADF
-.I sockfd
+.Fa how
+is 
+.Dv SHUT_RDWR ,
+further sends and receives will be disallowed.
+.Sh RETURN VALUES
+.Rv -std shutdown
+.Sh ERRORS
+The call succeeds unless:
+.Bl -tag -width Er
+.\" ===========
+.It Bq Er EBADF
+.Fa Socket
 is not a valid descriptor.
-.TP
-.B ENOTCONN
+.\" ===========
+.It Bq Er EINVAL
+The
+.Fa how
+argument is invalid.
+.\" ===========
+.It Bq Er ENOTCONN
 The specified socket is not connected.
-.TP
-.B ENOTSOCK
-.I sockfd
+.\" ===========
+.It Bq Er ENOTSOCK
+.Fa Socket
 is a file, not a socket.
-.SH "CONFORMING TO"
-POSIX.1-2001, 4.4BSD (the
-.BR shutdown ()
-function call first appeared in 4.2BSD).
-.SH NOTES
-The constants
-.BR SHUT_RD ,
-.BR SHUT_WR ,
-.B SHUT_RDWR
-have the value 0, 1, 2,
-respectively, and are defined in
-.I <sys/socket.h>
-since glibc-2.1.91.
-.SH "SEE ALSO"
-.BR connect (2),
-.BR socket (2),
-.BR socket (7)
-.SH COLOPHON
-This page is part of release 3.27 of the Linux
-.I man-pages
-project.
-A description of the project,
-and information about reporting bugs,
-can be found at
-http://www.kernel.org/doc/man-pages/.
+.El
+.Sh SEE ALSO
+.Xr connect 2 ,
+.Xr socket 2
+.Sh HISTORY
+The
+.Fn shutdown
+function call appeared in
+.Bx 4.2 .

@@ -1,258 +1,252 @@
-.\" Hey Emacs! This file is -*- nroff -*- source.
+.\"	$NetBSD: rename.2,v 1.7 1995/02/27 12:36:15 cgd Exp $
 .\"
-.\" This manpage is Copyright (C) 1992 Drew Eckhardt;
-.\"                               1993 Michael Haardt;
-.\"                          1993,1995 Ian Jackson.
+.\" Copyright (c) 1983, 1991, 1993
+.\"	The Regents of the University of California.  All rights reserved.
 .\"
-.\" Permission is granted to make and distribute verbatim copies of this
-.\" manual provided the copyright notice and this permission notice are
-.\" preserved on all copies.
+.\" Redistribution and use in source and binary forms, with or without
+.\" modification, are permitted provided that the following conditions
+.\" are met:
+.\" 1. Redistributions of source code must retain the above copyright
+.\"    notice, this list of conditions and the following disclaimer.
+.\" 2. Redistributions in binary form must reproduce the above copyright
+.\"    notice, this list of conditions and the following disclaimer in the
+.\"    documentation and/or other materials provided with the distribution.
+.\" 3. All advertising materials mentioning features or use of this software
+.\"    must display the following acknowledgement:
+.\"	This product includes software developed by the University of
+.\"	California, Berkeley and its contributors.
+.\" 4. Neither the name of the University nor the names of its contributors
+.\"    may be used to endorse or promote products derived from this software
+.\"    without specific prior written permission.
 .\"
-.\" Permission is granted to copy and distribute modified versions of this
-.\" manual under the conditions for verbatim copying, provided that the
-.\" entire resulting derived work is distributed under the terms of a
-.\" permission notice identical to this one.
+.\" THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND
+.\" ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+.\" IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+.\" ARE DISCLAIMED.  IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS BE LIABLE
+.\" FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+.\" DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+.\" OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+.\" HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+.\" LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+.\" OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+.\" SUCH DAMAGE.
 .\"
-.\" Since the Linux kernel and libraries are constantly changing, this
-.\" manual page may be incorrect or out-of-date.  The author(s) assume no
-.\" responsibility for errors or omissions, or for damages resulting from
-.\" the use of the information contained herein.  The author(s) may not
-.\" have taken the same level of care in the production of this manual,
-.\" which is licensed free of charge, as they might when working
-.\" professionally.
+.\"     @(#)rename.2	8.1 (Berkeley) 6/4/93
 .\"
-.\" Formatted or processed versions of this manual, if unaccompanied by
-.\" the source, must acknowledge the copyright and authors of this work.
-.\"
-.\" Modified Sat Jul 24 00:35:52 1993 by Rik Faith <faith@cs.unc.edu>
-.\" Modified Thu Jun  4 12:21:13 1998 by Andries Brouwer <aeb@cwi.nl>
-.\" Modified Thu Mar  3 09:49:35 2005 by Michael Haardt <michael@moria.de>
-.\" 2007-03-25, mtk, added various text to DESCRIPTION.
-.\"
-.TH RENAME 2 2009-03-30 "Linux" "Linux Programmer's Manual"
-.SH NAME
-rename \- change the name or location of a file
-.SH SYNOPSIS
-.B #include <stdio.h>
-.sp
-.BI "int rename(const char *" oldpath ", const char *" newpath );
-.SH DESCRIPTION
-.BR rename ()
-renames a file, moving it between directories if required.
-Any other hard links to the file (as created using
-.BR link (2))
-are unaffected.
-Open file descriptors for
-.I oldpath
-are also unaffected.
-
-If
-.I newpath
-already exists it will be atomically replaced (subject to
-a few conditions; see ERRORS below), so that there is
-no point at which another process attempting to access
-.I newpath
-will find it missing.
-
-If
-.I oldpath
+.Dd September 18, 2008
+.Dt RENAME 2
+.Os BSD 4.2
+.Sh NAME
+.Nm rename
+.Nd change the name of a file
+.Sh SYNOPSIS
+.Fd #include <stdio.h>
+.Ft int
+.Fo rename
+.Fa "const char *old"
+.Fa "const char *new"
+.Fc
+.Sh DESCRIPTION
+The
+.Fn rename
+system call causes the link named
+.Fa old
+to be renamed as
+.Fa new .
+If 
+.Fa new
+exists, it is first removed.
+Both 
+.Fa old
 and
-.I newpath
-are existing hard links referring to the same file, then
-.BR rename ()
-does nothing, and returns a success status.
-
-If
-.I newpath
-exists but the operation fails for some reason
-.BR rename ()
-guarantees to leave an instance of
-.I newpath
-in place.
-
-.I oldpath
-can specify a directory.
-In this case,
-.I newpath
-must either not exist, or it must specify an empty directory.
-
-However, when overwriting there will probably be a window in which
-both
-.I oldpath
+.Fa new
+must be of the same type
+(that is, both must be either directories or non-directories)
+and must reside on the same file system.
+.Pp
+The
+.Fn rename
+system call guarantees that an instance of
+.Fa new
+will always exist,
+even if the system should crash in the middle of the operation.
+.Pp
+If the final component of
+.Fa old
+is a symbolic link,
+the symbolic link is renamed,
+not the file or directory to which it points.
+.Sh CAVEATS
+The system can deadlock if a loop is present in the file system graph.
+This loop takes the form of an entry in directory
+.Ql Pa a ,
+say
+.Ql Pa a/foo ,
+being a hard link to directory
+.Ql Pa b ,
+and an entry in
+directory
+.Ql Pa b ,
+say
+.Ql Pa b/bar ,
+being a hard link
+to directory
+.Ql Pa a .
+When such a loop exists and two separate processes attempt to
+perform
+.Ql rename a/foo b/bar
 and
-.I newpath
-refer to the file being renamed.
-
-If
-.I oldpath
-refers to a symbolic link the link is renamed; if
-.I newpath
-refers to a symbolic link the link will be overwritten.
-.SH "RETURN VALUE"
-On success, zero is returned.
-On error, \-1 is returned, and
-.I errno
-is set appropriately.
-.SH ERRORS
-.TP
-.B EACCES
-Write permission is denied for the directory containing
-.I oldpath
+.Ql rename b/bar a/foo ,
+respectively, 
+the system may deadlock attempting to lock
+both directories for modification.
+.Pp
+Whether or not hard links to directories are supported is specific to
+the underlying filesystem implementation.
+.Pp
+It is recommended that any hard links to directories in an underlying
+filesystem should be replaced by symbolic links by the system administrator
+to avoid the possibility of deadlocks.
+.Pp
+Moving or renaming a file or directory into a directory with inheritable ACLs does not result in ACLs being set on the file or directory. Use
+.Xr acl 3
+in conjunction with
+.Fn rename
+to set ACLs on the file or directory.
+.Sh RETURN VALUES
+A 0 value is returned if the operation succeeds, otherwise
+.Fn rename
+returns -1 and the global variable 
+.Va errno
+indicates the reason for the failure.
+.Sh ERRORS
+The
+.Fn rename
+system call will fail and neither of the argument files will be
+affected if:
+.Bl -tag -width Er
+.\" ===========
+.It Bq Er EACCES
+A component of either path prefix denies search permission.
+.\" ===========
+.It Bq Er EACCES
+The requested operation requires writing in a directory
+(e.g.,
+.Fa new ,
+new/.., or old/..) whose modes disallow this.
+.\" ===========
+.It Bq Er EDQUOT
+The directory in which the entry for the new name
+is being placed cannot be extended because the
+user's quota of disk blocks on the file system
+containing the directory has been exhausted.
+.\" ===========
+.It Bq Er EFAULT
+.Em Path
+points outside the process's allocated address space.
+.\" ===========
+.It Bq Er EINVAL
+.Fa Old
+is a parent directory of
+.Fa new ,
+or an attempt is made to rename
+.Ql \&.
 or
-.IR newpath ,
-or, search permission is denied for one of the directories
-in the path prefix of
-.I oldpath
-or
-.IR newpath ,
-or
-.I oldpath
-is a directory and does not allow write permission (needed to update
-the
-.I ..
-entry).
-(See also
-.BR path_resolution (7).)
-.TP
-.B EBUSY
-The rename fails because
-.IR oldpath " or " newpath
-is a directory that is in use by some process (perhaps as
-current working directory, or as root directory, or because
-it was open for reading) or is in use by the system
-(for example as mount point), while the system considers
-this an error.
-(Note that there is no requirement to return
-.B EBUSY
-in such
-cases \(em there is nothing wrong with doing the rename anyway \(em
-but it is allowed to return
-.B EBUSY
-if the system cannot otherwise
-handle such situations.)
-.TP
-.B EFAULT
-.IR oldpath " or " newpath " points outside your accessible address space."
-.TP
-.B EINVAL
-The new pathname contained a path prefix of the old, or, more generally,
-an attempt was made to make a directory a subdirectory of itself.
-.TP
-.B EISDIR
-.I newpath
-is an existing directory, but
-.I oldpath
+.Ql \&.. .
+.\" ===========
+.It Bq Er EIO
+An I/O error occurs while making or updating a directory entry.
+.\" ===========
+.It Bq Er EISDIR
+.Fa new
+is a directory, but
+.Fa old
 is not a directory.
-.TP
-.B ELOOP
-Too many symbolic links were encountered in resolving
-.IR oldpath " or " newpath .
-.TP
-.B EMLINK
-.I oldpath
-already has the maximum number of links to it, or
-it was a directory and the directory containing
-.I newpath
-has the maximum number of links.
-.TP
-.B ENAMETOOLONG
-.IR oldpath " or " newpath " was too long."
-.TP
-.B ENOENT
-The link named by
-.I oldpath
-does not exist;
-or, a directory component in
-.I newpath
-does not exist;
-or,
-.I oldpath
-or
-.I newpath
-is an empty string.
-.TP
-.B ENOMEM
-Insufficient kernel memory was available.
-.TP
-.B ENOSPC
-The device containing the file has no room for the new directory
-entry.
-.TP
-.B ENOTDIR
-A component used as a directory in
-.IR oldpath " or " newpath
-is not, in fact, a directory.
-Or,
-.I oldpath
-is a directory, and
-.I newpath
-exists but is not a directory.
-.TP
-.BR ENOTEMPTY " or " EEXIST
-.I newpath
-is a nonempty directory, that is, contains entries other than "." and "..".
-.TP
-.BR EPERM " or " EACCES
+.\" ===========
+.It Bq Er ELOOP
+Too many symbolic links are encountered in translating either pathname.
+This is taken to be indicative of a looping symbolic link.
+.\" ===========
+.It Bq Er ENAMETOOLONG
+A component of a pathname exceeds 
+.Dv {NAME_MAX}
+characters, or an entire path name exceeds
+.Dv {PATH_MAX}
+characters.
+.\" ===========
+.It Bq Er ENOENT
+A component of the
+.Fa old
+path does not exist,
+or a path prefix of
+.Fa new
+does not exist.
+.\" ===========
+.It Bq Er ENOSPC
+The directory in which the entry for the new name is being placed
+cannot be extended because there is no space left on the file
+system containing the directory.
+.\" ===========
+.It Bq Er ENOTDIR
+A component of either path prefix is not a directory.
+.\" ===========
+.It Bq Er ENOTDIR
+.Fa old
+is a directory, but
+.Fa new
+is not a directory.
+.\" ===========
+.It Bq Er ENOTEMPTY
+.Fa New
+is a directory and is not empty.
+.\" ===========
+.It Bq Er EPERM
 The directory containing
-.I oldpath
-has the sticky bit
-.RB ( S_ISVTX )
-set and the process's effective user ID is neither
-the user ID of the file to be deleted nor that of the directory
-containing it, and the process is not privileged
-(Linux: does not have the
-.B CAP_FOWNER
-capability);
-or
-.I newpath
-is an existing file and the directory containing it has the sticky bit set
-and the process's effective user ID is neither the user ID of the file
-to be replaced nor that of the directory containing it,
-and the process is not privileged
-(Linux: does not have the
-.B CAP_FOWNER
-capability);
-or the file system containing
-.I pathname
-does not support renaming of the type requested.
-.TP
-.B EROFS
-The file is on a read-only file system.
-.TP
-.B EXDEV
-.IR oldpath " and " newpath
-are not on the same mounted file system.
-(Linux permits a file system to be mounted at multiple points, but
-.BR rename ()
-does not work across different mount points,
-even if the same file system is mounted on both.)
-.SH "CONFORMING TO"
-4.3BSD, C89, C99, POSIX.1-2001.
-.SH BUGS
-On NFS file systems, you can not assume that if the operation
-failed the file was not renamed.
-If the server does the rename operation
-and then crashes, the retransmitted RPC which will be processed when the
-server is up again causes a failure.
-The application is expected to
-deal with this.
-See
-.BR link (2)
-for a similar problem.
-.SH "SEE ALSO"
-.BR mv (1),
-.BR chmod (2),
-.BR link (2),
-.BR renameat (2),
-.BR symlink (2),
-.BR unlink (2),
-.BR path_resolution (7),
-.BR symlink (7)
-.SH COLOPHON
-This page is part of release 3.27 of the Linux
-.I man-pages
-project.
-A description of the project,
-and information about reporting bugs,
-can be found at
-http://www.kernel.org/doc/man-pages/.
+.Fa old
+is marked sticky,
+and neither the containing directory nor
+.Fa old
+are owned by the effective user ID.
+.\" ===========
+.It Bq Er EPERM
+The
+.Fa new
+file exists,
+the directory containing
+.Fa new
+is marked sticky,
+and neither the containing directory nor
+.Fa new
+are owned by the effective user ID.
+.\" ===========
+.It Bq Er EROFS
+The requested link requires writing in a directory on a read-only file
+system.
+.\" ===========
+.It Bq Er EXDEV
+The link named by
+.Fa new
+and the file named by
+.Fa old
+are on different logical devices (file systems).
+Note that this error code will not be returned
+if the implementation permits cross-device links.
+.El
+.Sh CONFORMANCE
+The restriction on renaming a directory whose permissions disallow writing
+is based on the fact that UFS directories contain a ".." entry.
+If renaming a directory would move it to another parent directory,
+this entry needs to be changed.
+.Pp
+This restriction has been generalized to disallow renaming
+of any write-disabled directory,
+even when this would not require a change to the ".." entry.
+For consistency, HFS+ directories emulate this behavior.
+.Sh SEE ALSO
+.Xr open 2 ,
+.Xr symlink 7
+.Sh STANDARDS
+The
+.Fn rename
+function conforms to 
+.St -p1003.1-88 .

@@ -1,234 +1,136 @@
-.\" Hey Emacs! This file is -*- nroff -*- source.
+.\"	$NetBSD: fork.2,v 1.6 1995/02/27 12:32:36 cgd Exp $
 .\"
-.\" Copyright (C) 2006 Michael Kerrisk <mtk.manpages@gmail.com>
-.\" A few fragments remain from an earlier (1992) page by
-.\" Drew Eckhardt (drew@cs.colorado.edu),
+.\" Copyright (c) 1980, 1991, 1993
+.\"	The Regents of the University of California.  All rights reserved.
 .\"
-.\" Permission is granted to make and distribute verbatim copies of this
-.\" manual provided the copyright notice and this permission notice are
-.\" preserved on all copies.
+.\" Redistribution and use in source and binary forms, with or without
+.\" modification, are permitted provided that the following conditions
+.\" are met:
+.\" 1. Redistributions of source code must retain the above copyright
+.\"    notice, this list of conditions and the following disclaimer.
+.\" 2. Redistributions in binary form must reproduce the above copyright
+.\"    notice, this list of conditions and the following disclaimer in the
+.\"    documentation and/or other materials provided with the distribution.
+.\" 3. All advertising materials mentioning features or use of this software
+.\"    must display the following acknowledgement:
+.\"	This product includes software developed by the University of
+.\"	California, Berkeley and its contributors.
+.\" 4. Neither the name of the University nor the names of its contributors
+.\"    may be used to endorse or promote products derived from this software
+.\"    without specific prior written permission.
 .\"
-.\" Permission is granted to copy and distribute modified versions of this
-.\" manual under the conditions for verbatim copying, provided that the
-.\" entire resulting derived work is distributed under the terms of a
-.\" permission notice identical to this one.
+.\" THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND
+.\" ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+.\" IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+.\" ARE DISCLAIMED.  IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS BE LIABLE
+.\" FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+.\" DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+.\" OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+.\" HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+.\" LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+.\" OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+.\" SUCH DAMAGE.
 .\"
-.\" Since the Linux kernel and libraries are constantly changing, this
-.\" manual page may be incorrect or out-of-date.  The author(s) assume no
-.\" responsibility for errors or omissions, or for damages resulting from
-.\" the use of the information contained herein.  The author(s) may not
-.\" have taken the same level of care in the production of this manual,
-.\" which is licensed free of charge, as they might when working
-.\" professionally.
+.\"	@(#)fork.2	8.1 (Berkeley) 6/4/93
 .\"
-.\" Formatted or processed versions of this manual, if unaccompanied by
-.\" the source, must acknowledge the copyright and authors of this work.
-.\"
-.\" Modified by Michael Haardt (michael@moria.de)
-.\" Modified Sat Jul 24 13:22:07 1993 by Rik Faith (faith@cs.unc.edu)
-.\" Modified 21 Aug 1994 by Michael Chastain (mec@shell.portal.com):
-.\"   Referenced 'clone(2)'.
-.\" Modified 1995-06-10, 1996-04-18, 1999-11-01, 2000-12-24
-.\"   by Andries Brouwer (aeb@cwi.nl)
-.\" Modified, 27 May 2004, Michael Kerrisk <mtk.manpages@gmail.com>
-.\"     Added notes on capability requirements
-.\" 2006-09-04, Michael Kerrisk
-.\"     Greatly expanded, to describe all attributes that differ
-.\"	parent and child.
-.\"
-.TH FORK 2 2009-04-27 "Linux" "Linux Programmer's Manual"
-.SH NAME
-fork \- create a child process
-.SH SYNOPSIS
-.B #include <unistd.h>
-.sp
-.B pid_t fork(void);
-.SH DESCRIPTION
-.BR fork ()
-creates a new process by duplicating the calling process.
-The new process, referred to as the \fIchild\fP,
-is an exact duplicate of the calling process,
-referred to as the \fIparent\fP, except for the following points:
-.IP * 3
-The child has its own unique process ID,
-and this PID does not match the ID of any existing process group
-.RB ( setpgid (2)).
-.IP *
-The child's parent process ID is the same as the parent's process ID.
-.IP *
-The child does not inherit its parent's memory locks
-.RB ( mlock (2),
-.BR mlockall (2)).
-.IP *
-Process resource utilizations
-.RB ( getrusage (2))
-and CPU time counters
-.RB ( times (2))
-are reset to zero in the child.
-.IP *
-The child's set of pending signals is initially empty
-.RB ( sigpending (2)).
-.IP *
-The child does not inherit semaphore adjustments from its parent
-.RB ( semop (2)).
-.IP *
-The child does not inherit record locks from its parent
-.RB ( fcntl (2)).
-.IP *
-The child does not inherit timers from its parent
-.RB ( setitimer (2),
-.BR alarm (2),
-.BR timer_create (2)).
-.IP *
-The child does not inherit outstanding asynchronous I/O operations
-from its parent
-.RB ( aio_read (3),
-.BR aio_write (3)),
-nor does it inherit any asynchronous I/O contexts from its parent (see
-.BR io_setup (2)).
-.PP
-The process attributes in the preceding list are all specified
-in POSIX.1-2001.
-The parent and child also differ with respect to the following
-Linux-specific process attributes:
-.IP * 3
-The child does not inherit directory change notifications (dnotify)
-from its parent
-(see the description of
-.B F_NOTIFY
-in
-.BR fcntl (2)).
-.IP *
-The
-.BR prctl (2)
-.B PR_SET_PDEATHSIG
-setting is reset so that the child does not receive a signal
-when its parent terminates.
-.IP *
-Memory mappings that have been marked with the
-.BR madvise (2)
-.B MADV_DONTFORK
-flag are not inherited across a
-.BR fork ().
-.IP *
-The termination signal of the child is always
-.B SIGCHLD
-(see
-.BR clone (2)).
-.PP
-Note the following further points:
-.IP * 3
-The child process is created with a single thread \(em the
-one that called
-.BR fork ().
-The entire virtual address space of the parent is replicated in the child,
-including the states of mutexes, condition variables,
-and other pthreads objects; the use of
-.BR pthread_atfork (3)
-may be helpful for dealing with problems that this can cause.
-.IP *
-The child inherits copies of the parent's set of open file descriptors.
-Each file descriptor in the child refers to the same
-open file description (see
-.BR open (2))
-as the corresponding file descriptor in the parent.
-This means that the two descriptors share open file status flags,
-current file offset,
-and signal-driven I/O attributes (see the description of
-.B F_SETOWN
-and
-.B F_SETSIG
-in
-.BR fcntl (2)).
-.IP *
-The child inherits copies of the parent's set of open message
-queue descriptors (see
-.BR mq_overview (7)).
-Each descriptor in the child refers to the same
-open message queue description
-as the corresponding descriptor in the parent.
-This means that the two descriptors share the same flags
-.RI ( mq_flags ).
-.IP *
-The child inherits copies of the parent's set of open directory streams (see
-.BR opendir (3)).
-POSIX.1-2001 says that the corresponding directory streams
-in the parent and child
-.I may
-share the directory stream positioning;
-on Linux/glibc they do not.
-.SH "RETURN VALUE"
-On success, the PID of the child process is returned in the parent,
-and 0 is returned in the child.
-On failure, \-1 is returned in the parent,
-no child process is created, and
-.I errno
-is set appropriately.
-.SH ERRORS
-.TP
-.B EAGAIN
-.BR fork ()
-cannot allocate sufficient memory to copy the parent's page tables and
-allocate a task structure for the child.
-.TP
-.B EAGAIN
-It was not possible to create a new process because the caller's
-.B RLIMIT_NPROC
-resource limit was encountered.
-To exceed this limit, the process must have either the
-.B CAP_SYS_ADMIN
-or the
-.B CAP_SYS_RESOURCE
-capability.
-.TP
-.B ENOMEM
-.BR fork ()
-failed to allocate the necessary kernel structures because memory is tight.
-.SH "CONFORMING TO"
-SVr4, 4.3BSD, POSIX.1-2001.
-.SH NOTES
-.PP
-Under Linux,
-.BR fork ()
-is implemented using copy-on-write pages, so the only penalty that it incurs
-is the time and memory required to duplicate the parent's page tables,
-and to create a unique task structure for the child.
-
-Since version 2.3.3,
-.\" nptl/sysdeps/unix/sysv/linux/fork.c
-rather than invoking the kernel's
-.BR fork ()
-system call,
-the glibc
-.BR fork ()
-wrapper that is provided as part of the
-NPTL threading implementation invokes
-.BR clone (2)
-with flags that provide the same effect as the traditional system call.
-The glibc wrapper invokes any fork handlers that have been
-established using
-.BR pthread_atfork (3).
-.\" and does some magic to ensure that getpid(2) returns the right value.
-.SH EXAMPLE
-See
-.BR pipe (2)
-and
-.BR wait (2).
-.SH "SEE ALSO"
-.BR clone (2),
-.BR execve (2),
-.BR setrlimit (2),
-.BR unshare (2),
-.BR vfork (2),
-.BR wait (2),
-.BR daemon (3),
-.BR capabilities (7),
-.BR credentials (7)
-.SH COLOPHON
-This page is part of release 3.27 of the Linux
-.I man-pages
-project.
-A description of the project,
-and information about reporting bugs,
-can be found at
-http://www.kernel.org/doc/man-pages/.
+.Dd June 4, 1993
+.Dt FORK 2
+.Os BSD 4
+.Sh NAME
+.Nm fork
+.Nd create a new process
+.Sh SYNOPSIS
+.Fd #include <unistd.h>
+.Ft pid_t
+.Fo fork
+.Fa void
+.Fc
+.Sh DESCRIPTION
+.Fn Fork
+causes creation of a new process.
+The new process (child process) is an exact copy of the
+calling process (parent process) except for the following:
+.Bl -bullet -offset indent
+.It
+The child process has a unique process ID.
+.It
+The child process has a different parent
+process ID (i.e., the process ID of the parent process).
+.It
+The child process has its own copy of the parent's descriptors.
+These descriptors reference the same underlying objects, so that,
+for instance, file pointers in file objects are shared between
+the child and the parent, so that an
+.Xr lseek 2
+on a descriptor in the child process can affect a subsequent
+.Xr read
+or
+.Xr write
+by the parent.
+This descriptor copying is also used by the shell to
+establish standard input and output for newly created processes
+as well as to set up pipes.
+.It
+The child processes resource utilizations
+are set to 0; see
+.Xr setrlimit 2 .
+.El
+.Sh RETURN VALUES
+Upon successful completion,
+.Fn fork
+returns a value of 0 to the child process
+and returns the process ID of the child process to the parent process.
+Otherwise, a value of -1 is returned to the parent process,
+no child process is created, and the global variable
+.Va errno
+is set to indicate the error.
+.Sh ERRORS
+.Fn Fork
+will fail and no child process will be created if:
+.Bl -tag -width Er
+.\" ==========
+.It Bq Er EAGAIN
+The system-imposed limit
+on the total number of processes under execution
+would be exceeded.
+This limit is configuration-dependent.
+.\" ==========
+.It Bq Er EAGAIN
+The system-imposed limit
+.Dv MAXUPRC
+.Pq Aq Pa sys/param.h
+on the total number of
+processes under execution by a single user would be exceeded.
+.\" ==========
+.It Bq Er ENOMEM
+There is insufficient swap space for the new process.
+.El
+.Sh LEGACY SYNOPSIS
+.Fd #include <sys/types.h>
+.Fd #include <unistd.h>
+.Pp
+The include file
+.In sys/types.h
+is necessary.
+.Sh SEE ALSO
+.Xr execve 2 ,
+.Xr sigaction 2 ,
+.Xr wait 2 ,
+.Xr compat 5
+.Sh HISTORY
+A
+.Fn fork
+function call appeared in
+.At v6 .
+.Sh CAVEATS
+There are limits to what you can do in the child process.
+To be totally safe you should restrict yourself to only
+executing async-signal safe operations until such time
+as one of the exec functions is called.  All APIs, including
+global data symbols, in any framework or library should be 
+assumed to be unsafe after a 
+.Fn fork
+unless explicitly documented to be safe or async-signal 
+safe.  If you need to use these frameworks in the child 
+process, you must exec.  In this situation it is reasonable 
+to exec yourself.

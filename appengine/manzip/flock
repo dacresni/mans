@@ -1,222 +1,149 @@
-.\" Hey Emacs! This file is -*- nroff -*- source.
+.\"	$NetBSD: flock.2,v 1.5 1995/02/27 12:32:32 cgd Exp $
 .\"
-.\" Copyright 1993 Rickard E. Faith (faith@cs.unc.edu) and
-.\" and Copyright 2002 Michael Kerrisk
+.\" Copyright (c) 1983, 1991, 1993
+.\"	The Regents of the University of California.  All rights reserved.
 .\"
-.\" Permission is granted to make and distribute verbatim copies of this
-.\" manual provided the copyright notice and this permission notice are
-.\" preserved on all copies.
+.\" Redistribution and use in source and binary forms, with or without
+.\" modification, are permitted provided that the following conditions
+.\" are met:
+.\" 1. Redistributions of source code must retain the above copyright
+.\"    notice, this list of conditions and the following disclaimer.
+.\" 2. Redistributions in binary form must reproduce the above copyright
+.\"    notice, this list of conditions and the following disclaimer in the
+.\"    documentation and/or other materials provided with the distribution.
+.\" 3. All advertising materials mentioning features or use of this software
+.\"    must display the following acknowledgement:
+.\"	This product includes software developed by the University of
+.\"	California, Berkeley and its contributors.
+.\" 4. Neither the name of the University nor the names of its contributors
+.\"    may be used to endorse or promote products derived from this software
+.\"    without specific prior written permission.
 .\"
-.\" Permission is granted to copy and distribute modified versions of this
-.\" manual under the conditions for verbatim copying, provided that the
-.\" entire resulting derived work is distributed under the terms of a
-.\" permission notice identical to this one.
+.\" THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND
+.\" ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+.\" IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+.\" ARE DISCLAIMED.  IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS BE LIABLE
+.\" FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+.\" DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+.\" OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+.\" HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+.\" LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+.\" OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+.\" SUCH DAMAGE.
 .\"
-.\" Since the Linux kernel and libraries are constantly changing, this
-.\" manual page may be incorrect or out-of-date.  The author(s) assume no
-.\" responsibility for errors or omissions, or for damages resulting from
-.\" the use of the information contained herein.  The author(s) may not
-.\" have taken the same level of care in the production of this manual,
-.\" which is licensed free of charge, as they might when working
-
+.\"     @(#)flock.2	8.2 (Berkeley) 12/11/93
 .\"
-.\" Formatted or processed versions of this manual, if unaccompanied by
-.\" the source, must acknowledge the copyright and authors of this work.
-.\"
-.\" Modified Fri Jan 31 16:26:07 1997 by Eric S. Raymond <esr@thyrsus.com>
-.\" Modified Fri Dec 11 17:57:27 1998 by Jamie Lokier <jamie@imbolc.ucc.ie>
-.\" Modified 24 Apr 2002 by Michael Kerrisk <mtk.manpages@gmail.com>
-.\"	Substantial rewrites and additions
-.\" 2005-05-10 mtk, noted that lock conversions are not atomic.
-.\"
-.\" FIXME: Maybe document LOCK_MAND, LOCK_RW, LOCK_READ, LOCK_WRITE
-.\"        which only have effect for SAMBA.
-.TH FLOCK 2 2009-07-25 "Linux" "Linux Programmer's Manual"
-.SH NAME
-flock \- apply or remove an advisory lock on an open file
-.SH SYNOPSIS
-.B #include <sys/file.h>
-.sp
-.BI "int flock(int " fd ", int " operation );
-.SH DESCRIPTION
-Apply or remove an advisory lock on the open file specified by
-.IR fd .
-The argument
-.I operation
-is one of the following:
-.RS 4
-.TP 9
-.B LOCK_SH
-Place a shared lock.
-More than one process may hold a shared lock for a given file
-at a given time.
-.TP
-.B LOCK_EX
-Place an exclusive lock.
-Only one process may hold an exclusive lock for a given
-file at a given time.
-.TP
-.B LOCK_UN
-Remove an existing lock held by this process.
-.RE
-.PP
-A call to
-.BR flock ()
-may block if an incompatible lock is held by another process.
-To make a nonblocking request, include
-.B LOCK_NB
-(by
-.IR OR ing)
-with any of the above operations.
-
-A single file may not simultaneously have both shared and exclusive locks.
-
-Locks created by
-.BR flock ()
-are associated with an open file table entry.
-This means that duplicate file descriptors (created by, for example,
-.BR fork (2)
+.Dd December 11, 1993
+.Dt FLOCK 2
+.Os BSD 4.2
+.Sh NAME
+.Nm flock
+.Nd "apply or remove an advisory lock on an open file"
+.Sh SYNOPSIS
+.Fd #include <sys/file.h>
+.Fd #define	LOCK_SH	1	/* shared lock */
+.Fd #define	LOCK_EX	2	/* exclusive lock */
+.Fd #define	LOCK_NB	4	/* don't block when locking */
+.Fd #define	LOCK_UN	8	/* unlock */
+.Ft int
+.Fn flock "int fd" "int operation"
+.Sh DESCRIPTION
+.Fn Flock
+applies or removes an
+.Em advisory
+lock on the file associated with the file descriptor
+.Fa fd .
+A lock is applied by specifying an
+.Fa operation
+parameter that is one of
+.Dv LOCK_SH
 or
-.BR dup (2))
-refer to the same lock, and this lock may be modified
-or released using any of these descriptors.
-Furthermore, the lock is released either by an explicit
-.B LOCK_UN
-operation on any of these duplicate descriptors, or when all
-such descriptors have been closed.
-
-If a process uses
-.BR open (2)
-(or similar) to obtain more than one descriptor for the same file,
-these descriptors are treated independently by
-.BR flock ().
-An attempt to lock the file using one of these file descriptors
-may be denied by a lock that the calling process has
-already placed via another descriptor.
-
-A process may only hold one type of lock (shared or exclusive)
-on a file.
-Subsequent
-.BR flock ()
-calls on an already locked file will convert an existing lock to the new
-lock mode.
-
-Locks created by
-.BR flock ()
-are preserved across an
-.BR execve (2).
-
-A shared or exclusive lock can be placed on a file regardless of the
-mode in which the file was opened.
-.SH "RETURN VALUE"
-On success, zero is returned.
-On error, \-1 is returned, and
-.I errno
-is set appropriately.
-.SH ERRORS
-.TP
-.B EBADF
-.I fd
-is not an open file descriptor.
-.TP
-.B EINTR
-While waiting to acquire a lock, the call was interrupted by
-delivery of a signal caught by a handler; see
-.BR signal (7).
-.TP
-.B EINVAL
-.I operation
-is invalid.
-.TP
-.B ENOLCK
-The kernel ran out of memory for allocating lock records.
-.TP
-.B EWOULDBLOCK
+.Dv LOCK_EX
+with the optional addition of
+.Dv LOCK_NB .
+To unlock
+an existing lock
+.Dv operation
+should be
+.Dv LOCK_UN .
+.Pp
+Advisory locks allow cooperating processes to perform
+consistent operations on files, but do not guarantee
+consistency (i.e., processes may still access files
+without using advisory locks possibly resulting in
+inconsistencies).
+.Pp
+The locking mechanism allows two types of locks:
+.Em shared
+locks and
+.Em exclusive
+locks.
+At any time multiple shared locks may be applied to a file,
+but at no time are multiple exclusive, or both shared and exclusive,
+locks allowed simultaneously on a file.  
+.Pp
+A shared lock may be
+.Em upgraded
+to an exclusive lock, and vice versa, simply by specifying
+the appropriate lock type; this results in the previous
+lock being released and the new lock applied (possibly
+after other processes have gained and released the lock).
+.Pp
+Requesting a lock on an object that is already locked
+normally causes the caller to be blocked until the lock may be
+acquired.  If
+.Dv LOCK_NB
+is included in
+.Fa operation ,
+then this will not happen; instead the call will fail and
+the error
+.Er EWOULDBLOCK
+will be returned.
+.Sh NOTES
+Locks are on files, not file descriptors.  That is, file descriptors
+duplicated through
+.Xr dup 2
+or
+.Xr fork 2
+do not result in multiple instances of a lock, but rather multiple
+references to a single lock.  If a process holding a lock on a file
+forks and the child explicitly unlocks the file, the parent will
+lose its lock.
+.Pp
+Processes blocked awaiting a lock may be awakened by signals.
+.Sh RETURN VALUES
+Zero is returned if the operation was successful;
+on an error a -1 is returned and an error code is left in
+the global location
+.Va errno .
+.Sh ERRORS
+The
+.Fn flock
+call fails if:
+.Bl -tag -width Er
+.It Bq Er EWOULDBLOCK
 The file is locked and the
-.B LOCK_NB
-flag was selected.
-.SH "CONFORMING TO"
-4.4BSD (the
-.BR flock ()
-call first appeared in 4.2BSD).
-A version of
-.BR flock (),
-possibly implemented in terms of
-.BR fcntl (2),
-appears on most Unix systems.
-.SH NOTES
-.BR flock ()
-does not lock files over NFS.
-Use
-.BR fcntl (2)
-instead: that does work over NFS, given a sufficiently recent version of
-Linux and a server which supports locking.
-.PP
-Since kernel 2.0,
-.BR flock ()
-is implemented as a system call in its own right rather
-than being emulated in the GNU C library as a call to
-.BR fcntl (2).
-This yields true BSD semantics:
-there is no interaction between the types of lock
-placed by
-.BR flock ()
-and
-.BR fcntl (2),
-and
-.BR flock ()
-does not detect deadlock.
-.PP
-.BR flock ()
-places advisory locks only; given suitable permissions on a file,
-a process is free to ignore the use of
-.BR flock ()
-and perform I/O on the file.
-.PP
-.BR flock ()
-and
-.BR fcntl (2)
-locks have different semantics with respect to forked processes and
-.BR dup (2).
-On systems that implement
-.BR flock ()
-using
-.BR fcntl (2),
-the semantics of
-.BR flock ()
-will be different from those described in this manual page.
-.PP
-Converting a lock
-(shared to exclusive, or vice versa) is not guaranteed to be atomic:
-the existing lock is first removed, and then a new lock is established.
-Between these two steps,
-a pending lock request by another process may be granted,
-with the result that the conversion either blocks, or fails if
-.B LOCK_NB
-was specified.
-(This is the original BSD behavior,
-and occurs on many other implementations.)
-.\" Kernel 2.5.21 changed things a little: during lock conversion
-.\" it is now the highest priority process that will get the lock -- mtk
-.SH "SEE ALSO"
-.BR close (2),
-.BR dup (2),
-.BR execve (2),
-.BR fcntl (2),
-.BR fork (2),
-.BR open (2),
-.BR lockf (3)
-
-See also
-.I Documentation/filesystem/locks.txt
-in the kernel source
-.RI ( Documentation/locks.txt
-in older kernels).
-.SH COLOPHON
-This page is part of release 3.27 of the Linux
-.I man-pages
-project.
-A description of the project,
-and information about reporting bugs,
-can be found at
-http://www.kernel.org/doc/man-pages/.
+.Dv LOCK_NB
+option was specified.
+.It Bq Er EBADF
+The argument
+.Fa fd
+is an invalid descriptor.
+.It Bq Er EINVAL
+The argument
+.Fa fd
+refers to an object other than a file.
+.It Bq Er ENOTSUP
+The referenced descriptor is not of the correct type.
+.El
+.Sh SEE ALSO
+.Xr close 2 ,
+.Xr dup 2 ,
+.Xr execve 2 ,
+.Xr fork 2 ,
+.Xr open 2
+.Sh HISTORY
+The
+.Fn flock
+function call appeared in
+.Bx 4.2 .

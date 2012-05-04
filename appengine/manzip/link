@@ -1,194 +1,191 @@
-.\" Hey Emacs! This file is -*- nroff -*- source.
+.\"	$NetBSD: link.2,v 1.7 1995/02/27 12:34:01 cgd Exp $
 .\"
-.\" This manpage is Copyright (C) 1992 Drew Eckhardt;
-.\"                               1993 Michael Haardt, Ian Jackson.
+.\" Copyright (c) 1980, 1991, 1993
+.\"	The Regents of the University of California.  All rights reserved.
 .\"
-.\" Permission is granted to make and distribute verbatim copies of this
-.\" manual provided the copyright notice and this permission notice are
-.\" preserved on all copies.
+.\" Redistribution and use in source and binary forms, with or without
+.\" modification, are permitted provided that the following conditions
+.\" are met:
+.\" 1. Redistributions of source code must retain the above copyright
+.\"    notice, this list of conditions and the following disclaimer.
+.\" 2. Redistributions in binary form must reproduce the above copyright
+.\"    notice, this list of conditions and the following disclaimer in the
+.\"    documentation and/or other materials provided with the distribution.
+.\" 3. All advertising materials mentioning features or use of this software
+.\"    must display the following acknowledgement:
+.\"	This product includes software developed by the University of
+.\"	California, Berkeley and its contributors.
+.\" 4. Neither the name of the University nor the names of its contributors
+.\"    may be used to endorse or promote products derived from this software
+.\"    without specific prior written permission.
 .\"
-.\" Permission is granted to copy and distribute modified versions of this
-.\" manual under the conditions for verbatim copying, provided that the
-.\" entire resulting derived work is distributed under the terms of a
-.\" permission notice identical to this one.
+.\" THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND
+.\" ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+.\" IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+.\" ARE DISCLAIMED.  IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS BE LIABLE
+.\" FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+.\" DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+.\" OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+.\" HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+.\" LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+.\" OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+.\" SUCH DAMAGE.
 .\"
-.\" Since the Linux kernel and libraries are constantly changing, this
-.\" manual page may be incorrect or out-of-date.  The author(s) assume no
-.\" responsibility for errors or omissions, or for damages resulting from
-.\" the use of the information contained herein.  The author(s) may not
-.\" have taken the same level of care in the production of this manual,
-.\" which is licensed free of charge, as they might when working
-.\" professionally.
+.\"     @(#)link.2	8.3 (Berkeley) 1/12/94
 .\"
-.\" Formatted or processed versions of this manual, if unaccompanied by
-.\" the source, must acknowledge the copyright and authors of this work.
-.\"
-.\" Modified 1993-07-23 by Rik Faith <faith@cs.unc.edu>
-.\" Modified 1994-08-21 by Michael Haardt
-.\" Modified 2004-06-23 by Michael Kerrisk <mtk.manpages@gmail.com>
-.\" Modified 2005-04-04, as per suggestion by Michael Hardt for rename.2
-.\"
-.TH LINK 2 2008-08-21 "Linux" "Linux Programmer's Manual"
-.SH NAME
-link \- make a new name for a file
-.SH SYNOPSIS
-.B #include <unistd.h>
-.sp
-.BI "int link(const char *" oldpath ", const char *" newpath );
-.SH DESCRIPTION
-.BR link ()
-creates a new link (also known as a hard link) to an existing file.
-
+.Dd October 29, 2008
+.Dt LINK 2
+.Os BSD 4
+.Sh NAME
+.Nm link
+.Nd make a hard file link
+.Sh SYNOPSIS
+.Fd #include <unistd.h>
+.Ft int
+.Fo link
+.Fa "const char *path1"
+.Fa "const char *path2"
+.Fc
+.Sh DESCRIPTION
+The
+.Fn link
+function call
+atomically creates the specified directory entry (hard link)
+.Fa path2
+with the attributes of the underlying object pointed at by
+.Fa path1 .
+If the link is successful,
+the link count of the underlying object is incremented;
+.Fa path1
+and
+.Fa path2
+share equal access and rights
+to the
+underlying object.
+.Pp
 If
-.I newpath
-exists it will
-.I not
-be overwritten.
-
-This new name may be used exactly as the old one for any operation;
-both names refer to the same file (and so have the same permissions
-and ownership) and it is impossible to tell which name was the
-"original".
-.SH "RETURN VALUE"
-On success, zero is returned.
-On error, \-1 is returned, and
-.I errno
-is set appropriately.
-.SH ERRORS
-.TP
-.B EACCES
-Write access to the directory containing
-.I newpath
-is denied, or search permission is denied for one of the directories
-in the path prefix of
-.I oldpath
-or
-.IR newpath .
-(See also
-.BR path_resolution (7).)
-.TP
-.B EEXIST
-.I newpath
+.Fa path1
+is removed, the file
+.Fa path2
+is not deleted and the link count of the
+underlying object is
+decremented.
+.Pp
+In order for the system call to succeed,
+.Fa path1
+must exist and both
+.Fa path1
+and
+.Fa path2
+must be in the same file system.
+As mandated by POSIX.1,
+.Fa path1
+may not be a directory.
+.Pp
+.Fn link
+will resolve and follow symbolic links contained within both
+.Fa path1
+and
+.Fa path2 .
+If the last component of
+.Fa path1
+is a symbolic link,
+.Fn link
+will point the hard link, 
+.Fa path2 ,
+to the underlying object pointed to by
+.Fa path1 ,
+not to the symbolic link itself.
+.Sh RETURN VALUES
+Upon successful completion, a value of 0 is returned.  Otherwise,
+a value of -1 is returned and
+.Va errno
+is set to indicate the error.
+.Sh ERRORS
+.Fn Link
+will fail and no link will be created if:
+.Bl -tag -width Er
+.\" ==========
+.It Bq Er EACCES
+A component of either path prefix denies search permission.
+.\" ==========
+.It Bq Er EACCES
+The requested link requires writing in a directory with a mode
+that denies write permission.
+.\" ==========
+.It Bq Er EACCES
+The current process cannot access the existing file.
+.\" ==========
+.It Bq Er EDQUOT
+The directory in which the entry for the new link
+is being placed cannot be extended because the
+user's quota of disk blocks on the file system
+containing the directory has been exhausted.
+.\" ==========
+.It Bq Er EEXIST
+The link named by
+.Fa path2
 already exists.
-.TP
-.B EFAULT
-.IR oldpath " or " newpath " points outside your accessible address space."
-.TP
-.B EIO
-An I/O error occurred.
-.TP
-.B ELOOP
-Too many symbolic links were encountered in resolving
-.IR oldpath " or " newpath .
-.TP
-.B EMLINK
-The file referred to by
-.I oldpath
-already has the maximum number of links to it.
-.TP
-.B ENAMETOOLONG
-.IR oldpath " or " newpath " was too long."
-.TP
-.B ENOENT
-A directory component in
-.IR oldpath " or " newpath
-does not exist or is a dangling symbolic link.
-.TP
-.B ENOMEM
-Insufficient kernel memory was available.
-.TP
-.B ENOSPC
-The device containing the file has no room for the new directory
-entry.
-.TP
-.B ENOTDIR
-A component used as a directory in
-.IR oldpath " or " newpath
-is not, in fact, a directory.
-.TP
-.B EPERM
-.I oldpath
+.\" ==========
+.It Bq Er EFAULT
+One of the pathnames specified
+is outside the process's allocated address space.
+.\" ==========
+.It Bq Er EIO
+An I/O error occurs while reading from or writing to 
+the file system to make the directory entry.
+.\" ==========
+.It Bq Er ELOOP
+Too many symbolic links are encountered in translating one of the pathnames.
+This is taken to be indicative of a looping symbolic link.
+.\" ==========
+.It Bq Er EMLINK
+The file already has {LINK_MAX} links.
+.\" ==========
+.It Bq Er ENAMETOOLONG
+A component of a pathname exceeds 
+.Dv {NAME_MAX}
+characters, or an entire path name exceeded 
+.Dv {PATH_MAX}
+characters.
+.\" ==========
+.It Bq Er ENOENT
+A component of either path prefix does not exist, or is a dangling symbolic link.
+.\" ==========
+.It Bq Er ENOENT
+The file named by
+.Fa path1
+does not exist, or is a dangling symbolic link.
+.\" ==========
+.It Bq Er ENOSPC
+The directory in which the entry for the new link is being placed
+cannot be extended because there is no space left on the file
+system containing the directory.
+.\" ==========
+.It Bq Er ENOTDIR
+A component of either path prefix is not a directory.
+.\" ==========
+.It Bq Er EPERM
+The file named by
+.Fa path1
 is a directory.
-.TP
-.B EPERM
-The file system containing
-.IR oldpath " and " newpath
-does not support the creation of hard links.
-.TP
-.B EROFS
-The file is on a read-only file system.
-.TP
-.B EXDEV
-.IR oldpath " and " newpath
-are not on the same mounted file system.
-(Linux permits a file system to be mounted at multiple points, but
-.BR link ()
-does not work across different mount points,
-even if the same file system is mounted on both.)
-.SH "CONFORMING TO"
-SVr4, 4.3BSD, POSIX.1-2001 (but see NOTES).
-.\" SVr4 documents additional ENOLINK and
-.\" EMULTIHOP error conditions; POSIX.1 does not document ELOOP.
-.\" X/OPEN does not document EFAULT, ENOMEM or EIO.
-.SH NOTES
-Hard links, as created by
-.BR link (),
-cannot span file systems.
-Use
-.BR symlink (2)
-if this is required.
-
-POSIX.1-2001 says that
-.BR link ()
-should dereference
-.I oldpath
-if it is a symbolic link.
-However, since kernel 2.0,
-.\" more precisely: since kernel 1.3.56
-Linux does not do so: if
-.I oldpath
-is a symbolic link, then
-.I newpath
-is created as a (hard) link to the same symbolic link file
-(i.e.,
-.I newpath
-becomes a symbolic link to the same file that
-.I oldpath
-refers to).
-Some other implementations behave in the same manner as Linux.
-.\" For example, the default Solaris compilation environment
-.\" behaves like Linux, and contributors to a March 2005
-.\" thread in the Austin mailing list reported that some
-.\" other (System V) implementations did/do the same -- MTK, Apr 05
-POSIX.1-2008 changes the specification of
-.BR link (),
-making it implementation-dependent whether or not
-.I oldpath
-is dereferenced if it is a symbolic link.
-For precise control over the treatment of symbolic links when
-creating a link, see
-.BR linkat (2).
-.SH BUGS
-On NFS file systems, the return code may be wrong in case the NFS server
-performs the link creation and dies before it can say so.
-Use
-.BR stat (2)
-to find out if the link got created.
-.SH "SEE ALSO"
-.BR ln (1),
-.BR linkat (2),
-.BR open (2),
-.BR rename (2),
-.BR stat (2),
-.BR symlink (2),
-.BR unlink (2),
-.BR path_resolution (7),
-.BR symlink (7)
-.SH COLOPHON
-This page is part of release 3.27 of the Linux
-.I man-pages
-project.
-A description of the project,
-and information about reporting bugs,
-can be found at
-http://www.kernel.org/doc/man-pages/.
+.\" ==========
+.It Bq Er EROFS
+The requested link requires writing in a directory
+on a read-only file system.
+.\" ==========
+.It Bq Er EXDEV
+The link named by
+.Fa path2
+and the file named by
+.Fa path1
+are on different file systems.
+.El
+.Sh SEE ALSO
+.Xr symlink 2 ,
+.Xr unlink 2
+.Sh STANDARDS
+The
+.Fn link
+function is expected to conform to 
+.St -p1003.1-88 .

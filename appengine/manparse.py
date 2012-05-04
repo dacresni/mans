@@ -7,6 +7,11 @@ name_pattern=re.compile("^.Nm",re.DEBUG)
 date_string=re.compile("^.Dd",re.DEBUG)
 headder_pattern=re.compile( "^.Fd"re.DEBUG)
 function_name_pattern=re.compile("^.BR"re.DEBUG)
+patterns = { "name":name_pattern,
+        "date": date_string, 
+        "headder":headder_pattern,
+        "function":function_name_pattern }
+
 def scan(block, patterns):
     """ takes a block of text and a dictionary{"name":pattern}  of compiled regex patterns returns a {name:results} dictionary
     """

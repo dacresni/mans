@@ -1,187 +1,141 @@
-.\" Hey Emacs! This file is -*- nroff -*- source.
+.\"	$NetBSD: kill.2,v 1.7 1995/02/27 12:33:53 cgd Exp $
 .\"
-.\" Copyright (c) 1992 Drew Eckhardt (drew@cs.colorado.edu), March 28, 1992
+.\" Copyright (c) 1980, 1991, 1993
+.\"	The Regents of the University of California.  All rights reserved.
 .\"
-.\" Permission is granted to make and distribute verbatim copies of this
-.\" manual provided the copyright notice and this permission notice are
-.\" preserved on all copies.
+.\" Redistribution and use in source and binary forms, with or without
+.\" modification, are permitted provided that the following conditions
+.\" are met:
+.\" 1. Redistributions of source code must retain the above copyright
+.\"    notice, this list of conditions and the following disclaimer.
+.\" 2. Redistributions in binary form must reproduce the above copyright
+.\"    notice, this list of conditions and the following disclaimer in the
+.\"    documentation and/or other materials provided with the distribution.
+.\" 3. All advertising materials mentioning features or use of this software
+.\"    must display the following acknowledgement:
+.\"	This product includes software developed by the University of
+.\"	California, Berkeley and its contributors.
+.\" 4. Neither the name of the University nor the names of its contributors
+.\"    may be used to endorse or promote products derived from this software
+.\"    without specific prior written permission.
 .\"
-.\" Permission is granted to copy and distribute modified versions of this
-.\" manual under the conditions for verbatim copying, provided that the
-.\" entire resulting derived work is distributed under the terms of a
-.\" permission notice identical to this one.
+.\" THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND
+.\" ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+.\" IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+.\" ARE DISCLAIMED.  IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS BE LIABLE
+.\" FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+.\" DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+.\" OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+.\" HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+.\" LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+.\" OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+.\" SUCH DAMAGE.
 .\"
-.\" Since the Linux kernel and libraries are constantly changing, this
-.\" manual page may be incorrect or out-of-date.  The author(s) assume no
-.\" responsibility for errors or omissions, or for damages resulting from
-.\" the use of the information contained herein.  The author(s) may not
-.\" have taken the same level of care in the production of this manual,
-.\" which is licensed free of charge, as they might when working
-.\" professionally.
+.\"     @(#)kill.2	8.3 (Berkeley) 4/19/94
 .\"
-.\" Formatted or processed versions of this manual, if unaccompanied by
-.\" the source, must acknowledge the copyright and authors of this work.
-.\"
-.\" Modified by Michael Haardt <michael@moria.de>
-.\" Modified by Thomas Koenig <ig25@rz.uni-karlsruhe.de>
-.\" Modified 1993-07-23 by Rik Faith <faith@cs.unc.edu>
-.\" Modified 1993-07-25 by Rik Faith <faith@cs.unc.edu>
-.\" Modified 1995-11-01 by Michael Haardt
-.\"  <michael@cantor.informatik.rwth-aachen.de>
-.\" Modified 1996-04-14 by Andries Brouwer <aeb@cwi.nl>
-.\"  [added some polishing contributed by Mike Battersby <mib@deakin.edu.au>]
-.\" Modified 1996-07-21 by Andries Brouwer <aeb@cwi.nl>
-.\" Modified 1997-01-17 by Andries Brouwer <aeb@cwi.nl>
-.\" Modified 2001-12-18 by Andries Brouwer <aeb@cwi.nl>
-.\" Modified 2002-07-24 by Michael Kerrisk <mtk.manpages@gmail.com>
-.\"	Added note on historical rules enforced when an unprivileged process
-.\"	sends a signal.
-.\" Modified 2004-06-16 by Michael Kerrisk <mtk.manpages@gmail.com>
-.\"     Added note on CAP_KILL
-.\" Modified 2004-06-24 by aeb
-.\" Modified, 2004-11-30, after idea from emmanuel.colbus@ensimag.imag.fr
-.\"
-.TH KILL 2 2009-09-15 "Linux" "Linux Programmer's Manual"
-.SH NAME
-kill \- send signal to a process
-.SH SYNOPSIS
-.nf
-.B #include <sys/types.h>
-.br
-.B #include <signal.h>
-.sp
-.BI "int kill(pid_t " pid ", int " sig );
-.fi
-.sp
-.in -4n
-Feature Test Macro Requirements for glibc (see
-.BR feature_test_macros (7)):
-.in
-.sp
-.ad l
-.BR kill ():
-_POSIX_C_SOURCE\ >=\ 1 || _XOPEN_SOURCE || _POSIX_SOURCE
-.ad b
-.SH DESCRIPTION
+.Dd April 19, 1994
+.Dt KILL 2
+.Os BSD 4
+.Sh NAME
+.Nm kill
+.Nd send signal to a process
+.Sh SYNOPSIS
+.Fd #include <signal.h>
+.Ft int
+.Fo kill
+.Fa "pid_t pid"
+.Fa "int sig"
+.Fc
+.Sh DESCRIPTION
 The
-.BR kill ()
-system call
-can be used to send any signal to any process group or process.
-.PP
-If \fIpid\fP is positive, then signal \fIsig\fP is sent to the
-process with the ID specified by \fIpid\fP.
-.PP
-If \fIpid\fP equals 0, then \fIsig\fP is sent to every process in the
-process group of the calling process.
-.PP
-If \fIpid\fP equals \-1, then \fIsig\fP is sent to every process
-for which the calling process has permission to send signals,
-except for process 1 (\fIinit\fP), but see below.
-.PP
-If \fIpid\fP is less than \-1, then \fIsig\fP is sent to every process
-in the process group whose ID is \fI\-pid\fP.
-.PP
-If \fIsig\fP is 0, then no signal is sent, but error checking is still
-performed;
-this can be used to check for the existence of a process ID or
-process group ID.
-
-For a process to have permission to send a signal
-it must either be privileged (under Linux: have the
-.B CAP_KILL
-capability), or the real or effective
-user ID of the sending process must equal the real or
-saved set-user-ID of the target process.
-In the case of
-.B SIGCONT
-it suffices when the sending and receiving
-processes belong to the same session.
-.SH "RETURN VALUE"
-On success (at least one signal was sent), zero is returned.
-On error, \-1 is returned, and
-.I errno
-is set appropriately.
-.SH ERRORS
-.TP
-.B EINVAL
-An invalid signal was specified.
-.TP
-.B EPERM
-The process does not have permission to send the signal
-to any of the target processes.
-.TP
-.B ESRCH
-The pid or process group does not exist.
-Note that an existing process might be a zombie,
-a process which already committed termination, but
-has not yet been
-.BR wait (2)ed
-for.
-.SH "CONFORMING TO"
-SVr4, 4.3BSD, POSIX.1-2001.
-.SH NOTES
-The only signals that can be sent to process ID 1, the
-.I init
-process, are those for which
-.I init
-has explicitly installed signal handlers.
-This is done to assure the
-system is not brought down accidentally.
-.LP
-POSIX.1-2001 requires that \fIkill(\-1,sig)\fP send \fIsig\fP
-to all processes that the calling process may send signals to,
-except possibly for some implementation-defined system processes.
-Linux allows a process to signal itself, but on Linux the call
-\fIkill(\-1,sig)\fP does not signal the calling process.
-.LP
-POSIX.1-2001 requires that if a process sends a signal to itself,
-and the sending thread does not have the signal blocked,
-and no other thread
-has it unblocked or is waiting for it in
-.BR sigwait (3),
-at least one
-unblocked signal must be delivered to the sending thread before the
-.BR kill ()
-returns.
-.SS "Linux Notes"
-Across different kernel versions, Linux has enforced different rules
-for the permissions required for an unprivileged process
-to send a signal to another process.
-.\" In the 0.* kernels things chopped and changed quite
-.\" a bit - MTK, 24 Jul 02
-In kernels 1.0 to 1.2.2, a signal could be sent if the
-effective user ID of the sender matched that of the receiver,
-or the real user ID of the sender matched that of the receiver.
-From kernel 1.2.3 until 1.3.77, a signal could be sent if the
-effective user ID of the sender matched either the real or effective
-user ID of the receiver.
-The current rules, which conform to POSIX.1-2001, were adopted
-in kernel 1.3.78.
-.SH BUGS
-In 2.6 kernels up to and including 2.6.7,
-there was a bug that meant that when sending signals to a process group,
-.BR kill ()
-failed with the error
-.B EPERM
-if the caller did have permission to send the signal to \fIany\fP (rather
-than \fIall\fP) of the members of the process group.
-Notwithstanding this error return, the signal was still delivered
-to all of the processes for which the caller had permission to signal.
-.SH "SEE ALSO"
-.BR _exit (2),
-.BR killpg (2),
-.BR signal (2),
-.BR sigqueue (2),
-.BR tkill (2),
-.BR exit (3),
-.BR capabilities (7),
-.BR credentials (7),
-.BR signal (7)
-.SH COLOPHON
-This page is part of release 3.27 of the Linux
-.I man-pages
-project.
-A description of the project,
-and information about reporting bugs,
-can be found at
-http://www.kernel.org/doc/man-pages/.
+.Fn kill
+function sends the signal specified by
+.Fa sig
+to
+.Fa pid ,
+a
+process or a group of processes.
+Typically,
+.Fa Sig
+will be one of the signals specified in
+.Xr sigaction 2 .
+A value of 0, however,
+will cause error checking to be performed (with no signal being sent). 
+This can be used to check the validity of
+.Fa pid .
+.Pp
+For a process to have permission to send a signal to a process designated
+by
+.Fa pid ,
+the real or effective user ID of the receiving process must match
+that of the sending process or the user must have appropriate privileges
+(such as given by a set-user-ID program or the user is the super-user).
+A single exception is the signal SIGCONT,
+which may always be sent to any descendant of the current process.
+.Bl -tag -width Ds
+.It \&If Fa pid No \&is greater than zero :
+.Fa Sig
+is sent to the process whose ID is equal to
+.Fa pid.
+.It \&If Fa pid No \&is zero :
+.Fa Sig
+is sent to all processes whose group ID is equal
+to the process group ID of the sender,
+and for which the process has permission;
+this is a variant of
+.Xr killpg 2 .
+.It \&If Fa pid No \&is -1 :
+If the user has super-user privileges,
+the signal is sent to all processes excluding
+system processes and the process sending the signal.
+If the user is not the super user,
+the signal is sent to all processes with the same uid as the user,
+excluding the process sending the signal.
+No error is returned if any process could be signaled.
+.El
+.Pp
+For compatibility with System V,
+if the process number is negative but not -1,
+the signal is sent to all processes whose process group ID
+is equal to the absolute value of the process number.
+This is a variant of
+.Xr killpg 2 .
+.Sh RETURN VALUES
+Upon successful completion, a value of 0 is returned.
+Otherwise, a value of -1 is returned and
+.Va errno
+is set to indicate the error.
+.Sh ERRORS
+.Fn Kill
+will fail and no signal will be sent if:
+.Bl -tag -width Er
+.\" ==========
+.It Bq Er EINVAL
+.Fa Sig
+is not a valid, supported signal number.
+.\" ==========
+.It Bq Er EPERM
+The sending process is not the super-user and its effective
+user id does not match the effective user-id of the receiving process.
+When signaling a process group, this error is returned if any members
+of the group could not be signaled.
+.\" ==========
+.It Bq Er ESRCH
+No process or process group can be found
+corresponding to that specified by
+.Fa pid .
+.\" ==========
+.It Bq Er ESRCH
+The process id was given as 0,
+but the sending process does not have a process group.
+.El
+.Sh SEE ALSO
+.Xr getpgrp 2 ,
+.Xr getpid 2 ,
+.Xr killpg 2 ,
+.Xr sigaction 2
+.Sh STANDARDS
+The
+.Fn kill
+function is expected to conform to 
+.St -p1003.1-88 .

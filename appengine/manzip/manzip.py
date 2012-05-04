@@ -15,9 +15,9 @@ def names():
         #filenam = "".join([manname, ".txt" ])
         filenam = "manzip/%s"%(manname)
         print filenam 
-        #phage = file(filenam, 'w' )
-        #phage.write(mantext)
-        #phage.close()
+        phage = file(filenam, 'w' )
+        phage.write(mantext)
+        phage.close()
 
    
 

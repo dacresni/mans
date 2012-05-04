@@ -1,34 +1,7 @@
-.\" Hey Emacs! This file is -*- nroff -*- source.
+.\"	$NetBSD: connect.2,v 1.8 1995/10/12 15:40:48 jtc Exp $
 .\"
-.\" Copyright 1993 Rickard E. Faith (faith@cs.unc.edu)
-.\" Portions extracted from /usr/include/sys/socket.h, which does not have
-.\" any authorship information in it.  It is probably available under the GPL.
-.\"
-.\" Permission is granted to make and distribute verbatim copies of this
-.\" manual provided the copyright notice and this permission notice are
-.\" preserved on all copies.
-.\"
-.\" Permission is granted to copy and distribute modified versions of this
-.\" manual under the conditions for verbatim copying, provided that the
-.\" entire resulting derived work is distributed under the terms of a
-.\" permission notice identical to this one.
-.\"
-.\" Since the Linux kernel and libraries are constantly changing, this
-.\" manual page may be incorrect or out-of-date.  The author(s) assume no
-.\" responsibility for errors or omissions, or for damages resulting from
-.\" the use of the information contained herein.  The author(s) may not
-.\" have taken the same level of care in the production of this manual,
-.\" which is licensed free of charge, as they might when working
-.\" professionally.
-.\"
-.\" Formatted or processed versions of this manual, if unaccompanied by
-.\" the source, must acknowledge the copyright and authors of this work.
-.\"
-.\"
-.\" Other portions are from the 6.9 (Berkeley) 3/10/91 man page:
-.\"
-.\" Copyright (c) 1983 The Regents of the University of California.
-.\" All rights reserved.
+.\" Copyright (c) 1983, 1993
+.\"	The Regents of the University of California.  All rights reserved.
 .\"
 .\" Redistribution and use in source and binary forms, with or without
 .\" modification, are permitted provided that the following conditions
@@ -40,8 +13,8 @@
 .\"    documentation and/or other materials provided with the distribution.
 .\" 3. All advertising materials mentioning features or use of this software
 .\"    must display the following acknowledgement:
-.\"     This product includes software developed by the University of
-.\"     California, Berkeley and its contributors.
+.\"	This product includes software developed by the University of
+.\"	California, Berkeley and its contributors.
 .\" 4. Neither the name of the University nor the names of its contributors
 .\"    may be used to endorse or promote products derived from this software
 .\"    without specific prior written permission.
@@ -58,218 +31,201 @@
 .\" OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 .\" SUCH DAMAGE.
 .\"
-.\" Modified 1997-01-31 by Eric S. Raymond <esr@thyrsus.com>
-.\" Modified 1998, 1999 by Andi Kleen
-.\" Modified 2004-06-23 by Michael Kerrisk <mtk.manpages@gmail.com>
+.\"     @(#)connect.2	8.1 (Berkeley) 6/4/93
 .\"
-.TH CONNECT 2 2008-12-03 "Linux" "Linux Programmer's Manual"
-.SH NAME
-connect \- initiate a connection on a socket
-.SH SYNOPSIS
-.nf
-.BR "#include <sys/types.h>" "          /* See NOTES */"
-.br
-.B #include <sys/socket.h>
-.sp
-.BI "int connect(int " sockfd ", const struct sockaddr *" addr ,
-.BI "            socklen_t " addrlen );
-.fi
-.SH DESCRIPTION
-The
-.BR connect ()
-system call connects the socket referred to by the file descriptor
-.I sockfd
-to the address specified by
-.IR addr .
-The
-.I addrlen
-argument specifies the size of
-.IR addr .
-The format of the address in
-.I addr
-is determined by the address space of the socket
-.IR sockfd ;
-see
-.BR socket (2)
-for further details.
-
-If the socket
-.I sockfd
-is of type
-.B SOCK_DGRAM
-then
-.I addr
-is the address to which datagrams are sent by default, and the only
-address from which datagrams are received.
+.Dd June 4, 1993
+.Dt CONNECT 2
+.Os BSD 4.2
+.Sh NAME
+.Nm connect
+.Nd initiate a connection on a socket
+.Sh SYNOPSIS
+.Fd #include <sys/types.h>
+.Fd #include <sys/socket.h>
+.Ft int
+.Fo connect
+.Fa "int socket"
+.Fa "const struct sockaddr *address"
+.Fa "socklen_t address_len"
+.Fc
+.Sh DESCRIPTION
+The parameter
+.Fa socket
+is a socket.
+If it is of type
+.Dv SOCK_DGRAM ,
+this call specifies the peer with which the socket is to be associated;
+this address is that to which datagrams are to be sent,
+and the only address from which datagrams are to be received.
 If the socket is of type
-.B SOCK_STREAM
-or
-.BR SOCK_SEQPACKET ,
-this call attempts to make a connection to the socket that is bound
-to the address specified by
-.IR addr .
-.PP
-Generally, connection-based protocol sockets may successfully
-.BR connect ()
-only once; connectionless protocol sockets may use
-.BR connect ()
+.Dv SOCK_STREAM ,
+this call attempts to make a connection to
+another socket.
+The other socket is specified by
+.Fa address ,
+which is an address in the communications space of the socket.
+.Pp
+Each communications space interprets the
+.Fa address
+parameter in its own way.
+Generally, stream sockets may successfully
+.Fn connect
+only once; datagram sockets may use
+.Fn connect
 multiple times to change their association.
-Connectionless sockets may
-dissolve the association by connecting to an address with the
-.I sa_family
-member of
-.I sockaddr
-set to
-.BR AF_UNSPEC
-(supported on Linux since kernel 2.2).
-.SH "RETURN VALUE"
-If the connection or binding succeeds, zero is returned.
-On error, \-1 is returned, and
-.I errno
-is set appropriately.
-.SH ERRORS
-The following are general socket errors only.
-There may be other domain-specific error codes.
-.TP
-.B EACCES
-For Unix domain sockets, which are identified by pathname:
-Write permission is denied on the socket file,
-or search permission is denied for one of the directories
-in the path prefix.
-(See also
-.BR path_resolution (7).)
-.TP
-.BR EACCES ", " EPERM
-The user tried to connect to a broadcast address without having the socket
-broadcast flag enabled or the connection request failed because of a local
-firewall rule.
-.TP
-.B EADDRINUSE
-Local address is already in use.
-.TP
-.B EAFNOSUPPORT
-The passed address didn't have the correct address family in its
-.I sa_family
-field.
-.TP
-.B EAGAIN
-No more free local ports or insufficient entries in the routing cache.
-For
-.B AF_INET
-see the description of
-.I /proc/sys/net/ipv4/ip_local_port_range
-.BR ip (7)
-for information on how to increase the number of local ports.
-.TP
-.B EALREADY
-The socket is nonblocking and a previous connection attempt has not yet
-been completed.
-.TP
-.B EBADF
-The file descriptor is not a valid index in the descriptor table.
-.TP
-.B ECONNREFUSED
-No-one listening on the remote address.
-.TP
-.B EFAULT
-The socket structure address is outside the user's address space.
-.TP
-.B EINPROGRESS
-The socket is nonblocking and the connection cannot be completed
-immediately.
+Datagram sockets may dissolve the association
+by connecting to an invalid address, such as a null address 
+or an address with 
+the address family set to 
+.Dv AF_UNSPEC 
+(the error 
+.Dv EAFNOSUPPORT 
+will be harmlessly returned).
+.Sh RETURN VALUES
+Upon successful completion, a value of 0 is returned.
+Otherwise, a value of -1 is returned and the global integer variable
+.Va errno
+is set to indicate the error.
+.Sh ERRORS
+The
+.Fn connect
+system call will fail if:
+.Bl -tag -width Er
+.\" ==========
+.It Bq Er EACCES
+The destination address is a broadcast address and the 
+socket option 
+.Dv SO_BROADCAST 
+is not set.
+.\" ==========
+.It Bq Er EADDRINUSE
+The address is already in use.
+.\" ==========
+.It Bq Er EADDRNOTAVAIL
+The specified address is not available on this machine.
+.\" ==========
+.It Bq Er EAFNOSUPPORT
+Addresses in the specified address family cannot be used with this socket.
+.\" ==========
+.It Bq Er EALREADY
+The socket is non-blocking
+and a previous connection attempt
+has not yet been completed.
+.\" ==========
+.It Bq Er EBADF
+.Fa socket
+is not a valid descriptor.
+.\" ==========
+.It Bq Er ECONNREFUSED
+The attempt to connect was ignored
+(because the target is not listening for connections)
+or explicitly rejected.
+.\" ==========
+.It Bq Er EFAULT
+The
+.Fa address
+parameter specifies an area outside
+the process address space.
+.\" ==========
+.It Bq Er EHOSTUNREACH
+The target host cannot be reached (e.g., down, disconnected).
+.\" ==========
+.It Bq Er EINPROGRESS
+The socket is non-blocking 
+and the connection cannot
+be completed immediately.
 It is possible to
-.BR select (2)
-or
-.BR poll (2)
+.Xr select 2
 for completion by selecting the socket for writing.
-After
-.BR select (2)
-indicates writability, use
-.BR getsockopt (2)
-to read the
-.B SO_ERROR
-option at level
-.B SOL_SOCKET
-to determine whether
-.BR connect ()
-completed successfully
-.RB ( SO_ERROR
-is zero) or unsuccessfully
-.RB ( SO_ERROR
-is one of the usual error codes listed here,
-explaining the reason for the failure).
-.TP
-.B EINTR
-The system call was interrupted by a signal that was caught; see
-.BR signal (7).
-.\" For TCP, the connection will complete asynchronously.
-.\" See http://lkml.org/lkml/2005/7/12/254
-.TP
-.B EISCONN
+.\" ==========
+.It Bq Er EINTR
+Its execution was interrupted by a signal.
+.\" ==========
+.It Bq Er EINVAL
+An invalid argument was detected
+(e.g.,
+.Fa address_len
+is not valid for the address family,
+the specified address family is invalid).
+.\" ==========
+.It Bq Er EISCONN
 The socket is already connected.
-.TP
-.B ENETUNREACH
-Network is unreachable.
-.TP
-.B ENOTSOCK
-The file descriptor is not associated with a socket.
-.TP
-.B ETIMEDOUT
-Timeout while attempting connection.
-The server may be too
-busy to accept new connections.
-Note that for IP sockets the timeout may
-be very long when syncookies are enabled on the server.
-.SH "CONFORMING TO"
-SVr4, 4.4BSD, (the
-.BR connect ()
-function first appeared in 4.2BSD), POSIX.1-2001.
-.\" SVr4 documents the additional
-.\" general error codes
-.\" .BR EADDRNOTAVAIL ,
-.\" .BR EINVAL ,
-.\" .BR EAFNOSUPPORT ,
-.\" .BR EALREADY ,
-.\" .BR EINTR ,
-.\" .BR EPROTOTYPE ,
-.\" and
-.\" .BR ENOSR .
-.\" It also
-.\" documents many additional error conditions not described here.
-.SH NOTES
-POSIX.1-2001 does not require the inclusion of
-.IR <sys/types.h> ,
-and this header file is not required on Linux.
-However, some historical (BSD) implementations required this header
-file, and portable applications are probably wise to include it.
-
-The third argument of
-.BR connect ()
-is in reality an
-.I int
-(and this is what 4.x BSD and libc4 and libc5 have).
-Some POSIX confusion resulted in the present
-.IR socklen_t ,
-also used by glibc.
-See also
-.BR accept (2).
-.SH EXAMPLE
-An example of the use of
-.BR connect ()
-is shown in
-.BR getaddrinfo (3).
-.SH "SEE ALSO"
-.BR accept (2),
-.BR bind (2),
-.BR getsockname (2),
-.BR listen (2),
-.BR socket (2),
-.BR path_resolution (7)
-.SH COLOPHON
-This page is part of release 3.27 of the Linux
-.I man-pages
-project.
-A description of the project,
-and information about reporting bugs,
-can be found at
-http://www.kernel.org/doc/man-pages/.
+.\" ==========
+.It Bq Er ENETDOWN
+The local network interface is not functioning.
+.\" ==========
+.It Bq Er ENETUNREACH
+The network isn't reachable from this host.
+.\" ==========
+.It Bq Er ENOBUFS
+The system call was unable to allocate a needed memory buffer.
+.\" ==========
+.It Bq Er ENOTSOCK
+.Fa socket
+is not a file descriptor for a socket.
+.\" ==========
+.It Bq Er EOPNOTSUPP
+Because
+.Fa socket
+is listening, no connection is allowed.
+.\" ==========
+.It Bq Er EPROTOTYPE
+.Fa address
+has a different type than the socket
+that is bound to the specified peer address.
+.\" ==========
+.It Bq Er ETIMEDOUT
+Connection establishment timed out without establishing a connection.
+.\" ==========
+.It Bq Er ECONNRESET
+Remote host reset the connection request.
+.El
+.Pp
+The following errors are specific to connecting names in the UNIX domain.
+These errors may not apply in future versions of the UNIX IPC domain.
+.Bl -tag -width Er
+.\" ==========
+.It Bq Er EACCES
+Search permission is denied for a component of the path prefix.
+.\" ==========
+.It Bq Er EACCES
+Write access to the named socket is denied.
+.\" ==========
+.It Bq Er EIO
+An I/O error occurred while reading from or writing to the file system.
+.\" ==========
+.It Bq Er ELOOP
+Too many symbolic links were encountered in translating the pathname.
+This is taken to be indicative of a looping symbolic link.
+.\" ==========
+.It Bq Er ENAMETOOLONG
+A component of a pathname exceeded 
+.Dv {NAME_MAX}
+characters, or an entire path name exceeded 
+.Dv {PATH_MAX}
+characters.
+.\" ==========
+.It Bq Er ENOENT
+The named socket does not exist.
+.\" ==========
+.It Bq Er ENOTDIR
+A component of the path prefix is not a directory.
+.El
+.Sh LEGACY SYNOPSIS
+.Fd #include <sys/types.h>
+.Fd #include <sys/socket.h>
+.Pp
+The include file
+.In sys/types.h
+is necessary.
+.Sh SEE ALSO
+.Xr accept 2 ,
+.Xr getsockname 2 ,
+.Xr select 2 ,
+.Xr socket 2 ,
+.Xr compat 5
+.Sh HISTORY
+The
+.Fn connect
+function call appeared in
+.Bx 4.2 .

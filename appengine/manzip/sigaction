@@ -1,803 +1,618 @@
-'\" t
-.\" Copyright (c) 1994,1995 Mike Battersby <mib@deakin.edu.au>
-.\" and Copyright 2004, 2005 Michael Kerrisk <mtk.manpages@gmail.com>
-.\" based on work by faith@cs.unc.edu
+.\" Copyright (c) 1980, 1990, 1993
+.\"	The Regents of the University of California.  All rights reserved.
 .\"
-.\" Permission is granted to make and distribute verbatim copies of this
-.\" manual provided the copyright notice and this permission notice are
-.\" preserved on all copies.
+.\" Redistribution and use in source and binary forms, with or without
+.\" modification, are permitted provided that the following conditions
+.\" are met:
+.\" 1. Redistributions of source code must retain the above copyright
+.\"    notice, this list of conditions and the following disclaimer.
+.\" 2. Redistributions in binary form must reproduce the above copyright
+.\"    notice, this list of conditions and the following disclaimer in the
+.\"    documentation and/or other materials provided with the distribution.
+.\" 3. All advertising materials mentioning features or use of this software
+.\"    must display the following acknowledgement:
+.\"	This product includes software developed by the University of
+.\"	California, Berkeley and its contributors.
+.\" 4. Neither the name of the University nor the names of its contributors
+.\"    may be used to endorse or promote products derived from this software
+.\"    without specific prior written permission.
 .\"
-.\" Permission is granted to copy and distribute modified versions of this
-.\" manual under the conditions for verbatim copying, provided that the
-.\" entire resulting derived work is distributed under the terms of a
-.\" permission notice identical to this one.
+.\" THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND
+.\" ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+.\" IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+.\" ARE DISCLAIMED.  IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS BE LIABLE
+.\" FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+.\" DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+.\" OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+.\" HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+.\" LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+.\" OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+.\" SUCH DAMAGE.
 .\"
-.\" Since the Linux kernel and libraries are constantly changing, this
-.\" manual page may be incorrect or out-of-date.  The author(s) assume no
-.\" responsibility for errors or omissions, or for damages resulting from
-.\" the use of the information contained herein.  The author(s) may not
-.\" have taken the same level of care in the production of this manual,
-.\" which is licensed free of charge, as they might when working
-.\" professionally.
+.\"	From: @(#)sigaction.2	8.2 (Berkeley) 4/3/94
+.\" $FreeBSD: src/lib/libc/sys/sigaction.2,v 1.48 2003/03/24 16:07:19 charnier Exp $
 .\"
-.\" Formatted or processed versions of this manual, if unaccompanied by
-.\" the source, must acknowledge the copyright and authors of this work.
-.\"
-.\" Modified, aeb, 960424
-.\" Modified Fri Jan 31 17:31:20 1997 by Eric S. Raymond <esr@thyrsus.com>
-.\" Modified Thu Nov 26 02:12:45 1998 by aeb - add SIGCHLD stuff.
-.\" Modified Sat May  8 17:40:19 1999 by Matthew Wilcox
-.\"	add POSIX.1b signals
-.\" Modified Sat Dec 29 01:44:52 2001 by Evan Jones <ejones@uwaterloo.ca>
-.\"	SA_ONSTACK
-.\" Modified 2004-11-11 by Michael Kerrisk <mtk.manpages@gmail.com>
-.\"	Added mention of SIGCONT under SA_NOCLDSTOP
-.\"	Added SA_NOCLDWAIT
-.\" Modified 2004-11-17 by Michael Kerrisk <mtk.manpages@gmail.com>
-.\"	Updated discussion for POSIX.1-2001 and SIGCHLD and sa_flags.
-.\"	Formatting fixes
-.\" 2004-12-09, mtk, added SI_TKILL + other minor changes
-.\" 2005-09-15, mtk, split sigpending(), sigprocmask(), sigsuspend()
-.\"	out of this page into separate pages.
-.\" 2010-06-11 Andi Kleen, add hwpoison signal extensions
-.\" 2010-06-11 mtk, improvements to discussion of various siginfo_t fields.
-.\"
-.TH SIGACTION 2 2010-06-16 "Linux" "Linux Programmer's Manual"
-.SH NAME
-sigaction \- examine and change a signal action
-.SH SYNOPSIS
-.nf
-.B #include <signal.h>
-.sp
-.BI "int sigaction(int " signum ", const struct sigaction *" act ,
-.BI "              struct sigaction *" oldact );
-.fi
-.sp
-.in -4n
-Feature Test Macro Requirements for glibc (see
-.BR feature_test_macros (7)):
-.in
-.sp
-.ad l
-.BR sigaction ():
-_POSIX_C_SOURCE\ >=\ 1 || _XOPEN_SOURCE || _POSIX_SOURCE
-.ad b
-.SH DESCRIPTION
-The
-.BR sigaction ()
-system call is used to change the action taken by a process on
-receipt of a specific signal.
-(See
-.BR signal (7)
-for an overview of signals.)
-.PP
-.I signum
-specifies the signal and can be any valid signal except
-.B SIGKILL
-and
-.BR SIGSTOP .
-.PP
-If
-.I act
-is non-NULL, the new action for signal
-.I signum
-is installed from
-.IR act .
-If
-.I oldact
-is non-NULL, the previous action is saved in
-.IR oldact .
-.PP
-The
-.I sigaction
-structure is defined as something like:
-.sp
-.in +4n
-.nf
-struct sigaction {
-    void     (*sa_handler)(int);
-    void     (*sa_sigaction)(int, siginfo_t *, void *);
-    sigset_t   sa_mask;
-    int        sa_flags;
-    void     (*sa_restorer)(void);
+.Dd September 18, 2008 
+.Dt SIGACTION 2
+.Os
+.Sh NAME
+.Nm sigaction
+.Nd software signal facilities
+.Sh LIBRARY
+.Lb libc
+.Sh SYNOPSIS
+.In signal.h
+.Bd -literal
+
+struct  sigaction {
+        union __sigaction_u __sigaction_u;  /* signal handler */
+        sigset_t sa_mask;               /* signal mask to apply */
+        int     sa_flags;               /* see signal options below */
 };
-.fi
-.in
-.PP
-On some architectures a union is involved: do not assign to both
-.I sa_handler
-and
-.IR sa_sigaction .
-.PP
-The
-.I sa_restorer
-element is obsolete and should not be used.
-POSIX does not specify a
-.I sa_restorer
-element.
-.PP
-.I sa_handler
-specifies the action to be associated with
-.I signum
-and may be
-.B SIG_DFL
-for the default action,
-.B SIG_IGN
-to ignore this signal, or a pointer to a signal handling function.
-This function receives the signal number as its only argument.
-.PP
-If
-.B SA_SIGINFO
-is specified in
-.IR sa_flags ,
-then
-.I sa_sigaction
-(instead of
-.IR sa_handler )
-specifies the signal-handling function for
-.IR signum .
-This function receives the signal number as its first argument, a
-pointer to a
-.I siginfo_t
-as its second argument and a pointer to a
-.I ucontext_t
-(cast to \fIvoid\ *\fP) as its third argument.
-.PP
-.I sa_mask
-specifies a mask of signals which should be blocked
-(i.e., added to the signal mask of the thread in which
-the signal handler is invoked)
-during execution of the signal handler.
-In addition, the signal which triggered the handler
-will be blocked, unless the
-.B SA_NODEFER
-flag is used.
-.PP
-.I sa_flags
-specifies a set of flags which modify the behavior of the signal.
-It is formed by the bitwise OR of zero or more of the following:
-.RS 4
-.TP
-.B SA_NOCLDSTOP
-If
-.I signum
-is
-.BR SIGCHLD ,
-do not receive notification when child processes stop (i.e., when they
-receive one of
-.BR SIGSTOP ", " SIGTSTP ", " SIGTTIN
-or
-.BR SIGTTOU )
-or resume (i.e., they receive
-.BR SIGCONT )
-(see
-.BR wait (2)).
-This flag is only meaningful when establishing a handler for
-.BR SIGCHLD .
-.TP
-.BR SA_NOCLDWAIT " (since Linux 2.6)"
-.\" To be precise: Linux 2.5.60 -- MTK
-If
-.I signum
-is
-.BR SIGCHLD ,
-do not transform children into zombies when they terminate.
-See also
-.BR waitpid (2).
-This flag is only meaningful when establishing a handler for
-.BR SIGCHLD ,
-or when setting that signal's disposition to
-.BR SIG_DFL .
 
-If the
-.B SA_NOCLDWAIT
-flag is set when establishing a handler for
-.BR SIGCHLD ,
-POSIX.1 leaves it unspecified whether a
-.B SIGCHLD
-signal is generated when a child process terminates.
-On Linux, a
-.B SIGCHLD
-signal is generated in this case;
-on some other implementations, it is not.
-.TP
-.B SA_NODEFER
-Do not prevent the signal from being received from within its own signal
-handler.
-This flag is only meaningful when establishing a signal handler.
-.B SA_NOMASK
-is an obsolete, nonstandard synonym for this flag.
-.TP
-.B SA_ONSTACK
-Call the signal handler on an alternate signal stack provided by
-.BR sigaltstack (2).
-If an alternate stack is not available, the default stack will be used.
-This flag is only meaningful when establishing a signal handler.
-.TP
-.BR SA_RESETHAND
-Restore the signal action to the default state once the signal handler
-has been called.
-This flag is only meaningful when establishing a signal handler.
-.B SA_ONESHOT
-is an obsolete, nonstandard synonym for this flag.
-.TP
-.B SA_RESTART
-Provide behavior compatible with BSD signal semantics by making certain
-system calls restartable across signals.
-This flag is only meaningful when establishing a signal handler.
-See
-.BR signal (7)
-for a discussion of system call restarting.
-.TP
-.BR SA_SIGINFO " (since Linux 2.2)"
-The signal handler takes 3 arguments, not one.
-In this case,
-.I sa_sigaction
-should be set instead of
-.IR sa_handler .
-This flag is only meaningful when establishing a signal handler.
-.\" (The
-.\" .I sa_sigaction
-.\" field was added in Linux 2.1.86.)
-.RE
-.PP
-The
-.I siginfo_t
-argument to
-.I sa_sigaction
-is a struct with the following elements:
-.sp
-.in +4n
-.nf
-siginfo_t {
-    int      si_signo;    /* Signal number */
-    int      si_errno;    /* An errno value */
-    int      si_code;     /* Signal code */
-    int      si_trapno;   /* Trap number that caused
-                             hardware-generated signal
-                             (unused on most architectures) */
-.\" FIXME
-.\" si_trapno seems to be only used on SPARC and Alpha;
-.\" this page could use a little more detail on its purpose there.
-    pid_t    si_pid;      /* Sending process ID */
-    uid_t    si_uid;      /* Real user ID of sending process */
-    int      si_status;   /* Exit value or signal */
-    clock_t  si_utime;    /* User time consumed */
-    clock_t  si_stime;    /* System time consumed */
-    sigval_t si_value;    /* Signal value */
-    int      si_int;      /* POSIX.1b signal */
-    void    *si_ptr;      /* POSIX.1b signal */
-    int      si_overrun;  /* Timer overrun count; POSIX.1b timers */
-    int      si_timerid;  /* Timer ID; POSIX.1b timers */
-.\" In the kernel: si_tid
-    void    *si_addr;     /* Memory location which caused fault */
-    long     si_band;     /* Band event (was \fIint\fP in
-                             glibc 2.3.2 and earlier) */
-    int      si_fd;       /* File descriptor */
-    short    si_addr_lsb; /* Least significant bit of address
-                             (since kernel 2.6.32) */
-}
-.fi
-.in
+union __sigaction_u {
+	void    (*__sa_handler)(int);
+	void    (*__sa_sigaction)(int, struct __siginfo *,
+		       void *);
+};
 
-.IR si_signo ", " si_errno " and " si_code
-are defined for all signals.
-.RI ( si_errno
-is generally unused on Linux.)
-The rest of the struct may be a union, so that one should only
-read the fields that are meaningful for the given signal:
-.IP * 2
-Signals sent with
-.BR kill (2)
-and
-.BR sigqueue (2)
-fill in
-.IR si_pid " and " si_uid .
-In addition, signals sent with
-.BR sigqueue (2)
-fill in
-.IR si_int " and " si_ptr
-with the values specified by the sender the signal;
-see
-.BR sigqueue (2)
-for more details.
-.IP *
-Signals sent by POSIX.1b timers (since Linux 2.6) fill in
-.I si_overrun
-and
-.IR si_timerid .
-The
-.I si_timerid
-field is an internal ID used by the kernel to identify
-the timer; it is not the same as the timer ID returned by
-.BR timer_create (2).
-The
-.I si_overrun
-field is the timer overrun count;
-this is the same information as is obtained by a call to
-.BR timer_getoverrun (2).
-These fields are nonstandard Linux extensions.
-.IP *
-Signals sent for message queue notification (see the description of
-.B SIGEV_SIGNAL
-in
-.BR mq_notify (3))
-fill in
-.IR si_int / si_ptr ,
-with the
-.I sigev_value
-supplied to
-.BR mq_notify (3);
-.IR si_pid ,
-with the process ID of the message sender; and
-.IR si_uid ,
-with the real user ID of the message sender.
-.IP *
-.B SIGCHLD
-fills in
-.IR si_pid ", " si_uid ", " si_status ", " si_utime " and " si_stime ,
-providing information about the child.
-The
-.I si_pid
-field is the process ID of the child;
-.I si_uid
-is the child's real user ID.
-The
-.I si_status
-field contains the exit status of the child (if
-.I si_code
-is
-.BR CLD_EXITED ),
-or the signal number that caused the process to change state.
-The
-.I si_utime
-and
-.I si_stime
-contain the user and system CPU time used by the child process;
-these fields do not include the times used by waited-for children (unlike
-.BR getrusage (2)
-and
-.BR time (2)).
-In kernels up to 2.6, and since 2.6.27, these fields report
-CPU time in units of
-.IR sysconf(_SC_CLK_TCK) .
-In 2.6 kernels before 2.6.27,
-a bug meant that these fields reported time in units
-of the (configurable) system jiffy (see
-.BR time (7)).
-.\" FIXME .
-.\" When si_utime and si_stime where originally implemented, the
-.\" measurement unit was HZ, which was the same as clock ticks
-.\" (sysconf(_SC_CLK_TCK)).  In 2.6, HZ became configurable, and
-.\" was *still* used as the unit to return the info these fields,
-.\" with the result that the field values depended on the the
-.\" configured HZ.  Of course, the should have been measured in
-.\" USER_HZ instead, so that sysconf(_SC_CLK_TCK) could be used to
-.\" convert to seconds.  I have a queued patch to fix this:
-.\" http://thread.gmane.org/gmane.linux.kernel/698061/ .
-.\" This patch made it into 2.6.27.
-.\" But note that these fields still don't return the times of
-.\" waited-for children (as is done by getrusage() and times()
-.\" and wait4()).  Solaris 8 does include child times.
-.IP *
-.BR SIGILL ,
-.BR SIGFPE ,
-.BR SIGSEGV ,
-.BR SIGBUS ,
-and
-.BR SIGTRAP
-fill in
-.I si_addr
-with the address of the fault.
-.\" FIXME SIGTRAP also sets the following for ptrace_notify() ?
-.\"     info.si_code = exit_code;
-.\"     info.si_pid = task_pid_vnr(current);
-.\"     info.si_uid = current_uid();  /* Real UID */
-On some architectures,
-these signals also fill in the
-.I si_trapno
-filed.
-Some suberrors of
-.BR SIGBUS ,
-in particular
-.B BUS_MCEERR_AO
-and
-.BR BUS_MCEERR_AR ,
-also fill in
-.IR si_addr_lsb .
-This field indicates the least significant bit of the reported address
-and therefore the extent of the corruption.
-For example, if a full page was corrupted,
-.I si_addr_lsb
-contains
-.IR log2(sysconf(_SC_PAGESIZE)) .
-.B BUS_MCERR_*
-and
-.I si_addr_lsb
-are Linux-specific extensions.
-.IP *
-.BR SIGPOLL / SIGIO
-fills in
-.IR si_band " and " si_fd .
-The
-.I si_band
-event is a bit mask containing the same values as are filled in the
-.I revents
-field by
-.BR poll (2).
-The
-.I si_fd
-field indicates the file descriptor for which the I/O event occurred.
-.PP
-.I si_code
-is a value (not a bit mask)
-indicating why this signal was sent.
-The following list shows the values which can be placed in
-.I si_code
-for any signal, along with reason that the signal was generated.
-.RS 4
-.TP 15
-.B SI_USER
-.BR kill (2)
-or
-.BR raise (3)
-.TP
-.B SI_KERNEL
-Sent by the kernel.
-.TP
-.B SI_QUEUE
-.BR sigqueue (2)
-.TP
-.B SI_TIMER
-POSIX timer expired
-.TP
-.B SI_MESGQ
-POSIX message queue state changed (since Linux 2.6.6); see
-.BR mq_notify (3)
-.TP
-.B SI_ASYNCIO
-AIO completed
-.TP
-.B SI_SIGIO
-queued SIGIO
-.TP
-.B SI_TKILL
-.BR tkill (2)
-or
-.BR tgkill (2)
-(since Linux 2.4.19)
-.\" SI_DETHREAD is defined in 2.6.9 sources, but isn't implemented
-.\" It appears to have been an idea that was tried during 2.5.6
-.\" through to 2.5.24 and then was backed out.
-.RE
-.PP
-The following values can be placed in
-.I si_code
-for a
-.B SIGILL
-signal:
-.RS 4
-.TP 15
-.B ILL_ILLOPC
-illegal opcode
-.TP
-.B ILL_ILLOPN
-illegal operand
-.TP
-.B ILL_ILLADR
-illegal addressing mode
-.TP
-.B ILL_ILLTRP
-illegal trap
-.TP
-.B ILL_PRVOPC
-privileged opcode
-.TP
-.B ILL_PRVREG
-privileged register
-.TP
-.B ILL_COPROC
-coprocessor error
-.TP
-.B ILL_BADSTK
-internal stack error
-.RE
-.PP
-The following values can be placed in
-.I si_code
-for a
-.B SIGFPE
-signal:
-.RS 4
-.TP 15
-.B FPE_INTDIV
-integer divide by zero
-.TP
-.B FPE_INTOVF
-integer overflow
-.TP
-.B FPE_FLTDIV
-floating-point divide by zero
-.TP
-.B FPE_FLTOVF
-floating-point overflow
-.TP
-.B FPE_FLTUND
-floating-point underflow
-.TP
-.B FPE_FLTRES
-floating-point inexact result
-.TP
-.B FPE_FLTINV
-floating-point invalid operation
-.TP
-.B FPE_FLTSUB
-subscript out of range
-.RE
-.PP
-The following values can be placed in
-.I si_code
-for a
-.B SIGSEGV
-signal:
-.RS 4
-.TP 15
-.B SEGV_MAPERR
-address not mapped to object
-.TP
-.B SEGV_ACCERR
-invalid permissions for mapped object
-.RE
-.PP
-The following values can be placed in
-.I si_code
-for a
-.B SIGBUS
-signal:
-.RS 4
-.TP 15
-.B BUS_ADRALN
-invalid address alignment
-.TP
-.B BUS_ADRERR
-nonexistent physical address
-.TP
-.B BUS_OBJERR
-object-specific hardware error
-.TP
-.BR BUS_MCEERR_AR " (since Linux 2.6.32)"
-Hardware memory error consumed on a machine check; action required.
-.TP
-.BR BUS_MCEERR_AO " (since Linux 2.6.32)"
-Hardware memory error detected in process but not consumed; action optional.
-.RE
-.PP
-The following values can be placed in
-.I si_code
-for a
-.B SIGTRAP
-signal:
-.RS 4
-.TP 15
-.B TRAP_BRKPT
-process breakpoint
-.TP
-.B TRAP_TRACE
-process trace trap
-.TP
-.BR TRAP_BRANCH " (since Linux 2.4)"
-process taken branch trap
-.TP
-.BR TRAP_HWBKPT " (since Linux 2.4)"
-hardware breakpoint/watchpoint
-.RE
-.PP
-The following values can be placed in
-.I si_code
-for a
-.B SIGCHLD
-signal:
-.RS 4
-.TP 15
-.B CLD_EXITED
-child has exited
-.TP
-.B CLD_KILLED
-child was killed
-.TP
-.B CLD_DUMPED
-child terminated abnormally
-.TP
-.B CLD_TRAPPED
-traced child has trapped
-.TP
-.B CLD_STOPPED
-child has stopped
-.TP
-.B CLD_CONTINUED
-stopped child has continued (since Linux 2.6.9)
-.RE
-.PP
-The following values can be placed in
-.I si_code
-for a
-.B SIGPOLL
-signal:
-.RS 4
-.TP 15
-.B POLL_IN
-data input available
-.TP
-.B POLL_OUT
-output buffers available
-.TP
-.B POLL_MSG
-input message available
-.TP
-.B POLL_ERR
-I/O error
-.TP
-.B POLL_PRI
-high priority input available
-.TP
-.B POLL_HUP
-device disconnected
-.RE
-.SH "RETURN VALUE"
-.BR sigaction ()
-returns 0 on success and \-1 on error.
-.SH ERRORS
-.TP
-.B EFAULT
-.IR act " or " oldact
-points to memory which is not a valid part of the process address space.
-.TP
-.B EINVAL
-An invalid signal was specified.
-This will also be generated if an attempt
-is made to change the action for
-.BR SIGKILL " or " SIGSTOP ", "
-which cannot be caught or ignored.
-.SH "CONFORMING TO"
-POSIX.1-2001, SVr4.
-.\" SVr4 does not document the EINTR condition.
-.SH NOTES
-A child created via
-.BR fork (2)
-inherits a copy of its parent's signal dispositions.
-During an
-.BR execve (2),
-the dispositions of handled signals are reset to the default;
-the dispositions of ignored signals are left unchanged.
+#define	sa_handler	__sigaction_u.__sa_handler
+#define	sa_sigaction	__sigaction_u.__sa_sigaction
 
-According to POSIX, the behavior of a process is undefined after it
-ignores a
-.BR SIGFPE ,
-.BR SIGILL ,
-or
-.B SIGSEGV
-signal that was not generated by
-.BR kill (2)
-or
-.BR raise (3).
-Integer division by zero has undefined result.
-On some architectures it will generate a
-.B SIGFPE
-signal.
-(Also dividing the most negative integer by \-1 may generate
-.BR SIGFPE .)
-Ignoring this signal might lead to an endless loop.
-.PP
-POSIX.1-1990 disallowed setting the action for
-.B SIGCHLD
+.Ed
+.Ft int
+.Fo sigaction
+.Fa "int sig"
+.Fa "const struct sigaction *restrict act"
+.Fa "struct sigaction *restrict oact"
+.Fc
+.Sh DESCRIPTION
+The system defines a set of signals that may be delivered to a process.
+Signal delivery resembles the occurrence of a hardware interrupt:
+the signal is normally blocked from further occurrence, the current process
+context is saved, and a new one is built.  A process may specify a
+.Em handler
+to which a signal is delivered, or specify that a signal is to be
+.Em ignored .
+A process may also specify that a default action is to be taken
+by the system when a signal occurs.
+A signal may also be
+.Em blocked ,
+in which case its delivery is postponed until it is
+.Em unblocked .
+The action to be taken on delivery is determined at the time
+of delivery.
+Normally, signal handlers execute on the current stack
+of the process.  This may be changed, on a per-handler basis,
+so that signals are taken on a special
+.Em "signal stack" .
+.Pp
+Signal routines normally execute with the signal that caused their
+invocation
+.Em blocked ,
+but other signals may yet occur.
+A global
+.Em "signal mask"
+defines the set of signals currently blocked from delivery
+to a process.  The signal mask for a process is initialized
+from that of its parent (normally empty).  It
+may be changed with a
+.Xr sigprocmask 2
+call, or when a signal is delivered to the process.
+.Pp
+When a signal
+condition arises for a process, the signal is added to a set of
+signals pending for the process.
+If the signal is not currently
+.Em blocked
+by the process then it is delivered to the process.
+Signals may be delivered any time a process enters the operating system
+(e.g., during a system call, page fault or trap, or clock interrupt).
+If multiple signals are ready to be delivered at the same time,
+any signals that could be caused by traps are delivered first.
+Additional signals may be processed at the same time, with each
+appearing to interrupt the handlers for the previous signals
+before their first instructions.
+The set of pending signals is returned by the
+.Xr sigpending 2
+system call.
+When a caught signal
+is delivered, the current state of the process is saved,
+a new signal mask is calculated (as described below),
+and the signal handler is invoked.  The call to the handler
+is arranged so that if the signal handling routine returns
+normally the process will resume execution in the context
+from before the signal's delivery.
+If the process wishes to resume in a different context, then it
+must arrange to restore the previous context itself.
+.Pp
+When a signal is delivered to a process a new signal mask is
+installed for the duration of the process' signal handler
+(or until a
+.Xr sigprocmask 2
+system call is made).
+This mask is formed by taking the union of the current signal mask set,
+the signal to be delivered, and
+the signal mask associated with the handler to be invoked.
+.Pp
+The
+.Fn sigaction
+system call
+assigns an action for a signal specified by
+.Fa sig .
+If
+.Fa act
+is non-zero, it
+specifies an action
+.Dv ( SIG_DFL ,
+.Dv SIG_IGN ,
+or a handler routine) and mask
+to be used when delivering the specified signal.
+If
+.Fa oact
+is non-zero, the previous handling information for the signal
+is returned to the user.
+.Pp
+Once a signal handler is installed, it normally remains installed
+until another
+.Fn sigaction
+system call is made, or an
+.Xr execve 2
+is performed.
+A signal-specific default action may be reset by
+setting
+.Fa sa_handler
 to
-.BR SIG_IGN .
-POSIX.1-2001 allows this possibility, so that ignoring
-.B SIGCHLD
-can be used to prevent the creation of zombies (see
-.BR wait (2)).
-Nevertheless, the historical BSD and System V behaviors for ignoring
-.B SIGCHLD
-differ, so that the only completely portable method of ensuring that
-terminated children do not become zombies is to catch the
-.B SIGCHLD
-signal and perform a
-.BR wait (2)
-or similar.
-.PP
-POSIX.1-1990 only specified
-.BR SA_NOCLDSTOP .
-POSIX.1-2001 added
-.BR SA_NOCLDWAIT ,
-.BR SA_RESETHAND ,
-.BR SA_NODEFER ,
+.Dv SIG_DFL .
+The defaults are process termination, possibly with core dump;
+no action; stopping the process; or continuing the process.
+See the signal list below for each signal's default action.
+If
+.Fa sa_handler
+is
+.Dv SIG_DFL ,
+the default action for the signal is to discard the signal,
+and if a signal is pending,
+the pending signal is discarded even if the signal is masked.
+If
+.Fa sa_handler
+is set to
+.Dv SIG_IGN
+current and pending instances
+of the signal are ignored and discarded.
+.Pp
+Options may be specified by setting
+.Va sa_flags .
+The meaning of the various bits is as follows:
+.Bl -tag -offset indent -width SA_RESETHANDXX
+.It Dv SA_NOCLDSTOP
+If this bit is set when installing a catching function
+for the
+.Dv SIGCHLD
+signal,
+the
+.Dv SIGCHLD
+signal will be generated only when a child process exits,
+not when a child process stops.
+.It Dv SA_NOCLDWAIT
+If this bit is set when calling
+.Fn sigaction
+for the
+.Dv SIGCHLD
+signal, the system will not create zombie processes when children of
+the calling process exit.  If the calling process subsequently issues
+a
+.Xr wait 2
+(or equivalent), it blocks until all of the calling process's child
+processes terminate, and then returns a value of -1 with errno set to
+.Er ECHILD .
+.It Dv SA_ONSTACK
+If this bit is set, the system will deliver the signal to the process
+on a
+.Em "signal stack" ,
+specified with
+.Xr sigaltstack 2 .
+.It Dv SA_NODEFER
+If this bit is set, further occurrences of the delivered signal are
+not masked during the execution of the handler.
+.It Dv SA_RESETHAND
+If this bit is set, the handler is reset back to
+.Dv SIG_DFL
+at the moment the signal is delivered.
+.It Dv SA_RESTART
+See paragraph below.
+.It Dv SA_SIGINFO
+If this bit is set, the handler function is assumed to be pointed to by the
+.Dv sa_sigaction
+member of struct sigaction and should match the prototype shown above or as
+below in
+.Sx EXAMPLES .
+This bit should not be set when assigning
+.Dv SIG_DFL
+or
+.Dv SIG_IGN .
+.El
+.Pp
+If a signal is caught during the system calls listed below,
+the call may be forced to terminate
+with the error
+.Er EINTR ,
+the call may return with a data transfer shorter than requested,
+or the call may be restarted.
+Restart of pending calls is requested
+by setting the
+.Dv SA_RESTART
+bit in
+.Va sa_flags .
+The affected system calls include
+.Xr open 2 ,
+.Xr read 2 ,
+.Xr write 2 ,
+.Xr sendto 2 ,
+.Xr recvfrom 2 ,
+.Xr sendmsg 2
 and
-.BR SA_SIGINFO .
-Use of these latter values in
-.I sa_flags
-may be less portable in applications intended for older
-Unix implementations.
-.PP
+.Xr recvmsg 2
+on a communications channel or a slow device (such as a terminal,
+but not a regular file)
+and during a
+.Xr wait 2
+or
+.Xr ioctl 2 .
+However, calls that have already committed are not restarted,
+but instead return a partial success (for example, a short read count).
+.Pp
+After a
+.Xr fork 2
+or
+.Xr vfork 2
+all signals, the signal mask, the signal stack,
+and the restart/interrupt flags are inherited by the child.
+.Pp
 The
-.B SA_RESETHAND
-flag is compatible with the SVr4 flag of the same name.
-.PP
+.Xr execve 2
+system call reinstates the default
+action for all signals which were caught and
+resets all signals to be caught on the user stack.
+Ignored signals remain ignored;
+the signal mask remains the same;
+signals that restart pending system calls continue to do so.
+.Pp
+The following is a list of all signals
+with names as in the include file
+.Aq Pa signal.h :
+.Bl -column SIGVTALARMXX "create core imagexxx"
+.It Sy "NAME	Default Action	Description"
+.It Dv SIGHUP No "	terminate process" "	terminal line hangup"
+.It Dv SIGINT No "	terminate process" "	interrupt program"
+.It Dv SIGQUIT No "	create core image" "	quit program"
+.It Dv SIGILL No "	create core image" "	illegal instruction"
+.It Dv SIGTRAP No "	create core image" "	trace trap"
+.It Dv SIGABRT No "	create core image" Ta Xr abort 3
+call (formerly
+.Dv SIGIOT )
+.It Dv SIGEMT No "	create core image" "	emulate instruction executed"
+.It Dv SIGFPE No "	create core image" "	floating-point exception"
+.It Dv SIGKILL No "	terminate process" "	kill program"
+.It Dv SIGBUS No "	create core image" "	bus error"
+.It Dv SIGSEGV No "	create core image" "	segmentation violation"
+.It Dv SIGSYS No "	create core image" "	non-existent system call invoked"
+.It Dv SIGPIPE No "	terminate process" "	write on a pipe with no reader"
+.It Dv SIGALRM No "	terminate process" "	real-time timer expired"
+.It Dv SIGTERM No "	terminate process" "	software termination signal"
+.It Dv SIGURG No "	discard signal" "	urgent condition present on socket"
+.It Dv SIGSTOP No "	stop process" "	stop (cannot be caught or ignored)"
+.It Dv SIGTSTP No "	stop process" "	stop signal generated from keyboard"
+.It Dv SIGCONT No "	discard signal" "	continue after stop"
+.It Dv SIGCHLD No "	discard signal" "	child status has changed"
+.It Dv SIGTTIN No "	stop process" "	background read attempted from control terminal"
+.It Dv SIGTTOU No "	stop process" "	background write attempted to control terminal"
+.It Dv SIGIO No "	discard signal" Tn "	I/O"
+is possible on a descriptor (see
+.Xr fcntl 2 )
+.It Dv SIGXCPU No "	terminate process" "	cpu time limit exceeded (see"
+.Xr setrlimit 2 )
+.It Dv SIGXFSZ No "	terminate process" "	file size limit exceeded (see"
+.Xr setrlimit 2 )
+.It Dv SIGVTALRM No "	terminate process" "	virtual time alarm (see"
+.Xr setitimer 2 )
+.It Dv SIGPROF No "	terminate process" "	profiling timer alarm (see"
+.Xr setitimer 2 )
+.It Dv SIGWINCH No "	discard signal" "	Window size change"
+.It Dv SIGINFO No "	discard signal" "	status request from keyboard"
+.It Dv SIGUSR1 No "	terminate process" "	User defined signal 1"
+.It Dv SIGUSR2 No "	terminate process" "	User defined signal 2"
+.El
+.Sh NOTE
 The
-.B SA_NODEFER
-flag is compatible with the SVr4 flag of the same name under kernels
-1.3.9 and newer.
-On older kernels the Linux implementation
-allowed the receipt of any signal, not just the one we are installing
-(effectively overriding any
-.I sa_mask
-settings).
-.PP
-.BR sigaction ()
-can be called with a NULL second argument to query the current signal
-handler.
-It can also be used to check whether a given signal is valid for
-the current machine by calling it with NULL second and third arguments.
-.PP
-It is not possible to block
-.BR SIGKILL " or " SIGSTOP
-(by specifying them in
-.IR sa_mask ).
-Attempts to do so are silently ignored.
-.PP
-See
-.BR sigsetops (3)
-for details on manipulating signal sets.
-.PP
-See
-.BR signal (7)
-for a list of the async-signal-safe functions that can be
-safely called inside from inside a signal handler.
-.SS Undocumented
-Before the introduction of
-.B SA_SIGINFO
-it was also possible to get some additional information,
-namely by using a
-.I sa_handler
-with second argument of type
-.IR "struct sigcontext".
-See the relevant kernel sources for details.
-This use is obsolete now.
-.SH BUGS
-In kernels up to and including 2.6.13, specifying
-.B SA_NODEFER
-in
-.I sa_flags
-prevents not only the delivered signal from being masked during
-execution of the handler, but also the signals specified in
-.IR sa_mask .
-This bug was fixed in kernel 2.6.14.
-.SH EXAMPLE
-See
-.BR mprotect (2).
-.SH "SEE ALSO"
-.BR kill (1),
-.BR kill (2),
-.BR killpg (2),
-.BR pause (2),
-.BR sigaltstack (2),
-.BR signal (2),
-.BR signalfd (2),
-.BR sigpending (2),
-.BR sigprocmask (2),
-.BR sigqueue (2),
-.BR sigsuspend (2),
-.BR wait (2),
-.BR raise (3),
-.BR siginterrupt (3),
-.BR sigsetops (3),
-.BR sigvec (3),
-.BR core (5),
-.BR signal (7)
-.SH COLOPHON
-This page is part of release 3.27 of the Linux
-.I man-pages
-project.
-A description of the project,
-and information about reporting bugs,
-can be found at
-http://www.kernel.org/doc/man-pages/.
+.Fa sa_mask
+field specified in
+.Fa act
+is not allowed to block
+.Dv SIGKILL
+or
+.Dv SIGSTOP .
+Any attempt to do so will be silently ignored.
+.Pp
+The following functions are either reentrant or not interruptible
+by signals and are async-signal safe.
+Therefore applications may
+invoke them, without restriction, from signal-catching functions:
+.Pp
+Base Interfaces:
+.Pp
+.Fn _exit ,
+.Fn access ,
+.Fn alarm ,
+.Fn cfgetispeed ,
+.Fn cfgetospeed ,
+.Fn cfsetispeed ,
+.Fn cfsetospeed ,
+.Fn chdir ,
+.Fn chmod ,
+.Fn chown ,
+.Fn close ,
+.Fn creat ,
+.Fn dup ,
+.Fn dup2 ,
+.Fn execle ,
+.Fn execve ,
+.Fn fcntl ,
+.Fn fork ,
+.Fn fpathconf ,
+.Fn fstat ,
+.Fn fsync ,
+.Fn getegid ,
+.Fn geteuid ,
+.Fn getgid ,
+.Fn getgroups ,
+.Fn getpgrp ,
+.Fn getpid ,
+.Fn getppid ,
+.Fn getuid ,
+.Fn kill ,
+.Fn link ,
+.Fn lseek ,
+.Fn mkdir ,
+.Fn mkfifo ,
+.Fn open ,
+.Fn pathconf ,
+.Fn pause ,
+.Fn pipe ,
+.Fn raise ,
+.Fn read ,
+.Fn rename ,
+.Fn rmdir ,
+.Fn setgid ,
+.Fn setpgid ,
+.Fn setsid ,
+.Fn setuid ,
+.Fn sigaction ,
+.Fn sigaddset ,
+.Fn sigdelset ,
+.Fn sigemptyset ,
+.Fn sigfillset  ,
+.Fn sigismember ,
+.Fn signal ,
+.Fn sigpending ,
+.Fn sigprocmask ,
+.Fn sigsuspend ,
+.Fn sleep ,
+.Fn stat ,
+.Fn sysconf ,
+.Fn tcdrain ,
+.Fn tcflow ,
+.Fn tcflush ,
+.Fn tcgetattr ,
+.Fn tcgetpgrp ,
+.Fn tcsendbreak ,
+.Fn tcsetattr ,
+.Fn tcsetpgrp ,
+.Fn time ,
+.Fn times ,
+.Fn umask ,
+.Fn uname ,
+.Fn unlink ,
+.Fn utime ,
+.Fn wait ,
+.Fn waitpid ,
+.Fn write .
+.Pp
+Realtime Interfaces:
+.Pp
+.Fn aio_error ,
+.Fn sigpause ,
+.Fn aio_return ,
+.Fn aio_suspend ,
+.Fn sem_post ,
+.Fn sigset .
+.Pp
+ANSI C Interfaces:
+.Pp
+.Fn strcpy ,
+.Fn strcat ,
+.Fn strncpy ,
+.Fn strncat ,
+and perhaps some others.
+.Pp
+Extension Interfaces:
+.Pp
+.Fn strlcpy ,
+.Fn strlcat .
+.Pp
+All functions not in the above lists are considered to be unsafe
+with respect to signals.  That is to say, the behaviour of such
+functions when called from a signal handler is undefined.
+In general though, signal handlers should do little more than set a
+flag; most other actions are not safe.
+.Pp
+Also, it is good practice to make a copy of the global variable
+.Va errno
+and restore it before returning from the signal handler.
+This protects against the side effect of
+.Va errno
+being set by functions called from inside the signal handler.
+.Sh RETURN VALUES
+.Rv -std sigaction
+.Sh EXAMPLES
+There are three possible prototypes the handler may match:
+.Bl -tag -offset indent -width short
+.It ANSI C:
+.Ft void
+.Fn handler int ;
+.It POSIX SA_SIGINFO:
+.Ft void
+.Fn handler int "siginfo_t *info" "ucontext_t *uap" ;
+.El
+.Pp
+The handler function should match the SA_SIGINFO prototype if the
+SA_SIGINFO bit is set in flags.
+It then should be pointed to by the
+.Dv sa_sigaction
+member of
+.Dv struct sigaction .
+Note that you should not assign SIG_DFL or SIG_IGN this way.
+.Pp
+If the SA_SIGINFO flag is not set, the handler function should match
+either the ANSI C or traditional
+.Bx
+prototype and be pointed to by
+the
+.Dv sa_handler
+member of
+.Dv struct sigaction .
+In practice,
+.Fx
+always sends the three arguments of the latter and since the ANSI C
+prototype is a subset, both will work.
+The
+.Dv sa_handler
+member declaration in
+.Fx
+include files is that of ANSI C (as required by POSIX),
+so a function pointer of a
+.Bx Ns -style
+function needs to be casted to
+compile without warning.
+The traditional
+.Bx
+style is not portable and since its capabilities
+are a full subset of a SA_SIGINFO handler,
+its use is deprecated.
+.Pp
+The
+.Fa sig
+argument is the signal number, one of the
+.Dv SIG...
+values from <signal.h>.
+.Pp
+The
+.Fa code
+argument of the
+.Bx Ns -style
+handler and the
+.Dv si_code
+member of the
+.Dv info
+argument to a SA_SIGINFO handler contain a numeric code explaining the
+cause of the signal, usually one of the
+.Dv SI_...
+values from
+<sys/signal.h> or codes specific to a signal, i.e. one of the
+.Dv FPE_...
+values for SIGFPE.
+.Pp
+The
+.Fa uap
+argument to a POSIX SA_SIGINFO handler points to an instance of
+ucontext_t.
+.Sh ERRORS
+The
+.Fn sigaction
+system call
+will fail and no new signal handler will be installed if one
+of the following occurs:
+.Bl -tag -width Er
+.\" ===========
+.It Bq Er EFAULT
+Either
+.Fa act
+or
+.Fa oact
+points to memory that is not a valid part of the process
+address space.
+.\" ===========
+.It Bq Er EINVAL
+The
+.Fa sig
+argument
+is not a valid signal number.
+.\" ===========
+.It Bq Er EINVAL
+An attempt is made to ignore or supply a handler for
+.Dv SIGKILL
+or
+.Dv SIGSTOP .
+.\" ===========
+.It Bq Er EINVAL
+An attempt was made to set the action to SIG_DFL
+for a signal that cannot be caught or ignored (or both).
+.El
+.Sh STANDARDS
+The
+.Fn sigaction
+system call is expected to conform to
+.St -p1003.1-90 .
+The
+.Dv SA_ONSTACK
+and
+.Dv SA_RESTART
+flags are Berkeley extensions,
+as are the signals,
+.Dv SIGTRAP ,
+.Dv SIGEMT ,
+.Dv SIGBUS ,
+.Dv SIGSYS ,
+.Dv SIGURG ,
+.Dv SIGIO ,
+.Dv SIGXCPU ,
+.Dv SIGXFSZ ,
+.Dv SIGVTALRM ,
+.Dv SIGPROF ,
+.Dv SIGWINCH ,
+and
+.Dv SIGINFO .
+Those signals are available on most
+.Bx Ns \-derived
+systems.
+The
+.Dv SA_NODEFER
+and
+.Dv SA_RESETHAND
+flags are intended for backwards compatibility with other operating
+systems.  The
+.Dv SA_NOCLDSTOP ,
+and
+.Dv SA_NOCLDWAIT
+.\" and
+.\" SA_SIGINFO
+flags are featuring options commonly found in other operating systems.
+.Sh SEE ALSO
+.Xr kill 1 ,
+.Xr kill 2 ,
+.Xr ptrace 2 ,
+.Xr sigaltstack 2 ,
+.Xr sigblock 2 ,
+.Xr sigpause 2 ,
+.Xr sigpending 2 ,
+.Xr sigprocmask 2 ,
+.Xr sigsetmask 2 ,
+.Xr sigsuspend 2 ,
+.Xr sigvec 2 ,
+.Xr wait 2 ,
+.Xr fpsetmask 3 ,
+.Xr setjmp 3 ,
+.Xr siginterrupt 3 ,
+.Xr sigsetops 3 ,
+.Xr ucontext 3 ,
+.Xr tty 4

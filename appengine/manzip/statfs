@@ -1,272 +1,281 @@
-.\" Copyright (C) 2003 Andries Brouwer (aeb@cwi.nl)
+.\"	$NetBSD: statfs.2,v 1.10 1995/06/29 11:40:48 cgd Exp $
 .\"
-.\" Permission is granted to make and distribute verbatim copies of this
-.\" manual provided the copyright notice and this permission notice are
-.\" preserved on all copies.
+.\" Copyright (c) 1989, 1991, 1993
+.\"	The Regents of the University of California.  All rights reserved.
 .\"
-.\" Permission is granted to copy and distribute modified versions of this
-.\" manual under the conditions for verbatim copying, provided that the
-.\" entire resulting derived work is distributed under the terms of a
-.\" permission notice identical to this one.
+.\" Redistribution and use in source and binary forms, with or without
+.\" modification, are permitted provided that the following conditions
+.\" are met:
+.\" 1. Redistributions of source code must retain the above copyright
+.\"    notice, this list of conditions and the following disclaimer.
+.\" 2. Redistributions in binary form must reproduce the above copyright
+.\"    notice, this list of conditions and the following disclaimer in the
+.\"    documentation and/or other materials provided with the distribution.
+.\" 3. All advertising materials mentioning features or use of this software
+.\"    must display the following acknowledgement:
+.\"	This product includes software developed by the University of
+.\"	California, Berkeley and its contributors.
+.\" 4. Neither the name of the University nor the names of its contributors
+.\"    may be used to endorse or promote products derived from this software
+.\"    without specific prior written permission.
 .\"
-.\" Since the Linux kernel and libraries are constantly changing, this
-.\" manual page may be incorrect or out-of-date.  The author(s) assume no
-.\" responsibility for errors or omissions, or for damages resulting from
-.\" the use of the information contained herein.  The author(s) may not
-.\" have taken the same level of care in the production of this manual,
-.\" which is licensed free of charge, as they might when working
-.\" professionally.
+.\" THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND
+.\" ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+.\" IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+.\" ARE DISCLAIMED.  IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS BE LIABLE
+.\" FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+.\" DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+.\" OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+.\" HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+.\" LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+.\" OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+.\" SUCH DAMAGE.
 .\"
-.\" Formatted or processed versions of this manual, if unaccompanied by
-.\" the source, must acknowledge the copyright and authors of this work.
+.\"	@(#)statfs.2	8.3 (Berkeley) 2/11/94
 .\"
-.\" Modified 2003-08-17 by Walter Harms
-.\" Modified 2004-06-23 by Michael Kerrisk <mtk.manpages@gmail.com>
-.\"
-.TH STATFS 2 2010-09-04 "Linux" "Linux Programmer's Manual"
-.SH NAME
-statfs, fstatfs \- get file system statistics
-.SH SYNOPSIS
-.BR "#include <sys/vfs.h>    " "/* or <sys/statfs.h> */"
-.sp
-.BI "int statfs(const char *" path ", struct statfs *" buf );
+.Dd August 14, 2008
+.Dt STATFS 2
+.Os
+.Sh NAME
+.Nm statfs,
+.Nm statfs64,
+.Nm fstatfs,
+.Nm fstatfs64
+.Nd get file system statistics
+.Sh SYNOPSIS
+.Fd #include <sys/param.h>
+.Fd #include <sys/mount.h>
+.Ft int
+.Fn statfs "const char *path" "struct statfs *buf"
+.Ft int
+.Fn fstatfs "int fd" "struct statfs *buf"
+.Sh TRANSITIIONAL SYNOPSIS (NOW DEPRECATED)
+.Ft int
 .br
-.BI "int fstatfs(int " fd ", struct statfs *" buf );
-.SH DESCRIPTION
-The function
-.BR statfs ()
-returns information about a mounted file system.
-.I path
-is the pathname of any file within the mounted file system.
-.I buf
-is a pointer to a
-.I statfs
-structure defined approximately as follows:
+.Fn statfs64 "const char *path" "struct statfs64 *buf" ;
+.sp
+.Ft int
+.br
+.Fn fstatfs64 "int fd" "struct statfs64 *buf" ;
+.Sh DESCRIPTION
+The
+.Fn statfs
+routine returns information about a mounted file system.
+The
+.Fa path
+argument is the path name of any file or directory within the mounted file system.
+The
+.Fa buf
+argument is a pointer to a 
+.Fa statfs
+structure.
+When the macro
+.Dv _DARWIN_FEATURE_64_BIT_INODE
+is not defined (the
+.Ft ino_t
+type is 32-bits), that structure is defined as:
+.Bd -literal
+typedef struct { int32_t val[2]; } fsid_t;
 
-.in +4n
-.nf
-#if __WORDSIZE == 32		/* System word size */
-# define __SWORD_TYPE           int
-#else /* __WORDSIZE == 64 */
-# define __SWORD_TYPE		long int
-#endif
+#define MFSNAMELEN      15 /* length of fs type name, not inc. nul */
+#define MNAMELEN        90 /* length of buffer for returned name */
 
-struct statfs {
-    __SWORD_TYPE f_type;    /* type of file system (see below) */
-    __SWORD_TYPE f_bsize;   /* optimal transfer block size */
-    fsblkcnt_t   f_blocks;  /* total data blocks in file system */
-    fsblkcnt_t   f_bfree;   /* free blocks in fs */
-    fsblkcnt_t   f_bavail;  /* free blocks available to
-                               unprivileged user */
-    fsfilcnt_t   f_files;   /* total file nodes in file system */
-    fsfilcnt_t   f_ffree;   /* free file nodes in fs */
-    fsid_t       f_fsid;    /* file system id */
-    __SWORD_TYPE f_namelen; /* maximum length of filenames */
-    __SWORD_TYPE f_frsize;  /* fragment size (since Linux 2.6) */
-    __SWORD_TYPE f_spare[5];
+struct statfs { /* when _DARWIN_FEATURE_64_BIT_INODE is NOT defined */
+    short   f_otype;	/* type of file system (reserved: zero) */
+    short   f_oflags;	/* copy of mount flags (reserved: zero) */
+    long    f_bsize;	/* fundamental file system block size */
+    long    f_iosize;	/* optimal transfer block size */
+    long    f_blocks;	/* total data blocks in file system */
+    long    f_bfree;	/* free blocks in fs */
+    long    f_bavail;	/* free blocks avail to non-superuser */
+    long    f_files;	/* total file nodes in file system */
+    long    f_ffree;	/* free file nodes in fs */
+    fsid_t  f_fsid;	/* file system id */
+    uid_t   f_owner;	/* user that mounted the file system */
+    short   f_reserved1;	/* reserved for future use */
+    short   f_type;	/* type of file system (reserved) */
+    long    f_flags;	/* copy of mount flags (reserved) */
+    long    f_reserved2[2];	/* reserved for future use */
+    char    f_fstypename[MFSNAMELEN]; /* fs type name */
+    char    f_mntonname[MNAMELEN];    /* directory on which mounted */
+    char    f_mntfromname[MNAMELEN];  /* mounted file system */
+    char    f_reserved3;	/* reserved for future use */
+    long    f_reserved4[4];	/* reserved for future use */
 };
+.Ed
+.Pp
+However, when the macro
+.Dv _DARWIN_FEATURE_64_BIT_INODE
+is defined, the
+.Ft ino_t
+type will be 64-bits (force 64-bit inode mode by defining the
+.Dv _DARWIN_USE_64_BIT_INODE
+macro before including header files).
+This will cause symbol variants of the 
+.Fa statfs
+family, with the
+.Fa $INODE64
+suffixes, to be automatically linked in.
+In addition, the
+.Fa statfs
+structure will now be defined as:
+.Bd -literal
+#define MFSTYPENAMELEN  16 /* length of fs type name including null */
+#define MAXPATHLEN      1024	
+#define MNAMELEN        MAXPATHLEN
 
-File system types:
-
-   ADFS_SUPER_MAGIC      0xadf5
-   AFFS_SUPER_MAGIC      0xADFF
-   BEFS_SUPER_MAGIC      0x42465331
-   BFS_MAGIC             0x1BADFACE
-   CIFS_MAGIC_NUMBER     0xFF534D42
-   CODA_SUPER_MAGIC      0x73757245
-   COH_SUPER_MAGIC       0x012FF7B7
-   CRAMFS_MAGIC          0x28cd3d45
-   DEVFS_SUPER_MAGIC     0x1373
-   EFS_SUPER_MAGIC       0x00414A53
-   EXT_SUPER_MAGIC       0x137D
-   EXT2_OLD_SUPER_MAGIC  0xEF51
-   EXT2_SUPER_MAGIC      0xEF53
-   EXT3_SUPER_MAGIC      0xEF53
-   EXT4_SUPER_MAGIC      0xEF53
-   HFS_SUPER_MAGIC       0x4244
-   HPFS_SUPER_MAGIC      0xF995E849
-   HUGETLBFS_MAGIC       0x958458f6
-   ISOFS_SUPER_MAGIC     0x9660
-   JFFS2_SUPER_MAGIC     0x72b6
-   JFS_SUPER_MAGIC       0x3153464a
-   MINIX_SUPER_MAGIC     0x137F /* orig. minix */
-   MINIX_SUPER_MAGIC2    0x138F /* 30 char minix */
-   MINIX2_SUPER_MAGIC    0x2468 /* minix V2 */
-   MINIX2_SUPER_MAGIC2   0x2478 /* minix V2, 30 char names */
-   MSDOS_SUPER_MAGIC     0x4d44
-   NCP_SUPER_MAGIC       0x564c
-   NFS_SUPER_MAGIC       0x6969
-   NTFS_SB_MAGIC         0x5346544e
-   OPENPROM_SUPER_MAGIC  0x9fa1
-   PROC_SUPER_MAGIC      0x9fa0
-   QNX4_SUPER_MAGIC      0x002f
-   REISERFS_SUPER_MAGIC  0x52654973
-   ROMFS_MAGIC           0x7275
-   SMB_SUPER_MAGIC       0x517B
-   SYSV2_SUPER_MAGIC     0x012FF7B6
-   SYSV4_SUPER_MAGIC     0x012FF7B5
-   TMPFS_MAGIC           0x01021994
-   UDF_SUPER_MAGIC       0x15013346
-   UFS_MAGIC             0x00011954
-   USBDEVICE_SUPER_MAGIC 0x9fa2
-   VXFS_SUPER_MAGIC      0xa501FCF5
-   XENIX_SUPER_MAGIC     0x012FF7B4
-   XFS_SUPER_MAGIC       0x58465342
-   _XIAFS_SUPER_MAGIC    0x012FD16D
-.fi
-.in
-.PP
-Nobody knows what
-.I f_fsid
-is supposed to contain (but see below).
-.PP
-Fields that are undefined for a particular file system are set to 0.
-.BR fstatfs ()
-returns the same information about an open file referenced by descriptor
-.IR fd .
-.SH "RETURN VALUE"
-On success, zero is returned.
-On error, \-1 is returned, and
-.I errno
-is set appropriately.
-.SH ERRORS
-.TP
-.B EACCES
-.RB ( statfs ())
-Search permission is denied for a component of the path prefix of
-.IR path .
-(See also
-.BR path_resolution (7).)
-.TP
-.B EBADF
-.RB ( fstatfs ())
-.I fd
-is not a valid open file descriptor.
-.TP
-.B EFAULT
-.I buf
-or
-.I path
-points to an invalid address.
-.TP
-.B EINTR
-This call was interrupted by a signal.
-.TP
-.B EIO
-An I/O error occurred while reading from the file system.
-.TP
-.B ELOOP
-.RB ( statfs ())
-Too many symbolic links were encountered in translating
-.IR path .
-.TP
-.B ENAMETOOLONG
-.RB ( statfs ())
-.I path
-is too long.
-.TP
-.B ENOENT
-.RB ( statfs ())
-The file referred to by
-.I path
-does not exist.
-.TP
-.B ENOMEM
-Insufficient kernel memory was available.
-.TP
-.B ENOSYS
-The file system does not support this call.
-.TP
-.B ENOTDIR
-.RB ( statfs ())
+struct statfs { /* when _DARWIN_FEATURE_64_BIT_INODE is defined */
+    uint32_t    f_bsize;        /* fundamental file system block size */ 
+    int32_t     f_iosize;       /* optimal transfer block size */ 
+    uint64_t    f_blocks;       /* total data blocks in file system */ 
+    uint64_t    f_bfree;        /* free blocks in fs */ 
+    uint64_t    f_bavail;       /* free blocks avail to non-superuser */ 
+    uint64_t    f_files;        /* total file nodes in file system */ 
+    uint64_t    f_ffree;        /* free file nodes in fs */ 
+    fsid_t      f_fsid;         /* file system id */ 
+    uid_t       f_owner;        /* user that mounted the filesystem */ 
+    uint32_t    f_type;         /* type of filesystem */ 
+    uint32_t    f_flags;        /* copy of mount exported flags */ 
+    uint32_t    f_fssubtype;    /* fs sub-type (flavor) */ 
+    char        f_fstypename[MFSTYPENAMELEN];   /* fs type name */ 
+    char        f_mntonname[MAXPATHLEN];        /* directory on which mounted */ 
+    char        f_mntfromname[MAXPATHLEN];      /* mounted filesystem */ 
+    uint32_t    f_reserved[8];  /* For future use */ 
+};
+.Ed
+.Pp
+Fields that are undefined for a particular file system are set to -1.
+The
+.Fn fstatfs
+routine returns the same information about an open file referenced by descriptor
+.Fa fd .
+.Sh FLAGS
+.Bl -tag -width MNT_UNKOWNPERMISSIONS
+These are some of the flags that may be present in the f_flags field. 
+.It Dv MNT_RDONLY
+A read-only filesystem
+.It Dv MNT_SYNCHRONOUS
+File system is written to synchronously
+.It Dv MNT_NOEXEC
+Can't exec from filesystem
+.It Dv MNT_NOSUID
+Setuid bits are not honored on this filesystem
+.It Dv MNT_NODEV
+Don't interpret special files
+.It Dv MNT_UNION
+Union with underlying filesysten
+.It Dv MNT_ASYNC
+File system written to asynchronously
+.It Dv MNT_EXPORTED
+File system is exported
+.It Dv MNT_LOCAL
+File system is stored locally
+.It Dv MNT_QUOTA
+Quotas are enabled on this file system
+.It Dv MNT_ROOTFS
+This file system is the root of the file system
+.It Dv MNT_DOVOLFS
+File system supports volfs
+.It Dv MNT_DONTBROWSE
+File system is not appropriate path to user data
+.It Dv MNT_UNKNOWNPERMISSIONS
+VFS will ignore ownership information on filesystem objects
+.It Dv MNT_AUTOMOUNTED
+File system was mounted by automounter
+.It Dv MNT_JOURNALED
+File system is journaled
+.It Dv MNT_DEFWRITE
+File system should defer writes
+.It Dv MNT_MULTILABEL
+MAC support for individual labels
+.El
+.Sh CAVEATS
+In Mac OS X versions before 10.4, f_iosize is 4096. On these older
+systems, use MAXBSIZE instead.
+.Sh RETURN VALUES
+Upon successful completion, a value of 0 is returned.
+Otherwise, -1 is returned and the global variable
+.Va errno
+is set to indicate the error.
+.Sh ERRORS
+The
+.Fn statfs
+routine fails if one or more of the following are true:
+.Bl -tag -width Er
+.It Bq Er ENOTDIR
 A component of the path prefix of
-.I path
+.Fa Path
 is not a directory.
-.TP
-.B EOVERFLOW
-Some values were too large to be represented in the returned struct.
-.SH "CONFORMING TO"
-Linux-specific.
-The Linux
-.BR statfs ()
-was inspired by the 4.4BSD one
-(but they do not use the same structure).
-.SH NOTES
-The kernel has system calls
-.BR statfs (),
-.BR fstatfs (),
-.BR statfs64 (),
+.It Bq Er ENAMETOOLONG
+The length of a component of
+.Fa path
+exceeds 
+.Dv {NAME_MAX}
+characters, or the length of
+.Fa path
+exceeds 
+.Dv {PATH_MAX}
+characters.
+.It Bq Er ENOENT
+The file or directory referred to by
+.Fa path
+does not exist.
+.It Bq Er EACCES
+Search permission is denied for a component of the path prefix of
+.Fa path .
+.It Bq Er ELOOP
+Too many symbolic links were encountered in translating
+.Fa path .
+.It Bq Er EFAULT
+.Fa Buf
+or
+.Fa path
+points to an invalid address.
+.It Bq Er EIO
+An
+.Tn I/O
+error occurred while reading from or writing to the file system.
+.El
+.Pp
+The
+.Fn fstatfs
+routine fails if one or more of the following are true:
+.Bl -tag -width Er
+.It Bq Er EBADF
+.Fa fd
+is not a valid open file descriptor.
+.It Bq Er EFAULT
+.Fa Buf
+points to an invalid address.
+.It Bq Er EIO
+An
+.Tn I/O
+error occurred while reading from or writing to the file system.
+.El
+.Sh TRANSITIONAL DESCRIPTION (NOW DEPRECATED)
+The
+.Fa statfs64
 and
-.BR fstatfs64 ()
-to support this library call.
-
-Some systems only have \fI<sys/vfs.h>\fP, other systems also have
-\fI<sys/statfs.h>\fP, where the former includes the latter.
-So it seems
-including the former is the best choice.
-
-LSB has deprecated the library calls
-.BR statfs ()
-and
-.BR fstatfs ()
-and tells us to use
-.BR statvfs (2)
-and
-.BR fstatvfs (2)
-instead.
-.SS The f_fsid field
-Solaris, Irix and POSIX have a system call
-.BR statvfs (2)
-that returns a
-.I "struct statvfs"
-(defined in
-.IR <sys/statvfs.h> )
-containing an
-.I "unsigned long"
-.IR f_fsid .
-Linux, SunOS, HP-UX, 4.4BSD have a system call
-.BR statfs ()
-that returns a
-.I "struct statfs"
-(defined in
-.IR <sys/vfs.h> )
-containing a
-.I fsid_t
-.IR f_fsid ,
-where
-.I fsid_t
-is defined as
-.IR "struct { int val[2]; }" .
-The same holds for FreeBSD, except that it uses the include file
-.IR <sys/mount.h> .
-
-The general idea is that
-.I f_fsid
-contains some random stuff such that the pair
-.RI ( f_fsid , ino )
-uniquely determines a file.
-Some operating systems use (a variation on) the device number, or the device number
-combined with the file-system type.
-Several OSes restrict giving out the
-.I f_fsid
-field to the superuser only (and zero it for unprivileged users),
-because this field is used in the filehandle of the file system
-when NFS-exported, and giving it out is a security concern.
-.LP
-Under some OSes the
-.I fsid
-can be used as second argument to the
-.BR sysfs ()
-system call.
-.SH "SEE ALSO"
-.BR stat (2),
-.BR statvfs (2),
-.BR path_resolution (7)
-.SH COLOPHON
-This page is part of release 3.27 of the Linux
-.I man-pages
-project.
-A description of the project,
-and information about reporting bugs,
-can be found at
-http://www.kernel.org/doc/man-pages/.
+.Fa fstatfs64
+routines are equivalent to their corresponding non-64-suffixed routine,
+when 64-bit inodes are in effect.
+They were added before there was support for the symbol variants, and so are
+now deprecated.
+Instead of using these, set the
+.Dv _DARWIN_USE_64_BIT_INODE
+macro before including header files to force 64-bit inode support.
+.Pp
+The
+.Fa statfs64
+structure used by these deprecated routines is the same as the
+.Fa statfs
+structure when 64-bit inodes are in effect (see above).
+.Sh HISTORY
+The
+.Fn statfs
+function first appeared in 4.4BSD. The
+.Fn statfs64
+and 
+.Fn fstatfs64
+first appeared in Max OS X 10.5 (Leopard) and are now deprecated
+in favor of the corresponding symbol variants.

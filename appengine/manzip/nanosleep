@@ -1,220 +1,115 @@
-.\" Hey Emacs! This file is -*- nroff -*- source.
+.\" $FreeBSD: src/lib/libc/sys/nanosleep.2,v 1.8.2.4 2001/12/14 18:34:01 ru Exp $
+.\"	$OpenBSD: nanosleep.2,v 1.1 1997/04/20 20:56:20 tholo Exp $
+.\"	$NetBSD: nanosleep.2,v 1.1 1997/04/17 18:12:02 jtc Exp $
 .\"
-.\" Copyright (C) Markus Kuhn, 1996
-.\" and Copyright (C) Linux Foundation, 2008, written by Michael Kerrisk
-.\"     <mtk.manpages@gmail.com>
+.\" Copyright (c) 1986, 1991, 1993
+.\"	The Regents of the University of California.  All rights reserved.
 .\"
-.\" This is free documentation; you can redistribute it and/or
-.\" modify it under the terms of the GNU General Public License as
-.\" published by the Free Software Foundation; either version 2 of
-.\" the License, or (at your option) any later version.
+.\" Redistribution and use in source and binary forms, with or without
+.\" modification, are permitted provided that the following conditions
+.\" are met:
+.\" 1. Redistributions of source code must retain the above copyright
+.\"    notice, this list of conditions and the following disclaimer.
+.\" 2. Redistributions in binary form must reproduce the above copyright
+.\"    notice, this list of conditions and the following disclaimer in the
+.\"    documentation and/or other materials provided with the distribution.
+.\" 3. All advertising materials mentioning features or use of this software
+.\"    must display the following acknowledgement:
+.\"	This product includes software developed by the University of
+.\"	California, Berkeley and its contributors.
+.\" 4. Neither the name of the University nor the names of its contributors
+.\"    may be used to endorse or promote products derived from this software
+.\"    without specific prior written permission.
 .\"
-.\" The GNU General Public License's references to "object code"
-.\" and "executables" are to be interpreted as the output of any
-.\" document formatting or typesetting system, including
-.\" intermediate and printed output.
+.\" THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND
+.\" ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+.\" IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+.\" ARE DISCLAIMED.  IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS BE LIABLE
+.\" FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+.\" DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+.\" OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+.\" HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+.\" LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+.\" OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+.\" SUCH DAMAGE.
 .\"
-.\" This manual is distributed in the hope that it will be useful,
-.\" but WITHOUT ANY WARRANTY; without even the implied warranty of
-.\" MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-.\" GNU General Public License for more details.
+.\"     @(#)sleep.3	8.1 (Berkeley) 6/4/93
 .\"
-.\" You should have received a copy of the GNU General Public
-.\" License along with this manual; if not, write to the Free
-.\" Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111,
-.\" USA.
-.\"
-.\" 1996-04-10  Markus Kuhn <mskuhn@cip.informatik.uni-erlangen.de>
-.\"             First version written
-.\" Modified, 2004-10-24, aeb
-.\" 2008-06-24, mtk
-.\"     Minor rewrites of some parts.
-.\"     NOTES: describe case where clock_nanosleep() can be preferable.
-.\"     NOTES: describe CLOCK_REALTIME versus CLOCK_NANOSLEEP
-.\"     Replace crufty discussion of HZ with a pointer to time(7).
-.TH NANOSLEEP 2 2009-01-19 "Linux" "Linux Programmer's Manual"
-.SH NAME
-nanosleep \- high-resolution sleep
-.SH SYNOPSIS
-.B #include <time.h>
-.sp
-.BI "int nanosleep(const struct timespec *" req ", struct timespec *" rem );
-.sp
-.in -4n
-Feature Test Macro Requirements for glibc (see
-.BR feature_test_macros (7)):
-.in
-.sp
-.BR nanosleep ():
-_POSIX_C_SOURCE\ >=\ 199309L
-.SH DESCRIPTION
-.BR nanosleep ()
-suspends the execution of the calling thread
-until either at least the time specified in
-.IR *req
-has elapsed, or the delivery of a signal
-that triggers the invocation of a handler in the calling thread or
-that terminates the process.
-
-If the call is interrupted by a signal handler,
-.BR nanosleep ()
-returns \-1, sets \fIerrno\fP to
-.BR EINTR ,
-and writes the remaining time into the structure pointed to by
-.I rem
-unless
-.I rem
-is NULL.
-The value of
-.I *rem
-can then be used to call
-.BR nanosleep ()
-again and complete the specified pause (but see NOTES).
-
-The structure
-.I timespec
-is used to specify intervals of time with nanosecond precision.
-It is defined as follows:
-.sp
-.in +4n
-.nf
-struct timespec {
-    time_t tv_sec;        /* seconds */
-    long   tv_nsec;       /* nanoseconds */
-};
-.fi
-.in
-.PP
-The value of the nanoseconds field must be in the range 0 to 999999999.
-
-Compared to
-.BR sleep  (3)
-and
-.BR usleep (3),
-.BR nanosleep ()
-has the following advantages:
-it provides a higher resolution for specifying the sleep interval;
-POSIX.1 explicitly specifies that it
-does not interact with signals;
-and it makes the task of resuming a sleep that has been
-interrupted by a signal handler easier.
-.SH "RETURN VALUE"
-On successfully sleeping for the requested interval,
-.BR nanosleep ()
-returns 0.
-If the call is interrupted by a signal handler or encounters an error,
-then it returns \-1, with
-.I errno
-set to indicate the error.
-.SH ERRORS
-.TP
-.B EFAULT
-Problem with copying information from user space.
-.TP
-.B EINTR
-The pause has been interrupted by a signal that was
-delivered to the thread.
-The remaining sleep time has been written
-into \fI*rem\fP so that the thread can easily call
-.BR nanosleep ()
-again and continue with the pause.
-.TP
-.B EINVAL
-The value in the
-.I tv_nsec
-field was not in the range 0 to 999999999 or
-.I tv_sec
-was negative.
-.SH "CONFORMING TO"
-POSIX.1-2001.
-.SH NOTES
-If the interval specified in
-.I req
-is not an exact multiple of the granularity underlying clock (see
-.BR time (7)),
-then the interval will be rounded up to the next multiple.
-Furthermore, after the sleep completes, there may still be a delay before
-the CPU becomes free to once again execute the calling thread.
-
-The fact that
-.BR nanosleep ()
-sleeps for a relative interval can be problematic if the call
-is repeatedly restarted after being interrupted by signals,
-since the time between the interruptions and restarts of the call
-will lead to drift in the time when the sleep finally completes.
-This problem can be avoided by using
-.BR clock_nanosleep (2)
-with an absolute time value.
-
-POSIX.1 specifies that
-.BR nanosleep ()
-should measure time against the
-.B CLOCK_REALTIME
-clock.
-However, Linux measures the time using the
-.B CLOCK_MONOTONIC
-clock.
-.\" See also http://thread.gmane.org/gmane.linux.kernel/696854/
-.\" Subject: nanosleep() uses CLOCK_MONOTONIC, should be CLOCK_REALTIME?
-.\" Date: 2008-06-22 07:35:41 GMT
-This probably does not matter, since the POSIX.1 specification for
-.BR clock_settime ()
-says that discontinuous changes in
-.B CLOCK_REALTIME
-should not affect
-.BR nanosleep ():
-.RS
-.PP
-Setting the value of the
-.B CLOCK_REALTIME
-clock via
-.BR clock_settime ()
-shall
-have no effect on threads that are blocked waiting for a relative time
-service based upon this clock, including the
-.BR nanosleep ()
-function; ...
-Consequently, these time services shall expire when the requested relative
-interval elapses, independently of the new or old value of the clock.
-.RE
-.SS "Old behavior"
-In order to support applications requiring much more precise pauses
-(e.g., in order to control some time-critical hardware),
-.BR nanosleep ()
-would handle pauses of up to 2\ ms by busy waiting with microsecond
-precision when called from a thread scheduled under a real-time policy
-like
-.B SCHED_FIFO
+.Dd April 17, 1997
+.Dt NANOSLEEP 2
+.Os
+.Sh NAME
+.Nm nanosleep
+.Nd suspend thread execution for an interval measured in nanoseconds
+.Sh LIBRARY
+.Lb libc
+.Sh SYNOPSIS
+.In time.h
+.Ft int
+.Fo nanosleep
+.Fa "const struct timespec *rqtp"
+.Fa "struct timespec *rmtp"
+.Fc
+.Sh DESCRIPTION
+The
+.Fn nanosleep
+function causes the calling thread to sleep
+for the amount of time specified in
+.Fa rqtp
+(the actual time slept may be longer, due to system latencies
+and possible limitations in the timer resolution of the hardware).
+An unmasked signal will
+cause
+.Fn nanosleep
+to terminate the sleep early, regardless of the
+.Dv SA_RESTART
+value on the interrupting signal.
+.Sh RETURN VALUES
+If
+.Fn nanosleep
+returns because the requested time has elapsed,
+the value returned will be zero.
+.Pp
+If
+.Fn nanosleep
+returns due to the delivery of a signal, the value returned
+will be the -1, and the global variable
+.Va errno
+will be set to indicate the interruption.
+If
+.Fa rmtp
+is
+.Pf non- Dv NULL ,
+the timespec structure it references is updated to contain the
+unslept amount (the request time minus the time actually slept).
+.Sh ERRORS
+The
+.Fn nanosleep
+call fails if:
+.Bl -tag -width Er
+.It Bq Er EFAULT
+Either
+.Fa rqtp
 or
-.BR SCHED_RR .
-This special extension was removed in kernel 2.5.39,
-hence is still present in
-current 2.4 kernels, but not in 2.6 kernels.
-.SH BUGS
-In Linux 2.4, if
-.BR nanosleep ()
-is stopped by a signal (e.g.,
-.BR SIGTSTP ),
-then the call fails with the error
-.B EINTR
-after the thread is resumed by a
-.B SIGCONT
-signal.
-If the system call is subsequently restarted,
-then the time that the thread spent in the stopped state is
-\fInot\fP counted against the sleep interval.
-.SH "SEE ALSO"
-.BR clock_nanosleep (2),
-.BR sched_setscheduler (2),
-.BR sleep (3),
-.BR timer_create (2),
-.BR usleep (3),
-.BR time (7)
-.SH COLOPHON
-This page is part of release 3.27 of the Linux
-.I man-pages
-project.
-A description of the project,
-and information about reporting bugs,
-can be found at
-http://www.kernel.org/doc/man-pages/.
+.Fa rmtp
+points to memory that is not a valid part of the process
+address space.
+.It Bq Er EINTR
+.Fn nanosleep
+was interrupted by the delivery of a signal.
+.It Bq Er EINVAL
+.Fa rqtp
+specified a nanosecond value less than zero
+or greater than or equal to 1000 million.
+.It Bq Er ENOSYS
+.Fn nanosleep
+is not supported by this implementation.
+.El
+.Sh SEE ALSO
+.Xr sigsuspend 2 ,
+.Xr sleep 3
+.Sh STANDARDS
+The
+.Fn nanosleep
+function conforms to
+.St -p1003.1b-93 .

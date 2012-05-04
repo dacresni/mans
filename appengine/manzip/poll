@@ -1,345 +1,226 @@
-.\" Hey Emacs! This file is -*- nroff -*- source.
 .\"
-.\" Copyright (C) 1997 Andries Brouwer (aeb@cwi.nl)
-.\" and Copyright (C) 2006, Michael Kerrisk <mtk.manpages@gmail.com>
+.\" Copyright (c) 2005 Apple Computer, Inc. All rights reserved.
 .\"
-.\" Permission is granted to make and distribute verbatim copies of this
-.\" manual provided the copyright notice and this permission notice are
-.\" preserved on all copies.
+.\" @APPLE_LICENSE_HEADER_START@
 .\"
-.\" Permission is granted to copy and distribute modified versions of this
-.\" manual under the conditions for verbatim copying, provided that the
-.\" entire resulting derived work is distributed under the terms of a
-.\" permission notice identical to this one.
+.\" This file contains Original Code and/or Modifications of Original Code
+.\" as defined in and that are subject to the Apple Public Source License
+.\" Version 2.0 (the 'License'). You may not use this file except in
+.\" compliance with the License. Please obtain a copy of the License at
+.\" http://www.opensource.apple.com/apsl/ and read it before using this
+.\" file.
 .\"
-.\" Since the Linux kernel and libraries are constantly changing, this
-.\" manual page may be incorrect or out-of-date.  The author(s) assume no
-.\" responsibility for errors or omissions, or for damages resulting from
-.\" the use of the information contained herein.  The author(s) may not
-.\" have taken the same level of care in the production of this manual,
-.\" which is licensed free of charge, as they might when working
-.\" professionally.
+.\" The Original Code and all software distributed under the License are
+.\" distributed on an 'AS IS' basis, WITHOUT WARRANTY OF ANY KIND, EITHER
+.\" EXPRESS OR IMPLIED, AND APPLE HEREBY DISCLAIMS ALL SUCH WARRANTIES,
+.\" INCLUDING WITHOUT LIMITATION, ANY WARRANTIES OF MERCHANTABILITY,
+.\" FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT OR NON-INFRINGEMENT.
+.\" Please see the License for the specific language governing rights and
+.\" limitations under the License.
 .\"
-.\" Formatted or processed versions of this manual, if unaccompanied by
-.\" the source, must acknowledge the copyright and authors of this work.
+.\" @APPLE_LICENSE_HEADER_END@
 .\"
-.\" Additions from Richard Gooch <rgooch@atnf.CSIRO.AU> and aeb, 971207
-.\" 2006-03-13, mtk, Added ppoll() + various other rewordings
-.\" 2006-07-01, mtk, Added POLLRDHUP + various other wording and
-.\"	formatting changes.
 .\"
-.TH POLL 2 2010-09-20 "Linux" "Linux Programmer's Manual"
-.SH NAME
-poll, ppoll \- wait for some event on a file descriptor
-.SH SYNOPSIS
-.nf
-.B #include <poll.h>
-.sp
-.BI "int poll(struct pollfd *" fds ", nfds_t " nfds ", int " timeout );
-.sp
-.B #define _GNU_SOURCE
-.B #include <poll.h>
-.sp
-.BI "int ppoll(struct pollfd *" fds ", nfds_t " nfds ", "
-.BI "        const struct timespec *" timeout_ts ", const sigset_t *" sigmask );
-.fi
-.SH DESCRIPTION
-.BR poll ()
-performs a similar task to
-.BR select (2):
-it waits for one of a set of file descriptors to become ready
-to perform I/O.
-
-The set of file descriptors to be monitored is specified in the
-.I fds
-argument, which is an array of structures of the following form:
-.in +4n
-.nf
-
+.\" Copyright (c) 1996 Charles M. Hannum.  All rights reserved.
+.\"
+.\" Redistribution and use in source and binary forms, with or without
+.\" modification, are permitted provided that the following conditions
+.\" are met:
+.\" 1. Redistributions of source code must retain the above copyright
+.\"    notice, this list of conditions and the following disclaimer.
+.\" 2. Redistributions in binary form must reproduce the above copyright
+.\"    notice, this list of conditions and the following disclaimer in the
+.\"    documentation and/or other materials provided with the distribution.
+.\" 3. All advertising materials mentioning features or use of this software
+.\"    must display the following acknowledgement:
+.\"	This product includes software developed by Charles M. Hannum.
+.\" 4. The name of the author may not be used to endorse or promote products
+.\"    derived from this software without specific prior written permission.
+.\"
+.\" THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
+.\" IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+.\" OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+.\" IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT,
+.\" INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+.\" NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+.\" DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+.\" THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+.\" (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+.\" THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+.\"
+.Dd February 27, 2005
+.Dt POLL 2
+.Os
+.Sh NAME
+.Nm poll
+.Nd synchronous I/O multiplexing
+.Sh SYNOPSIS
+.In poll.h
+.Ft int
+.Fo poll
+.Fa "struct pollfd fds[]"
+.Fa "nfds_t nfds"
+.Fa "int timeout"
+.Fc
+.Sh DESCRIPTION
+.Fn Poll
+examines a set of file descriptors
+to see if some of them are ready for I/O
+or if certain events have occurred on them.
+The
+.Fa fds
+argument is a pointer to an array of pollfd structures,
+as defined in
+.Aq Pa poll.h
+(shown below).  The
+.Fa nfds
+argument specifies the size of the
+.Fa fds
+array.
+.Bd -literal
 struct pollfd {
-    int   fd;         /* file descriptor */
-    short events;     /* requested events */
-    short revents;    /* returned events */
+    int    fd;       /* file descriptor */
+    short  events;   /* events to look for */
+    short  revents;  /* events returned */
 };
-.in
-.fi
-.PP
-The caller should specify the number of items in the
-.I fds
-array in
-.IR nfds .
-
-The field
-.I fd
-contains a file descriptor for an open file.
-
-The field
-.I events
-is an input parameter, a bit mask specifying the events the application
-is interested in.
-
-The field
-.I revents
-is an output parameter, filled by the kernel with the events that
-actually occurred.
-The bits returned in
-.I revents
-can include any of those specified in
-.IR events ,
-or one of the values
-.BR POLLERR ,
-.BR POLLHUP ,
-or
-.BR POLLNVAL .
-(These three bits are meaningless in the
-.I events
-field, and will be set in the
-.I revents
-field whenever the corresponding condition is true.)
-
-If none of the events requested (and no error) has occurred for any
-of the file descriptors, then
-.BR poll ()
-blocks until one of the events occurs.
-
-The
-.I timeout
-argument specifies an upper limit on the time for which
-.BR poll ()
-will block, in milliseconds.
-Specifying a negative value in
-.I timeout
-means an infinite timeout.
-
-The bits that may be set/returned in
-.I events
+.Ed
+.Pp
+The fields of
+.Fa struct pollfd
+are as follows:
+.Bl -tag -width XXXPOLLWRNORM
+.It fd
+File descriptor to poll.
+.It events
+Events to poll for.  (See below.)
+.It revents
+Events which may occur or have occurred.  (See below.)
+.El
+.Pp
+The event bitmasks in
+.Fa events
 and
-.I revents
-are defined in \fI<poll.h>\fP:
-.RS
-.TP
-.B POLLIN
-There is data to read.
-.TP
-.B POLLPRI
-There is urgent data to read (e.g., out-of-band data on TCP socket;
-pseudo-terminal master in packet mode has seen state change in slave).
-.TP
-.B POLLOUT
-Writing now will not block.
-.TP
-.BR POLLRDHUP " (since Linux 2.6.17)"
-Stream socket peer closed connection,
-or shut down writing half of connection.
-The
-.B _GNU_SOURCE
-feature test macro must be defined
-(before including
-.I any
-header files)
-in order to obtain this definition.
-.TP
-.B POLLERR
-Error condition (output only).
-.TP
-.B POLLHUP
-Hang up (output only).
-.TP
-.B POLLNVAL
-Invalid request:
-.I fd
-not open (output only).
-.RE
-.PP
-When compiling with
-.B _XOPEN_SOURCE
-defined, one also has the following,
-which convey no further information beyond the bits listed above:
-.RS
-.TP
-.B POLLRDNORM
-Equivalent to
-.BR POLLIN .
-.TP
-.B POLLRDBAND
-Priority band data can be read (generally unused on Linux).
-.\" POLLRDBAND is used in the DECnet protocol.
-.TP
-.B POLLWRNORM
-Equivalent to
-.BR POLLOUT .
-.TP
-.B POLLWRBAND
-Priority data may be written.
-.RE
-.PP
-Linux also knows about, but does not use
-.BR POLLMSG .
-.SS ppoll()
-The relationship between
-.BR poll ()
-and
-.BR ppoll ()
-is analogous to the relationship between
-.BR select (2)
-and
-.BR pselect (2):
-like
-.BR pselect (2),
-.BR ppoll ()
-allows an application to safely wait until either a file descriptor
-becomes ready or until a signal is caught.
-.PP
-Other than the difference in the precision of the
-timeout argument, the following
-.BR ppoll ()
-call:
-.nf
-
-    ready = ppoll(&fds, nfds, timeout_ts, &sigmask);
-
-.fi
-is equivalent to
-.I atomically
-executing the following calls:
-.nf
-
-    sigset_t origmask;
-    int timeout;
-
-    timeout = (timeout_ts == NULL) ? -1 :
-              (timeout_ts.tv_sec * 1000 + timeout_ts.tv_nsec / 1000000);
-    sigprocmask(SIG_SETMASK, &sigmask, &origmask);
-    ready = poll(&fds, nfds, timeout);
-    sigprocmask(SIG_SETMASK, &origmask, NULL);
-.fi
-.PP
-See the description of
-.BR pselect (2)
-for an explanation of why
-.BR ppoll ()
-is necessary.
-
-If the
-.I sigmask
-argument is specified as NULL, then
-no signal mask manipulation is performed
-(and thus
-.BR ppoll ()
-differs from
-.BR poll ()
-only in the precision of the timeout argument).
-
-The
-.I timeout_ts
-argument specifies an upper limit on the amount of time that
-.BR ppoll ()
-will block.
-This argument is a pointer to a structure of the following form:
-.in +4n
-.nf
-
-struct timespec {
-    long    tv_sec;         /* seconds */
-    long    tv_nsec;        /* nanoseconds */
-};
-.fi
-.in
-
+.Fa revents
+have the following bits:
+.Bl -tag -width XXXPOLLWRNORM
+.\" ===========
+.It POLLERR
+An exceptional condition has occurred on the device or socket.
+This flag is output only, and ignored if present in the input
+.Fa events
+bitmask.
+.\" ===========
+.It POLLHUP
+The device or socket has been disconnected.
+This flag is output only,
+and ignored if present in the input
+.Fa events
+bitmask.
+Note that POLLHUP and POLLOUT
+are mutually exclusive and should never be present in the
+.Fa revents
+bitmask at the same time.
+.\" ===========
+.It POLLIN
+Data other than high priority data may be read without blocking.
+This is equivalent to ( POLLRDNORM | POLLRDBAND ).
+.\" ===========
+.It POLLNVAL
+The file descriptor is not open.
+This flag is output only, and ignored if present in the input
+.Fa events
+bitmask.
+.\" ===========
+.It POLLOUT
+Normal data may be written without blocking.
+This is equivalent to POLLWRNORM.
+.\" ===========
+.It POLLPRI
+High priority data may be read without blocking.
+.\" ===========
+.It POLLRDBAND
+Priority data may be read without blocking.
+.\" ===========
+.It POLLRDNORM
+Normal data may be read without blocking.
+.\" ===========
+.It POLLWRBAND
+Priority data may be written without blocking.
+.\" ===========
+.It POLLWRNORM
+Normal data may be written without blocking.
+.El
+.Pp
+The distinction between normal, priority, and high-priority data
+is specific to particular file types or devices.
+.Pp
 If
-.I timeout_ts
-is specified as NULL, then
-.BR ppoll ()
-can block indefinitely.
-.SH "RETURN VALUE"
-On success, a positive number is returned; this is
-the number of structures which have nonzero
-.I revents
-fields (in other words, those descriptors with events or errors reported).
-A value of 0 indicates that the call timed out and no file
-descriptors were ready.
-On error, \-1 is returned, and
-.I errno
-is set appropriately.
-.SH ERRORS
-.TP
-.B EFAULT
-The array given as argument was not contained in the calling program's
-address space.
-.TP
-.B EINTR
-A signal occurred before any requested event; see
-.BR signal (7).
-.TP
-.B EINVAL
+.Fa timeout
+is greater than zero,
+it specifies a maximum interval (in milliseconds)
+to wait for any file descriptor to become ready.
+If
+.Fa timeout
+is zero, then
+.Fn poll
+will return without blocking. If the value of
+.Fa timeout
+is -1, the poll blocks indefinitely.
+.Sh RETURN VALUES
+.Fn Poll
+returns the number of descriptors that are ready for I/O,
+or -1 if an error occurred.
+If the time limit expires,
+.Fn poll
+returns 0.
+If
+.Fn poll
+returns with an error,
+including one due to an interrupted call,
+the
+.Fa fds
+array will be unmodified and the global variable
+.Va errno
+will be set to indicate the error.
+.Sh ERRORS
+.Fn Poll
+will fail if:
+.Bl -tag -width Er
+.\" ===========
+.It Bq Er EAGAIN
+Allocation of internal data structures fails.
+A subsequent request may succeed.
+.\" ===========
+.It Bq Er EFAULT
+.Fa Fds
+points outside the process's allocated address space.
+.\" ===========
+.It Bq Er EINTR
+A signal is delivered before the time limit expires
+and before any of the selected events occurs.
+.\" ===========
+.It Bq Er EINVAL
 The
-.I nfds
-value exceeds the
-.B RLIMIT_NOFILE
-value.
-.TP
-.B ENOMEM
-There was no space to allocate file descriptor tables.
-.SH VERSIONS
+.Fa nfds
+argument is greater than OPEN_MAX or the
+.Fa timeout
+argument is less than -1.
+.El
+.Sh BUGS
 The
-.BR poll ()
-system call was introduced in Linux 2.1.23.
+.Fn poll
+system call currently does not support devices.
+.Sh SEE ALSO
+.Xr accept 2 ,
+.Xr connect 2 ,
+.Xr kevent 2 ,
+.Xr read 2 ,
+.Xr recv 2 ,
+.Xr select 2 ,
+.Xr send 2 ,
+.Xr write 2
+.Sh HISTORY
 The
-.BR poll ()
-library call was introduced in libc 5.4.28
-(and provides emulation using select(2) if your kernel does not
-have a
-.BR poll ()
-system call).
-
-The
-.BR ppoll ()
-system call was added to Linux in kernel 2.6.16.
-The
-.BR ppoll ()
-library call was added in glibc 2.4.
-.SH "CONFORMING TO"
-.BR poll ()
-conforms to POSIX.1-2001.
-.BR ppoll ()
-is Linux-specific.
-.\" NetBSD 3.0 has a pollts() which is like Linux ppoll().
-.SH NOTES
-Some implementations define the nonstandard constant
-.B INFTIM
-with the value \-1 for use as a
-.IR timeout
-for
-.BR poll ().
-This constant is not provided in glibc.
-.SS "Linux Notes"
-The Linux
-.BR ppoll ()
-system call modifies its
-.I timeout_ts
-argument.
-However, the glibc wrapper function hides this behavior
-by using a local variable for the timeout argument that
-is passed to the system call.
-Thus, the glibc
-.BR ppoll ()
-function does not modify its
-.I timeout_ts
-argument.
-.SH BUGS
-See the discussion of spurious readiness notifications under the
-BUGS section of
-.BR select (2).
-.SH "SEE ALSO"
-.BR select (2),
-.BR select_tut (2),
-.BR feature_test_macros (7),
-.BR time (7)
-.SH COLOPHON
-This page is part of release 3.27 of the Linux
-.I man-pages
-project.
-A description of the project,
-and information about reporting bugs,
-can be found at
-http://www.kernel.org/doc/man-pages/.
+.Fn poll
+function call appeared in
+.At V .

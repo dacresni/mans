@@ -1,139 +1,132 @@
-.\" Hey Emacs! This file is -*- nroff -*- source.
+.\"	$NetBSD: close.2,v 1.5 1995/02/27 12:32:14 cgd Exp $
 .\"
-.\" This manpage is Copyright (C) 1992 Drew Eckhardt;
-.\"                               1993 Michael Haardt, Ian Jackson.
+.\" Copyright (c) 1980, 1991, 1993, 1994
+.\"	The Regents of the University of California.  All rights reserved.
 .\"
-.\" Permission is granted to make and distribute verbatim copies of this
-.\" manual provided the copyright notice and this permission notice are
-.\" preserved on all copies.
+.\" Redistribution and use in source and binary forms, with or without
+.\" modification, are permitted provided that the following conditions
+.\" are met:
+.\" 1. Redistributions of source code must retain the above copyright
+.\"    notice, this list of conditions and the following disclaimer.
+.\" 2. Redistributions in binary form must reproduce the above copyright
+.\"    notice, this list of conditions and the following disclaimer in the
+.\"    documentation and/or other materials provided with the distribution.
+.\" 3. All advertising materials mentioning features or use of this software
+.\"    must display the following acknowledgement:
+.\"	This product includes software developed by the University of
+.\"	California, Berkeley and its contributors.
+.\" 4. Neither the name of the University nor the names of its contributors
+.\"    may be used to endorse or promote products derived from this software
+.\"    without specific prior written permission.
 .\"
-.\" Permission is granted to copy and distribute modified versions of this
-.\" manual under the conditions for verbatim copying, provided that the
-.\" entire resulting derived work is distributed under the terms of a
-.\" permission notice identical to this one.
+.\" THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND
+.\" ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+.\" IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+.\" ARE DISCLAIMED.  IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS BE LIABLE
+.\" FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+.\" DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+.\" OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+.\" HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+.\" LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+.\" OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+.\" SUCH DAMAGE.
 .\"
-.\" Since the Linux kernel and libraries are constantly changing, this
-.\" manual page may be incorrect or out-of-date.  The author(s) assume no
-.\" responsibility for errors or omissions, or for damages resulting from
-.\" the use of the information contained herein.  The author(s) may not
-.\" have taken the same level of care in the production of this manual,
-.\" which is licensed free of charge, as they might when working
-.\" professionally.
+.\"     @(#)close.2	8.2 (Berkeley) 4/19/94
 .\"
-.\" Formatted or processed versions of this manual, if unaccompanied by
-.\" the source, must acknowledge the copyright and authors of this work.
-.\"
-.\" Modified Wed Jul 21 22:40:25 1993 by Rik Faith <faith@cs.unc.edu>
-.\" Modified Sat Feb 18 15:27:48 1995 by Michael Haardt
-.\" Modified Sun Apr 14 11:40:50 1996 by Andries Brouwer <aeb@cwi.nl>:
-.\"   corrected description of effect on locks (thanks to
-.\"   Tigran Aivazian <tigran@sco.com>).
-.\" Modified Fri Jan 31 16:21:46 1997 by Eric S. Raymond <esr@thyrsus.com>
-.\" Modified 2000-07-22 by Nicolás Lichtmaier <nick@debian.org>
-.\"   added note about close(2) not guaranteeing that data is safe on close.
-.\"
-.TH CLOSE 2 2007-12-28 "Linux" "Linux Programmer's Manual"
-.SH NAME
-close \- close a file descriptor
-.SH SYNOPSIS
-.nf
-.B #include <unistd.h>
-.sp
-.BI "int close(int " fd );
-.fi
-.SH DESCRIPTION
-.BR close ()
-closes a file descriptor, so that it no longer refers to any file and
-may be reused.
-Any record locks (see
-.BR fcntl (2))
-held on the file it was associated with,
-and owned by the process, are removed (regardless of the file
-descriptor that was used to obtain the lock).
-.PP
-If
-.I fd
-is the last file descriptor referring to the underlying
-open file description (see
-.BR open (2)),
-the resources associated with the open file description are freed;
-if the descriptor was the last reference to a file which has been
-removed using
-.BR unlink (2)
-the file is deleted.
-.SH "RETURN VALUE"
-.BR close ()
-returns zero on success.
-On error, \-1 is returned, and
-.I errno
-is set appropriately.
-.SH ERRORS
-.TP
-.B EBADF
-.I fd
-isn't a valid open file descriptor.
-.TP
-.B EINTR
+.Dd April 19, 1994
+.Dt CLOSE 2
+.Os BSD 4
+.Sh NAME
+.Nm close
+.Nd delete a descriptor
+.Sh SYNOPSIS
+.Fd #include <unistd.h>
+.Ft int
+.Fo close
+.Fa "int fildes"
+.Fc
+.Sh DESCRIPTION
 The
-.BR close ()
-call was interrupted by a signal; see
-.BR signal (7).
-.TP
-.B EIO
-An I/O error occurred.
-.SH "CONFORMING TO"
-SVr4, 4.3BSD, POSIX.1-2001.
-.\" SVr4 documents an additional ENOLINK error condition.
-.SH NOTES
-Not checking the return value of
-.BR close ()
-is a common but nevertheless
-serious programming error.
-It is quite possible that errors on a
-previous
-.BR write (2)
-operation are first reported at the final
-.BR close ().
-Not checking the return value when closing the file may lead to
-silent loss of data.
-This can especially be observed with NFS
-and with disk quota.
-.PP
-A successful close does not guarantee that the data has been successfully
-saved to disk, as the kernel defers writes.
-It is not common for a file system
-to flush the buffers when the stream is closed.
-If you need to be sure that
-the data is physically stored use
-.BR fsync (2).
-(It will depend on the disk hardware at this point.)
-.PP
-It is probably unwise to close file descriptors while
-they may be in use by system calls in
-other threads in the same process.
-Since a file descriptor may be reused,
-there are some obscure race conditions
-that may cause unintended side effects.
-.\" Date: Tue, 4 Sep 2007 13:57:35 +0200
-.\" From: Fredrik Noring <noring@nocrew.org>
-.\" One such race involves signals and ERESTARTSYS. If a file descriptor
-.\" in use by a system call is closed and then reused by e.g. an
-.\" independent open() in some unrelated thread, before the original system
-.\" call has restared after ERESTARTSYS, the original system call will
-.\" later restart with the reused file descriptor. This is most likely a
-.\" serious programming error.
-.SH "SEE ALSO"
-.BR fcntl (2),
-.BR fsync (2),
-.BR open (2),
-.BR shutdown (2),
-.BR unlink (2),
-.BR fclose (3)
-.SH COLOPHON
-This page is part of release 3.27 of the Linux
-.I man-pages
-project.
-A description of the project,
-and information about reporting bugs,
-can be found at
-http://www.kernel.org/doc/man-pages/.
+.Fn close
+call deletes a descriptor from the per-process object
+reference table.
+If this is the last reference to the underlying object, the
+object will be deactivated.
+For example, on the last close of a file
+the current
+.Em seek
+pointer associated with the file is lost;
+on the last close of a
+.Xr socket 2
+associated naming information and queued data are discarded;
+on the last close of a file holding an advisory lock
+the lock is released (see further
+.Xr flock 2 ) .
+.Pp
+When a process exits,
+all associated file descriptors are freed, but since there is
+a limit on active descriptors per processes, the
+.Fn close
+function call
+is useful when a large quantity of file descriptors are being handled.
+.Pp
+When a process forks (see
+.Xr fork 2 ) ,
+all descriptors for the new child process reference the same
+objects as they did in the parent before the fork.
+If a new process is then to be run using
+.Xr execve 2 ,
+the process would normally inherit these descriptors.  Most
+of the descriptors can be rearranged with
+.Xr dup2 2
+or deleted with
+.Fn close
+before the
+.Xr execve
+is attempted, but if some of these descriptors will still
+be needed if the execve fails, it is necessary to arrange for them
+to be closed if the execve succeeds.
+For this reason, the call
+.Dq Li fcntl(d, F_SETFD, 1)
+is provided,
+which arranges that a descriptor will be closed after a successful
+execve; the call
+.Dq Li fcntl(d, F_SETFD, 0)
+restores the default,
+which is to not close the descriptor.
+.Sh RETURN VALUES
+Upon successful completion, a value of 0 is returned.
+Otherwise, a value of -1 is returned and the global integer variable
+.Va errno
+is set to indicate the error.
+.Sh ERRORS
+The
+.Fn close
+system call will fail if:
+.Bl -tag -width Er
+.\" ==========
+.It Bq Er EBADF
+.Fa fildes
+is not a valid, active file descriptor.
+.\" ==========
+.It Bq Er EINTR
+Its execution was interrupted by a signal.
+.\" ==========
+.It Bq Er EIO
+A previously-uncommitted
+.Xr write 2
+encountered an input/output error.
+.El
+.Sh SEE ALSO
+.Xr accept 2 ,
+.Xr execve 2 ,
+.Xr fcntl 2 ,
+.Xr flock 2 ,
+.Xr open 2 ,
+.Xr pipe 2 ,
+.Xr socket 2 ,
+.Xr socketpair 2
+.Sh STANDARDS
+.Fn Close
+conforms to 
+.St -p1003.1-88 .

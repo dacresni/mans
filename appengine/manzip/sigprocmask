@@ -1,149 +1,127 @@
-.\" Copyright (c) 2005 Michael Kerrisk
-.\" based on earlier work by faith@cs.unc.edu and
-.\" Mike Battersby <mib@deakin.edu.au>
+.\"	$NetBSD: sigprocmask.2,v 1.6 1995/02/27 12:37:33 cgd Exp $
 .\"
-.\" Permission is granted to make and distribute verbatim copies of this
-.\" manual provided the copyright notice and this permission notice are
-.\" preserved on all copies.
+.\" Copyright (c) 1983, 1991, 1993
+.\"	The Regents of the University of California.  All rights reserved.
 .\"
-.\" Permission is granted to copy and distribute modified versions of this
-.\" manual under the conditions for verbatim copying, provided that the
-.\" entire resulting derived work is distributed under the terms of a
-.\" permission notice identical to this one.
+.\" Redistribution and use in source and binary forms, with or without
+.\" modification, are permitted provided that the following conditions
+.\" are met:
+.\" 1. Redistributions of source code must retain the above copyright
+.\"    notice, this list of conditions and the following disclaimer.
+.\" 2. Redistributions in binary form must reproduce the above copyright
+.\"    notice, this list of conditions and the following disclaimer in the
+.\"    documentation and/or other materials provided with the distribution.
+.\" 3. All advertising materials mentioning features or use of this software
+.\"    must display the following acknowledgement:
+.\"	This product includes software developed by the University of
+.\"	California, Berkeley and its contributors.
+.\" 4. Neither the name of the University nor the names of its contributors
+.\"    may be used to endorse or promote products derived from this software
+.\"    without specific prior written permission.
 .\"
-.\" Since the Linux kernel and libraries are constantly changing, this
-.\" manual page may be incorrect or out-of-date.  The author(s) assume no
-.\" responsibility for errors or omissions, or for damages resulting from
-.\" the use of the information contained herein.  The author(s) may not
-.\" have taken the same level of care in the production of this manual,
-.\" which is licensed free of charge, as they might when working
-.\" professionally.
+.\" THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND
+.\" ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+.\" IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+.\" ARE DISCLAIMED.  IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS BE LIABLE
+.\" FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+.\" DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+.\" OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+.\" HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+.\" LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+.\" OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+.\" SUCH DAMAGE.
 .\"
-.\" Formatted or processed versions of this manual, if unaccompanied by
-.\" the source, must acknowledge the copyright and authors of this work.
+.\"	@(#)sigprocmask.2	8.1 (Berkeley) 6/4/93
 .\"
-.\" 2005-09-15, mtk, Created new page by splitting off from sigaction.2
-.\"
-.TH SIGPROCMASK 2 2008-10-17 "Linux" "Linux Programmer's Manual"
-.SH NAME
-sigprocmask \- examine and change blocked signals
-.SH SYNOPSIS
-.B #include <signal.h>
-.sp
-.BI "int sigprocmask(int " how ", const sigset_t *" set ,
-.BI "sigset_t *" oldset );
-.sp
-.in -4n
-Feature Test Macro Requirements for glibc (see
-.BR feature_test_macros (7)):
-.in
-.sp
-.ad l
-.BR sigprocmask ():
-_POSIX_C_SOURCE\ >=\ 1 || _XOPEN_SOURCE || _POSIX_SOURCE
-.ad b
-.SH DESCRIPTION
-.BR sigprocmask ()
-is used to fetch and/or change the signal mask of the calling thread.
-The signal mask is the set of signals whose delivery is currently
-blocked for the caller
-(see also
-.BR signal (7)
-for more details).
-
-The behavior of the call is dependent on the value of
-.IR how ,
-as follows.
-.TP
-.B SIG_BLOCK
-The set of blocked signals is the union of the current set and the
-.I set
-argument.
-.TP
-.B SIG_UNBLOCK
-The signals in
-.I set
-are removed from the current set of blocked signals.
-It is permissible to attempt to unblock a signal which is not blocked.
-.TP
-.B SIG_SETMASK
-The set of blocked signals is set to the argument
-.IR set .
-.PP
+.Dd June 4, 1993
+.Dt SIGPROCMASK 2
+.Os
+.Sh NAME
+.Nm sigprocmask
+.Nd manipulate current signal mask
+.Sh SYNOPSIS
+.Fd #include <signal.h>
+.Ft int
+.Fo sigprocmask
+.Fa "int how"
+.Fa "const sigset_t *restrict set"
+.Fa "sigset_t *restrict oset"
+.Fc
+.Sh DESCRIPTION
+The
+.Fn sigprocmask
+function examines and/or changes the current signal mask
+(those signals that are blocked from delivery).
+Signals are blocked if they are members of the current signal mask set.
+.Pp
 If
-.I oldset
-is non-NULL, the previous value of the signal mask is stored in
-.IR oldset .
-
+.Fa set
+is not null, the action of
+.Fn sigprocmask
+depends on the value of the parameter
+.Fa how .
+The signal mask is changed as a function of the specified
+.Fa set
+and the current mask.
+The function is specified by
+.Fa how
+using one of the following values from
+.Aq Pa signal.h :
+.Bl -tag -width SIG_UNBLOCK
+.It Dv SIG_BLOCK
+The new mask is the union of the current mask and the specified
+.Fa set .
+.It Dv SIG_UNBLOCK
+The new mask is the intersection of the current mask
+and the complement of the specified
+.Fa set .
+.It Dv SIG_SETMASK
+The current mask is replaced by the specified
+.Fa set .
+.El
+.Pp
 If
-.I set
-is NULL, then the signal mask is unchanged (i.e.,
-.I how
-is ignored),
-but the current value of the signal mask is nevertheless returned in
-.I oldset
-(if it is not NULL).
-
-The use of
-.BR sigprocmask ()
-is unspecified in a multithreaded process; see
-.BR pthread_sigmask (3).
-.SH "RETURN VALUE"
-.BR sigprocmask ()
-returns 0 on success and \-1 on error.
-.SH ERRORS
-.B EINVAL
-The value specified in
-.I how
-was invalid.
-.SH "CONFORMING TO"
-POSIX.1-2001.
-.SH NOTES
-It is not possible to block
-.BR SIGKILL " or " SIGSTOP .
-Attempts to do so are silently ignored.
-
-Each of the threads in a process has its own signal mask.
-
-A child created via
-.BR fork (2)
-inherits a copy of its parent's signal mask;
-the signal mask is preserved across
-.BR execve (2).
-
-If
-.BR SIGBUS ,
-.BR SIGFPE ,
-.BR SIGILL ,
+.Fa oset
+is not null, it is set to
+the previous value of the signal mask.
+When
+.Fa set
+is null,
+the value of
+.Ar how
+is insignificant and the mask remains unset
+providing a way to examine the signal mask without modification.
+.Pp
+The system
+quietly disallows
+.Dv SIGKILL
 or
-.B SIGSEGV
-are generated
-while they are blocked, the result is undefined,
-unless the signal was generated by
-.BR kill (2),
-.BR sigqueue (2),
-or
-.BR raise (3).
-.PP
-See
-.BR sigsetops (3)
-for details on manipulating signal sets.
-.SH "SEE ALSO"
-.BR kill (2),
-.BR pause (2),
-.BR sigaction (2),
-.BR signal (2),
-.BR sigpending (2),
-.BR sigqueue (2),
-.BR sigsuspend (2),
-.BR pthread_sigmask (3),
-.BR sigsetops (3),
-.BR signal (7)
-.SH COLOPHON
-This page is part of release 3.27 of the Linux
-.I man-pages
-project.
-A description of the project,
-and information about reporting bugs,
-can be found at
-http://www.kernel.org/doc/man-pages/.
+.Dv SIGSTOP
+to be blocked.
+.Sh RETURN VALUES
+A 0 value indicated that the call succeeded.  A -1 return value
+indicates an error occurred and
+.Va errno
+is set to indicated the reason.
+.Sh ERRORS
+The
+.Fn sigprocmask
+call will fail and the signal mask will be unchanged if one
+of the following occurs:
+.Bl -tag -width Er
+.\" ===========
+.It Bq Er EINVAL
+.Fa how
+has a value other than those listed here.
+.El
+.Sh SEE ALSO
+.Xr kill 2 ,
+.Xr sigaction 2 ,
+.Xr sigsuspend 2 ,
+.Xr sigsetops 3
+.Sh STANDARDS
+The
+.Fn sigprocmask
+function call is expected to
+conform to
+.St -p1003.1-88 .

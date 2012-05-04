@@ -1,305 +1,167 @@
-.\" Copyright (c) 1993 Luigi P. Bai (lpb@softint.com) July 28, 1993
+.\"   $OpenBSD: shmget.2,v 1.2 1996/10/08 01:20:16 michaels Exp $
+.\"	$NetBSD: shmget.2,v 1.1 1995/10/16 23:49:32 jtc Exp $	
 .\"
-.\" Permission is granted to make and distribute verbatim copies of this
-.\" manual provided the copyright notice and this permission notice are
-.\" preserved on all copies.
+.\" Copyright (c) 1995 Frank van der Linden
+.\" All rights reserved.
 .\"
-.\" Permission is granted to copy and distribute modified versions of this
-.\" manual under the conditions for verbatim copying, provided that the
-.\" entire resulting derived work is distributed under the terms of a
-.\" permission notice identical to this one.
+.\" Redistribution and use in source and binary forms, with or without
+.\" modification, are permitted provided that the following conditions
+.\" are met:
+.\" 1. Redistributions of source code must retain the above copyright
+.\"    notice, this list of conditions and the following disclaimer.
+.\" 2. Redistributions in binary form must reproduce the above copyright
+.\"    notice, this list of conditions and the following disclaimer in the
+.\"    documentation and/or other materials provided with the distribution.
+.\" 3. All advertising materials mentioning features or use of this software
+.\"    must display the following acknowledgement:
+.\"      This product includes software developed for the NetBSD Project
+.\"      by Frank van der Linden
+.\" 4. The name of the author may not be used to endorse or promote products
+.\"    derived from this software without specific prior written permission
 .\"
-.\" Since the Linux kernel and libraries are constantly changing, this
-.\" manual page may be incorrect or out-of-date.  The author(s) assume no
-.\" responsibility for errors or omissions, or for damages resulting from
-.\" the use of the information contained herein.  The author(s) may not
-.\" have taken the same level of care in the production of this manual,
-.\" which is licensed free of charge, as they might when working
-.\" professionally.
-.\"
-.\" Formatted or processed versions of this manual, if unaccompanied by
-.\" the source, must acknowledge the copyright and authors of this work.
-.\"
-.\" Modified Wed Jul 28 10:57:35 1993, Rik Faith <faith@cs.unc.edu>
-.\" Modified Sun Nov 28 16:43:30 1993, Rik Faith <faith@cs.unc.edu>
-.\"          with material from Giorgio Ciucci <giorgio@crcc.it>
-.\" Portions Copyright 1993 Giorgio Ciucci <giorgio@crcc.it>
-.\" Modified Tue Oct 22 22:03:17 1996 by Eric S. Raymond <esr@thyrsus.com>
-.\" Modified, 8 Jan 2003, Michael Kerrisk, <mtk.manpages@gmail.com>
-.\"	Removed EIDRM from errors - that can't happen...
-.\" Modified, 27 May 2004, Michael Kerrisk <mtk.manpages@gmail.com>
-.\"     Added notes on capability requirements
-.\" Modified, 11 Nov 2004, Michael Kerrisk <mtk.manpages@gmail.com>
-.\"	Language and formatting clean-ups
-.\"	Added notes on /proc files
-.\"
-.TH SHMGET 2 2006-05-02 "Linux" "Linux Programmer's Manual"
-.SH NAME
-shmget \- allocates a shared memory segment
-.SH SYNOPSIS
-.ad l
-.B #include <sys/ipc.h>
-.br
-.B #include <sys/shm.h>
-.sp
-.BI "int shmget(key_t " key ", size_t " size ", int " shmflg );
-.ad b
-.SH DESCRIPTION
-.BR shmget ()
-returns the identifier of the shared memory segment
-associated with the value of the argument
-.IR key .
-A new shared memory segment, with size equal to the value of
-.I size
-rounded up to a multiple of
-.BR PAGE_SIZE ,
-is created if
-.I key
-has the value
-.B IPC_PRIVATE
-or
-.I key
-isn't
-.BR IPC_PRIVATE ,
-no shared memory segment corresponding to
-.I key
-exists, and
-.B IPC_CREAT
-is specified in
-.IR shmflg .
-.PP
-If
-.I shmflg
-specifies both
-.B IPC_CREAT
-and
-.B IPC_EXCL
-and a shared memory segment already exists for
-.IR key ,
-then
-.BR shmget ()
-fails with
-.I errno
-set to
-.BR EEXIST .
-(This is analogous to the effect of the combination
-.B O_CREAT | O_EXCL
-for
-.BR open (2).)
-.PP
-The value
-.I shmflg
-is composed of:
-.TP 12
-.B IPC_CREAT
-to create a new segment.
-If this flag is not used, then
-.BR shmget ()
-will find the segment associated with \fIkey\fP and check to see if
-the user has permission to access the segment.
-.TP
-.B IPC_EXCL
-used with \fBIPC_CREAT\fP to ensure failure if the segment already exists.
-.TP
-.I mode_flags
-(least significant 9 bits)
-specifying the permissions granted to the owner, group, and world.
-These bits have the same format, and the same
-meaning, as the
-.I mode
-argument of
-.BR open (2).
-Presently, the execute permissions are not used by the system.
-.TP
-.BR SHM_HUGETLB " (since Linux 2.6)"
-Allocate the segment using "huge pages."
-See the kernel source file
-.I Documentation/vm/hugetlbpage.txt
-for further information.
-.TP
-.BR SHM_NORESERVE " (since Linux 2.6.15)"
-This flag serves the same purpose as the
-.BR mmap (2)
-.B MAP_NORESERVE
-flag.
-Do not reserve swap space for this segment.
-When swap space is reserved, one has the guarantee
-that it is possible to modify the segment.
-When swap space is not reserved one might get
-.B SIGSEGV
-upon a write
-if no physical memory is available.
-See also the discussion of the file
-.I /proc/sys/vm/overcommit_memory
-in
-.BR proc (5).
-.\" As at 2.6.17-rc2, this flag has no effect if SHM_HUGETLB was also
-.\" specified.
-.PP
-When a new shared memory segment is created,
-its contents are initialized to zero values, and
-its associated data structure,
-.I shmid_ds
-(see
-.BR shmctl (2)),
+.\" THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
+.\" IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+.\" OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+.\" IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT,
+.\" INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+.\" NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+.\" DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+.\" THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+.\" (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+.\" THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+.\"/
+.Dd August 17, 1995
+.Dt SHMGET 2
+.Os
+.Sh NAME
+.Nm shmget
+.Nd get shared memory area identifier
+.Sh SYNOPSIS
+.Fd #include <sys/shm.h>
+.Ft int
+.Fo shmget
+.Fa "key_t key"
+.Fa "size_t size"
+.Fa "int shmflg"
+.Fc
+.Sh DESCRIPTION
+.Fn shmget
+returns the shared memory identifier associated with the key
+.Fa key .
+.Pp
+A shared memory segment is created if either
+.Fa key
+is equal to IPC_PRIVATE, or
+.Fa key
+does not have a shared memory segment identifier associated with it, and the IPC_CREAT
+bit is set in
+.Fa shmflg.
+.Pp
+If a new shared memory segment is created, the data structure associated with it (the
+.Va shmid_ds
+structure, see
+.Xr shmctl 2 )
 is initialized as follows:
-.IP
-.I shm_perm.cuid
+.Bl -bullet
+.It 
+.Va shm_perm.cuid
 and
-.I shm_perm.uid
-are set to the effective user ID of the calling process.
-.IP
-.I shm_perm.cgid
+.Va shm_perm.uid
+are set to the effective uid of the calling process.
+.It
+.Va shm_perm.gid
 and
-.I shm_perm.gid
-are set to the effective group ID of the calling process.
-.IP
-The least significant 9 bits of
-.I shm_perm.mode
-are set to the least significant 9 bit of
-.IR shmflg .
-.IP
-.I shm_segsz
-is set to the value of
-.IR size .
-.IP
-.IR shm_lpid ,
-.IR shm_nattch ,
-.I shm_atime
-and
-.I shm_dtime
-are set to 0.
-.IP
-.I shm_ctime
+.Va shm_perm.cgid
+are set to the effective gid of the calling process.
+.It
+.Va shm_perm.mode
+is set to the lower 9 bits of
+.Fa shmflg .
+.It
+.Va shm_lpid ,
+.Va shm_nattch ,
+.Va shm_atime ,
+and 
+.Va shm_dtime
+are set to 0
+.It
+.Va shm_ctime
 is set to the current time.
-.PP
-If the shared memory segment already exists, the permissions are
-verified, and a check is made to see if it is marked for destruction.
-.SH "RETURN VALUE"
-A valid segment identifier,
-.IR shmid ,
-is returned on success, \-1 on error.
-.SH ERRORS
-On failure,
-.I errno
-is set to one of the following:
-.TP
-.B EACCES
-The user does not have permission to access the
-shared memory segment, and does not have the
-.B CAP_IPC_OWNER
-capability.
-.TP
-.B EEXIST
-.B IPC_CREAT | IPC_EXCL
-was specified and the segment exists.
-.TP
-.B EINVAL
-A new segment was to be created and \fIsize\fP < \fBSHMMIN\fP
-or \fIsize\fP > \fBSHMMAX\fP, or no new segment was to be created,
-a segment with given key existed, but \fIsize\fP is greater than the size
-of that segment.
-.TP
-.B ENFILE
-.\" [2.6.7] shmem_zero_setup()-->shmem_file_setup()-->get_empty_filp()
-The system limit on the total number of open files has been reached.
-.TP
-.B ENOENT
-No segment exists for the given \fIkey\fP, and
-.B IPC_CREAT
-was not specified.
-.TP
-.B ENOMEM
-No memory could be allocated for segment overhead.
-.TP
-.B ENOSPC
-All possible shared memory IDs have been taken
-.RB ( SHMMNI ),
-or allocating a segment of the requested
-.I size
-would cause the system to exceed the system-wide limit on shared memory
-.RB ( SHMALL ).
-.TP
-.B EPERM
+.It
+.Va shm_segsz
+is set to the value of
+.Fa size .
+.It
 The
-.B SHM_HUGETLB
-flag was specified, but the caller was not privileged (did not have the
-.B CAP_IPC_LOCK
-capability).
-.SH "CONFORMING TO"
-SVr4, POSIX.1-2001.
-.\" SVr4 documents an additional error condition EEXIST.
-
-.B SHM_HUGETLB
-is a nonportable Linux extension.
-.SH NOTES
-.B IPC_PRIVATE
-isn't a flag field but a
-.I key_t
-type.
-If this special value is used for
-.IR key ,
-the system call ignores everything but the least significant 9 bits of
-.I shmflg
-and creates a new shared memory segment (on success).
-.PP
-The following limits on shared memory segment resources affect the
-.BR shmget ()
-call:
-.TP
-.B SHMALL
-System wide maximum of shared memory pages
-(on Linux, this limit can be read and modified via
-.IR /proc/sys/kernel/shmall ).
-.TP
-.B SHMMAX
-Maximum size in bytes for a shared memory segment: policy dependent
-(on Linux, this limit can be read and modified via
-.IR /proc/sys/kernel/shmmax ).
-.TP
-.B SHMMIN
-Minimum size in bytes for a shared memory segment: implementation
-dependent (currently 1 byte, though
-.B PAGE_SIZE
-is the effective minimum size).
-.TP
-.B SHMMNI
-System wide maximum number of shared memory segments: implementation
-dependent (currently 4096, was 128 before Linux 2.3.99;
-on Linux, this limit can be read and modified via
-.IR /proc/sys/kernel/shmmni ).
-.\" Kernels between 2.4.x and 2.6.8 had an off-by-one error that meant
-.\" that we could create one more segment than SHMMNI -- MTK
-.\" This /proc file is not available in Linux 2.2 and earlier -- MTK
-.PP
-The implementation has no specific limits for the per-process maximum
-number of shared memory segments
-.RB ( SHMSEG ).
-.SS Linux Notes
-Until version 2.3.30 Linux would return
-.B EIDRM
-for a
-.BR shmget ()
-on a shared memory segment scheduled for deletion.
-.SH BUGS
-The name choice
-.B IPC_PRIVATE
-was perhaps unfortunate,
-.B IPC_NEW
-would more clearly show its function.
-.SH "SEE ALSO"
-.BR shmat (2),
-.BR shmctl (2),
-.BR shmdt (2),
-.BR ftok (3),
-.BR capabilities (7),
-.BR shm_overview (7),
-.BR svipc (7)
-.SH COLOPHON
-This page is part of release 3.27 of the Linux
-.I man-pages
-project.
-A description of the project,
-and information about reporting bugs,
-can be found at
-http://www.kernel.org/doc/man-pages/.
+.Xr ftok 3
+function may be used to generate a key from a pathname.
+.El
+.Sh RETURN VALUES
+Upon successful completion a positive shared memory segment identifier is returned.
+Otherwise, -1 is returned and the global variable
+.Va errno
+is set to indicate the error.
+.Sh ERRORS
+The
+.Fn shmget
+system call will fail if:
+.Bl -tag -width Er
+.\" ===========
+.It Bq Er EACCES
+A shared memory segment is already associated with
+.Fa key
+and the caller has no permission to access it.
+.\" ===========
+.It Bq Er EEXIST
+Both IPC_CREAT and IPC_EXCL are set in
+.Fa shmflg ,
+and a shared memory segment is already associated with
+.Fa key .
+.\" ===========
+.It Bq Er EINVAL
+No shared memory segment is to be created,
+and a shared memory segment exists for
+.Fa key ,
+but the size of the segment associated with it
+is less than
+.Fa size ,
+which is non-zero.
+.\" ===========
+.It Bq Er ENOENT
+IPC_CREAT was not set in
+.Fa shmflg
+and no shared memory segment associated with
+.Fa key
+was found.
+.\" ===========
+.It Bq Er ENOMEM
+There is not enough memory left to created a shared memory segment of the
+requested size.
+.\" ===========
+.It Bq Er ENOSPC
+A new shared memory identifier could not be created because the system limit
+for the number of shared memory identifiers has been reached.
+.El
+.Sh LEGACY SYNOPSIS
+.Fd #include <sys/types.h>
+.Fd #include <sys/ipc.h>
+.Fd #include <sys/shm.h>
+.Pp
+.Ft int
+.br
+.Fo shmget
+.Fa "key_t key"
+.Fa "int size"
+.Fa "int shmflg"
+.Fc ;
+.Pp
+All of these include files are necessary.
+The type of
+.Fa size
+has changed.
+.Sh SEE ALSO
+.Xr ftok 3 ,
+.Xr shmat 2 ,
+.Xr shmctl 2 ,
+.Xr shmdt 2 ,
+.Xr compat 5

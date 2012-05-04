@@ -1,248 +1,154 @@
-.\" Hey Emacs! This file is -*- nroff -*- source.
+.\"	$NetBSD: access.2,v 1.7 1995/02/27 12:31:44 cgd Exp $
 .\"
-.\" This manpage is Copyright (C) 1992 Drew Eckhardt;
-.\"                               1993 Michael Haardt, Ian Jackson.
-.\" and Copyright (C) 2007 Michael Kerrisk <mtk.manpages@gmail.com>
+.\" Copyright (c) 1980, 1991, 1993
+.\"	The Regents of the University of California.  All rights reserved.
 .\"
-.\" Permission is granted to make and distribute verbatim copies of this
-.\" manual provided the copyright notice and this permission notice are
-.\" preserved on all copies.
+.\" Redistribution and use in source and binary forms, with or without
+.\" modification, are permitted provided that the following conditions
+.\" are met:
+.\" 1. Redistributions of source code must retain the above copyright
+.\"    notice, this list of conditions and the following disclaimer.
+.\" 2. Redistributions in binary form must reproduce the above copyright
+.\"    notice, this list of conditions and the following disclaimer in the
+.\"    documentation and/or other materials provided with the distribution.
+.\" 3. All advertising materials mentioning features or use of this software
+.\"    must display the following acknowledgement:
+.\"	This product includes software developed by the University of
+.\"	California, Berkeley and its contributors.
+.\" 4. Neither the name of the University nor the names of its contributors
+.\"    may be used to endorse or promote products derived from this software
+.\"    without specific prior written permission.
 .\"
-.\" Permission is granted to copy and distribute modified versions of this
-.\" manual under the conditions for verbatim copying, provided that the
-.\" entire resulting derived work is distributed under the terms of a
-.\" permission notice identical to this one.
+.\" THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND
+.\" ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+.\" IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+.\" ARE DISCLAIMED.  IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS BE LIABLE
+.\" FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+.\" DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+.\" OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+.\" HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+.\" LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+.\" OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+.\" SUCH DAMAGE.
 .\"
-.\" Since the Linux kernel and libraries are constantly changing, this
-.\" manual page may be incorrect or out-of-date.  The author(s) assume no
-.\" responsibility for errors or omissions, or for damages resulting from
-.\" the use of the information contained herein.  The author(s) may not
-.\" have taken the same level of care in the production of this manual,
-.\" which is licensed free of charge, as they might when working
-.\" professionally.
+.\"     @(#)access.2	8.2 (Berkeley) 4/1/94
 .\"
-.\" Formatted or processed versions of this manual, if unaccompanied by
-.\" the source, must acknowledge the copyright and authors of this work.
-.\"
-.\" Modified 1993-07-21 Rik Faith (faith@cs.unc.edu)
-.\" Modified 1994-08-21 by Michael Chastain (mec@shell.portal.com):
-.\"   Removed note about old kernel (pre-1.1.44) using wrong id on path.
-.\" Modified 1996-03-18 by Martin Schulze (joey@infodrom.north.de):
-.\"   Stated more clearly how it behaves with symbolic links.
-.\" Added correction due to Nick Duffek (nsd@bbc.com), aeb, 960426
-.\" Modified 1996-09-07 by Michael Haardt:
-.\"   Restrictions for NFS
-.\" Modified 1997-09-09 by Joseph S. Myers <jsm28@cam.ac.uk>
-.\" Modified 1998-01-13 by Michael Haardt:
-.\"   Using access is often insecure
-.\" Modified 2001-10-16 by aeb
-.\" Modified 2002-04-23 by Roger Luethi <rl@hellgate.ch>
-.\" Modified 2004-06-23 by Michael Kerrisk
-.\" 2007-06-10, mtk, various parts rewritten, and added BUGS section.
-.\"
-.TH ACCESS 2 2007-07-10 "Linux" "Linux Programmer's Manual"
-.SH NAME
-access \- check real user's permissions for a file
-.SH SYNOPSIS
-.nf
-.B #include <unistd.h>
-.sp
-.BI "int access(const char *" pathname ", int " mode );
-.fi
-.SH DESCRIPTION
-.BR access ()
-checks whether the calling process can access the file
-.IR pathname .
-If
-.I pathname
-is a symbolic link, it is dereferenced.
-
+.Dd April 1, 1994
+.Dt ACCESS 2
+.Os BSD 4
+.Sh NAME
+.Nm access
+.Nd check access permissions of a file or pathname
+.Sh SYNOPSIS
+.Fd #include <unistd.h>
+.Ft int
+.Fo access
+.Fa "const char *path"
+.Fa "int amode"
+.Fc
+.Sh DESCRIPTION
 The
-.I mode
-specifies the accessibility check(s) to be performed,
-and is either the value
-.BR F_OK ,
-.\" F_OK is defined as 0 on every system that I know of.
-or a mask consisting of the bitwise OR of one or more of
-.BR R_OK ", " W_OK ", and " X_OK .
-.B F_OK
-tests for the existence of the file.
-.BR R_OK ", " W_OK ", and " X_OK
-test whether the file exists and grants read, write, and
-execute permissions, respectively.
-
-The check is done using the calling process's
-.I real
-UID and GID, rather than the effective IDs as is done when
-actually attempting an operation (e.g.,
-.BR open (2))
-on the file.
-This allows set-user-ID programs to
-easily determine the invoking user's authority.
-
-If the calling process is privileged (i.e., its real UID is zero),
-then an
-.B X_OK
-check is successful for a regular file if execute permission
-is enabled for any of the file owner, group, or other.
-.SH "RETURN VALUE"
-On success (all requested permissions granted), zero is returned.
-On error (at least one bit in
-.I mode
-asked for a permission that is denied, or some other error occurred),
-\-1 is returned, and
-.I errno
-is set appropriately.
-.SH ERRORS
-.BR access ()
-shall fail if:
-.TP
-.B EACCES
-The requested access would be denied to the file, or search permission
-is denied for one of the directories in the path prefix of
-.IR pathname .
-(See also
-.BR path_resolution (7).)
-.TP
-.B ELOOP
-Too many symbolic links were encountered in resolving
-.IR pathname .
-.TP
-.B ENAMETOOLONG
-.I pathname
-is too long.
-.TP
-.B ENOENT
-A component of
-.I pathname
-does not exist or is a dangling symbolic link.
-.TP
-.B ENOTDIR
-A component used as a directory in
-.I pathname
-is not, in fact, a directory.
-.TP
-.B EROFS
-Write permission was requested for a file on a read-only file system.
-.PP
-.BR access ()
-may fail if:
-.TP
-.B EFAULT
-.I pathname
-points outside your accessible address space.
-.TP
-.B EINVAL
-.I mode
-was incorrectly specified.
-.TP
-.B EIO
-An I/O error occurred.
-.TP
-.B ENOMEM
-Insufficient kernel memory was available.
-.TP
-.B ETXTBSY
-Write access was requested to an executable which is being
-executed.
-.SH "CONFORMING TO"
-SVr4, 4.3BSD, POSIX.1-2001.
-.SH NOTES
-.PP
-.BR Warning :
-Using
-.BR access ()
-to check if a user is authorized to, for example,
-open a file before actually doing so using
-.BR open (2)
-creates a security hole, because the user might exploit the short time
-interval between checking and opening the file to manipulate it.
-.BR "For this reason, the use of this system call should be avoided" .
-.PP
-.BR access ()
-returns an error if any of the access types in
-.I mode
-is denied, even if some of the other access types in
-.I mode
-are permitted.
-.PP
-If the calling process has appropriate privileges (i.e., is superuser),
-POSIX.1-2001 permits implementation to indicate success for an
-.B X_OK
-check even if none of the execute file permission bits are set.
-.\" HPU-UX 11 and Tru64 5.1 do this.
-Linux does not do this.
-.PP
-A file is only accessible if the permissions on each of the
-directories in the path prefix of
-.I pathname
-grant search (i.e., execute) access.
-If any directory is inaccessible, then the
-.BR access ()
-call will fail, regardless of the permissions on the file itself.
-.PP
-Only access bits are checked, not the file type or contents.
-Therefore, if a directory is found to be writable,
-it probably means that files can be created in the directory,
-and not that the directory can be written as a file.
-Similarly, a DOS file may be found to be "executable," but the
-.BR execve (2)
-call will still fail.
-.PP
-.BR access ()
-may not work correctly on NFS file systems with UID mapping enabled,
-because UID mapping is done on the server and hidden from the client,
-which checks permissions.
-.SH BUGS
-In kernel 2.4 (and earlier) there is some strangeness in the handling of
-.B X_OK
-tests for superuser.
-If all categories of execute permission are disabled
-for a nondirectory file, then the only
-.BR access ()
-test that returns \-1 is when
-.I mode
-is specified as just
-.BR X_OK ;
-if
-.B R_OK
-or
-.B W_OK
-is also specified in
-.IR mode ,
-then
-.BR access ()
-returns 0 for such files.
-.\" This behavior appears to have been an implementation accident.
-Early 2.6 kernels (up to and including 2.6.3)
-also behaved in the same way as kernel 2.4.
-
-In kernels before 2.6.20,
-.BR access ()
-ignored the effect of the
-.B MS_NOEXEC
-flag if it was used to
-.BR mount (2)
-the underlying file system.
-Since kernel 2.6.20,
-.BR access ()
-honors this flag.
-.SH "SEE ALSO"
-.BR chmod (2),
-.BR chown (2),
-.BR faccessat (2),
-.BR open (2),
-.BR setgid (2),
-.BR setuid (2),
-.BR stat (2),
-.BR euidaccess (3),
-.BR credentials (7),
-.BR path_resolution (7)
-.SH COLOPHON
-This page is part of release 3.27 of the Linux
-.I man-pages
-project.
-A description of the project,
-and information about reporting bugs,
-can be found at
-http://www.kernel.org/doc/man-pages/.
+.Fn access
+function checks the accessibility of the
+file named by
+.Fa path
+for the access permissions indicated by
+.Fa amode .
+The value of
+.Fa amode
+is the bitwise inclusive OR of the access permissions to be
+checked
+.Pf ( Dv R_OK
+for read permission,
+.Dv W_OK
+for write permission and
+.Dv X_OK
+for execute/search permission) or the existence test,
+.Dv F_OK .
+All components of the pathname
+.Fa path
+are checked for access permissions (including
+.Dv F_OK ) .
+.Pp
+The real user ID is used in place of the effective user ID
+and the real group access list
+(including the real group ID) are
+used in place of the effective ID for verifying permission.
+.Pp
+Even if a process has appropriate privileges and indicates success for
+.Dv X_OK ,
+the file may not actually have execute permission bits set.
+Likewise for
+.Dv R_OK
+and
+.Dv W_OK .
+.Sh RETURN VALUES
+If
+.Fa path
+cannot be found
+or if any of the desired access modes would not be granted,
+then a -1 value is returned and the global integer variable
+.Va errno
+is set to indicate the error.
+Otherwise, a 0 value is returned.
+.Sh ERRORS
+Access to the file is denied if:
+.Bl -tag -width Er
+.\" ==========
+.It Bq Er EACCES
+Permission bits of the file mode do not permit the requested access,
+or search permission is denied on a component of the path prefix.
+.Pp
+The owner of a file has permission checked
+with respect to the ``owner'' read, write, and execute mode bits,
+members of the file's group other than the owner have permission checked
+with respect to the ``group'' mode bits,
+and all others have permissions checked
+with respect to the ``other'' mode bits.
+.\" 
+.\" ==========
+.It Bq Er EFAULT
+.Fa Path
+points outside the process's allocated address space.
+.It Bq Er EINVAL
+An invalid value was specified for
+.Ar amode .
+.\" ==========
+.It Bq Er EIO
+An I/O error occurred while reading from or writing to the file system.
+.\" ==========
+.It Bq Er ELOOP
+Too many symbolic links were encountered in translating the pathname.
+.\" ==========
+.It Bq Er ENAMETOOLONG
+A component of a pathname exceeded 
+.Dv {NAME_MAX}
+characters, or an entire path name exceeded 
+.Dv {PATH_MAX}
+characters.
+.\" ==========
+.It Bq Er ENOENT
+The named file does not exist.
+.\" ==========
+.It Bq Er ENOTDIR
+A component of the path prefix is not a directory.
+.\" ==========
+.It Bq Er EROFS
+Write access is requested for a file on a read-only file system.
+.\" ==========
+.It Bq Er ETXTBSY
+Write access is requested for a pure procedure (shared text)
+file that is presently being executed.
+.El
+.Sh SEE ALSO
+.Xr chmod 2 ,
+.Xr stat 2
+.Sh STANDARDS
+The
+.Fn access
+function conforms to 
+.St -p1003.1-90 .
+.Sh CAVEAT
+.Fn Access
+is a potential security hole and
+should never be used.

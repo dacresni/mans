@@ -1,195 +1,192 @@
-.\" Hey Emacs! This file is -*- nroff -*- source.
+.\"	$NetBSD: utimes.2,v 1.13 1999/03/22 19:45:11 garbled Exp $
 .\"
-.\" Copyright (c) 1992 Drew Eckhardt (drew@cs.colorado.edu), March 28, 1992
+.\" Copyright (c) 1990, 1993
+.\"	The Regents of the University of California.  All rights reserved.
 .\"
-.\" Permission is granted to make and distribute verbatim copies of this
-.\" manual provided the copyright notice and this permission notice are
-.\" preserved on all copies.
+.\" Redistribution and use in source and binary forms, with or without
+.\" modification, are permitted provided that the following conditions
+.\" are met:
+.\" 1. Redistributions of source code must retain the above copyright
+.\"    notice, this list of conditions and the following disclaimer.
+.\" 2. Redistributions in binary form must reproduce the above copyright
+.\"    notice, this list of conditions and the following disclaimer in the
+.\"    documentation and/or other materials provided with the distribution.
+.\" 3. All advertising materials mentioning features or use of this software
+.\"    must display the following acknowledgement:
+.\"	This product includes software developed by the University of
+.\"	California, Berkeley and its contributors.
+.\" 4. Neither the name of the University nor the names of its contributors
+.\"    may be used to endorse or promote products derived from this software
+.\"    without specific prior written permission.
 .\"
-.\" Permission is granted to copy and distribute modified versions of this
-.\" manual under the conditions for verbatim copying, provided that the
-.\" entire resulting derived work is distributed under the terms of a
-.\" permission notice identical to this one.
+.\" THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND
+.\" ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+.\" IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+.\" ARE DISCLAIMED.  IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS BE LIABLE
+.\" FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+.\" DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+.\" OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+.\" HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+.\" LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+.\" OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+.\" SUCH DAMAGE.
 .\"
-.\" Since the Linux kernel and libraries are constantly changing, this
-.\" manual page may be incorrect or out-of-date.  The author(s) assume no
-.\" responsibility for errors or omissions, or for damages resulting from
-.\" the use of the information contained herein.  The author(s) may not
-.\" have taken the same level of care in the production of this manual,
-.\" which is licensed free of charge, as they might when working
-.\" professionally.
+.\"     @(#)utimes.2	8.1 (Berkeley) 6/4/93
+.\" $FreeBSD: src/lib/libc/sys/utimes.2,v 1.8.2.4 2001/12/14 18:34:02 ru Exp $
 .\"
-.\" Formatted or processed versions of this manual, if unaccompanied by
-.\" the source, must acknowledge the copyright and authors of this work.
-.\"
-.\" Modified by Michael Haardt <michael@moria.de>
-.\" Modified 1993-07-24 by Rik Faith <faith@cs.unc.edu>
-.\" Modified 1995-06-10 by Andries Brouwer <aeb@cwi.nl>
-.\" Modified 2004-06-23 by Michael Kerrisk <mtk.manpages@gmail.com>
-.\" Modified 2004-10-10 by Andries Brouwer <aeb@cwi.nl>
-.\"
-.TH UTIME 2 2008-08-06 "Linux" "Linux Programmer's Manual"
-.SH NAME
-utime, utimes \- change file last access and modification times
-.SH SYNOPSIS
-.nf
-.B #include <sys/types.h>
-.br
-.B #include <utime.h>
-.sp
-.BI "int utime(const char *" filename ", const struct utimbuf *" times );
-.sp
-.B #include <sys/time.h>
-.sp
-.BI "int utimes(const char *" filename ", const struct timeval " times [2]);
-.fi
-.SH DESCRIPTION
-The
-.BR utime ()
-system call
-changes the access and modification times of the inode specified by
-.I filename
-to the
-.IR actime " and " modtime
-fields of
-.I times
-respectively.
-
+.Dd June 4, 1993
+.Dt UTIMES 2
+.Os
+.Sh NAME
+.Nm futimes ,
+.Nm utimes
+.Nd set file access and modification times
+.Sh LIBRARY
+.Lb libc
+.Sh SYNOPSIS
+.In sys/time.h
+.Ft int
+.Fo futimes
+.Fa "int fildes"
+.Fa "const struct timeval times[2]"
+.Fc
+.Ft int
+.Fo utimes
+.Fa "const char *path"
+.Fa "const struct timeval times[2]"
+.Fc
+.Sh DESCRIPTION
+The access and modification times of the file named by
+.Fa path
+or referenced by
+.Fa fildes
+are changed as specified by the argument
+.Fa times .
+.Pp
 If
-.I times
-is NULL, then the access and modification times of the file are set
-to the current time.
-
-Changing timestamps is permitted when: either
-the process has appropriate privileges,
-or the effective user ID equals the user ID
-of the file, or
-.I times
-is NULL and the process has write permission for the file.
-
-The
-.I utimbuf
-structure is:
-
-.in +4n
-.nf
-struct utimbuf {
-    time_t actime;       /* access time */
-    time_t modtime;      /* modification time */
-};
-.fi
-.in
-
-The
-.BR utime ()
-system call
-allows specification of timestamps with a resolution of 1 second.
-
-The
-.BR utimes ()
-system call
-is similar, but the
-.I times
-argument refers to an array rather than a structure.
-The elements of this array are
-.I timeval
-structures, which allow a precision of 1 microsecond for specifying timestamps.
-The
-.I timeval
-structure is:
-
-.in +4n
-.nf
-struct timeval {
-    long tv_sec;        /* seconds */
-    long tv_usec;       /* microseconds */
-};
-.fi
-.in
-.PP
-.IR times [0]
-specifies the new access time, and
-.IR times [1]
-specifies the new modification time.
+.Fa times
+is
+.Dv NULL ,
+the access and modification times are set to the current time.
+The caller must be the owner of the file, have permission to
+write the file, or be the super-user.
+.Pp
 If
-.I times
-is NULL, then analogously to
-.BR utime (),
-the access and modification times of the file are
-set to the current time.
-.SH "RETURN VALUE"
-On success, zero is returned.
-On error, \-1 is returned, and
-.I errno
-is set appropriately.
-.SH ERRORS
-.TP
-.B EACCES
-Search permission is denied for one of the directories in
-the path prefix of
-.I path
-(see also
-.BR path_resolution (7)).
-.TP
-.B EACCES
-.I times
-is NULL,
-the caller's effective user ID does not match the owner of the file,
-the caller does not have write access to the file,
-and the caller is not privileged
-(Linux: does not have either the
-.B CAP_DAC_OVERRIDE
+.Fa times
+is
+.Pf non- Dv NULL ,
+it is assumed to point to an array of two timeval structures.
+The access time is set to the value of the first element, and the
+modification time is set to the value of the second element.
+The caller must be the owner of the file or be the super-user.
+.Pp
+In either case, the inode-change-time of the file is set to the current
+time.
+.Sh RETURN VALUES
+.Rv -std
+.Sh ERRORS
+The
+.Fn utimes
+system call will fail if:
+.Bl -tag -width Er
+.\" ===========
+.It Bq Er EACCES
+Search permission is denied for a component of the path prefix;
 or the
-.B CAP_FOWNER
-capability).
-.TP
-.B ENOENT
-.I filename
-does not exist.
-.TP
-.B EPERM
-.I times
-is not NULL,
-the caller's effective UID does not match the owner of the file,
-and the caller is not privileged
-(Linux: does not have the
-.B CAP_FOWNER
-capability).
-.TP
-.B EROFS
-.I path
-resides on a read-only file system.
-.SH "CONFORMING TO"
-.BR utime ():
-SVr4, POSIX.1-2001.
-POSIX.1-2008 marks
-.BR utime ()
-as obsolete.
-.br
-.BR utimes ():
-4.3BSD, POSIX.1-2001.
-.SH NOTES
-Linux does not allow changing the timestamps on an immutable file,
-or setting the timestamps to something other than the current time
-on an append-only file.
-
-In libc4 and libc5,
-.BR utimes ()
-is just a wrapper for
-.BR utime ()
-and hence does not allow a subsecond resolution.
-.SH "SEE ALSO"
-.BR chattr (1),
-.BR futimesat (2),
-.BR stat (2),
-.BR utimensat (2),
-.BR futimes (3),
-.BR futimens (3)
-.SH COLOPHON
-This page is part of release 3.27 of the Linux
-.I man-pages
-project.
-A description of the project,
-and information about reporting bugs,
-can be found at
-http://www.kernel.org/doc/man-pages/.
+.Fa times
+argument is
+.Dv NULL
+and the effective user ID of the process does not
+match the owner of the file, and is not the super-user, and write
+access is denied.
+.\" ===========
+.It Bq Er EFAULT
+.Fa path
+or
+.Fa times
+points outside the process's allocated address space.
+.\" ===========
+.It Bq Er EIO
+An I/O error occurs while reading or writing the affected inode.
+.\" ===========
+.It Bq Er ELOOP
+Too many symbolic links are encountered in translating the pathname.
+This is taken to be indicative of a looping symbolic link.
+.\" ===========
+.It Bq Er ENAMETOOLONG
+A component of a pathname exceeds
+.Dv NAME_MAX
+characters, or an entire path name exceeded
+.Dv PATH_MAX
+characters.
+.\" ===========
+.It Bq Er ENOENT
+The named file does not exist.
+.\" ===========
+.It Bq Er ENOTDIR
+A component of the path prefix is not a directory.
+.\" ===========
+.It Bq Er EPERM
+The
+.Fa times
+argument is not
+.Dv NULL
+and the calling process's effective user ID
+does not match the owner of the file and is not the super-user.
+.\" ===========
+.It Bq Er EROFS
+The file system containing the file is mounted read-only.
+.El
+.Pp
+The
+.Fn futimes
+system call will fail if:
+.Bl -tag -width Er
+.\" ===========
+.It Bq Er EBADF
+.Fa fildes
+does not refer to a valid descriptor.
+.El
+.Pp
+All of the functions will fail if:
+.Bl -tag -width Er
+.\" ===========
+.It Bq Er EACCES
+The
+.Fa times
+argument is
+.Dv NULL
+and the effective user ID of the process does not
+match the owner of the file, and is not the super-user, and write
+access is denied.
+.\" ===========
+.It Bq Er EFAULT
+.Fa times
+points outside the process's allocated address space.
+.\" ===========
+.It Bq Er EIO
+An I/O error occurred while reading or writing the affected inode.
+.\" ===========
+.It Bq Er EPERM
+The
+.Fa times
+argument is not
+.Dv NULL
+and the calling process's effective user ID
+does not match the owner of the file and is not the super-user.
+.\" ===========
+.It Bq Er EROFS
+The file system containing the file is mounted read-only.
+.El
+.Sh SEE ALSO
+.Xr stat 2 ,
+.Xr utime 3
+.Sh HISTORY
+The
+.Fn utimes
+function call appeared in
+.Bx 4.2 .
+The
+.Fn futimes
+function call first appeared in
+.Fx 3.0 .

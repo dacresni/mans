@@ -1,142 +1,116 @@
-.\" Hey Emacs! This file is -*- nroff -*- source.
+.\"	$NetBSD: _exit.2,v 1.6 1995/02/27 12:31:34 cgd Exp $
 .\"
-.\" This manpage is Copyright (C) 1992 Drew Eckhardt;
-.\"                               1993 Michael Haardt, Ian Jackson.
+.\" Copyright (c) 1980, 1993
+.\"	The Regents of the University of California.  All rights reserved.
 .\"
-.\" Permission is granted to make and distribute verbatim copies of this
-.\" manual provided the copyright notice and this permission notice are
-.\" preserved on all copies.
+.\" Redistribution and use in source and binary forms, with or without
+.\" modification, are permitted provided that the following conditions
+.\" are met:
+.\" 1. Redistributions of source code must retain the above copyright
+.\"    notice, this list of conditions and the following disclaimer.
+.\" 2. Redistributions in binary form must reproduce the above copyright
+.\"    notice, this list of conditions and the following disclaimer in the
+.\"    documentation and/or other materials provided with the distribution.
+.\" 3. All advertising materials mentioning features or use of this software
+.\"    must display the following acknowledgement:
+.\"	This product includes software developed by the University of
+.\"	California, Berkeley and its contributors.
+.\" 4. Neither the name of the University nor the names of its contributors
+.\"    may be used to endorse or promote products derived from this software
+.\"    without specific prior written permission.
 .\"
-.\" Permission is granted to copy and distribute modified versions of this
-.\" manual under the conditions for verbatim copying, provided that the
-.\" entire resulting derived work is distributed under the terms of a
-.\" permission notice identical to this one.
+.\" THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND
+.\" ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+.\" IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+.\" ARE DISCLAIMED.  IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS BE LIABLE
+.\" FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+.\" DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+.\" OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+.\" HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+.\" LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+.\" OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+.\" SUCH DAMAGE.
 .\"
-.\" Since the Linux kernel and libraries are constantly changing, this
-.\" manual page may be incorrect or out-of-date.  The author(s) assume no
-.\" responsibility for errors or omissions, or for damages resulting from
-.\" the use of the information contained herein.  The author(s) may not
-.\" have taken the same level of care in the production of this manual,
-.\" which is licensed free of charge, as they might when working
-.\" professionally.
+.\"     @(#)_exit.2	8.1 (Berkeley) 6/4/93
 .\"
-.\" Formatted or processed versions of this manual, if unaccompanied by
-.\" the source, must acknowledge the copyright and authors of this work.
-.\"
-.\" Modified Wed Jul 21 23:02:38 1993 by Rik Faith <faith@cs.unc.edu>
-.\" Modified 2001-11-17, aeb
-.\"
-.TH _EXIT 2 2010-09-20 "Linux" "Linux Programmer's Manual"
-.SH NAME
-_exit, _Exit \- terminate the calling process
-.SH SYNOPSIS
-.B #include <unistd.h>
-.sp
-.BI "void _exit(int " status );
-.sp
-.B #include <stdlib.h>
-.sp
-.BI "void _Exit(int " status );
-.sp
-.in -4n
-Feature Test Macro Requirements for glibc (see
-.BR feature_test_macros (7)):
-.in
-.sp
-.ad l
-.BR _Exit ():
-.RS 4
-_XOPEN_SOURCE\ >=\ 600 || _ISOC99_SOURCE ||
-_POSIX_C_SOURCE\ >=\ 200112L;
-.br
-or
-.I cc\ -std=c99
-.ad
-.SH DESCRIPTION
-The function
-.BR _exit ()
-terminates the calling process "immediately".
-Any open file descriptors
-belonging to the process are closed; any children of the process are
-inherited by process 1,
-.IR init ,
-and the process's parent is sent a
-.B SIGCHLD
-signal.
-.LP
-The value
-.I status
-is returned to the parent process as the process's exit status, and
-can be collected using one of the
-.BR wait (2)
-family of calls.
-.LP
-The function
-.BR _Exit ()
-is equivalent to
-.BR _exit ().
-.SH "RETURN VALUE"
-These functions do not return.
-.SH "CONFORMING TO"
-SVr4, POSIX.1-2001, 4.3BSD.
-The function
-.BR _Exit ()
-was introduced by C99.
-.SH NOTES
-For a discussion on the effects of an exit, the transmission of
-exit status, zombie processes, signals sent, etc., see
-.BR exit (3).
-.LP
-The function
-.BR _exit ()
-is like
-.BR exit (3),
-but does not call any
-functions registered with
-.BR atexit (3)
-or
-.BR on_exit (3).
-Whether it flushes
-standard I/O buffers and removes temporary files created with
-.BR tmpfile (3)
-is implementation-dependent.
-On the other hand,
-.BR _exit ()
-does close open file descriptors, and this may cause an unknown delay,
-waiting for pending output to finish.
-If the delay is undesired,
-it may be useful to call functions like
-.BR tcflush (3)
-before calling
-.BR _exit ().
-Whether any pending I/O is canceled, and which pending I/O may be
-canceled upon
-.BR _exit (),
-is implementation-dependent.
-
-In glibc up to version 2.3, the
-.BR _exit ()
-wrapper function invoked the kernel system call of the same name.
-Since glibc 2.3, the wrapper function invokes
-.BR exit_group (2),
-in order to terminate all of the threads in a process.
-.SH "SEE ALSO"
-.BR execve (2),
-.BR exit_group (2),
-.BR fork (2),
-.BR kill (2),
-.BR wait (2),
-.BR wait4 (2),
-.BR waitpid (2),
-.BR atexit (3),
-.BR exit (3),
-.BR on_exit (3),
-.BR termios (3)
-.SH COLOPHON
-This page is part of release 3.27 of the Linux
-.I man-pages
-project.
-A description of the project,
-and information about reporting bugs,
-can be found at
-http://www.kernel.org/doc/man-pages/.
+.Dd June 4, 1993
+.Dt EXIT 2
+.Os BSD 4
+.Sh NAME
+.Nm _exit
+.Nd terminate the calling process
+.Sh SYNOPSIS
+.Fd #include <unistd.h>
+.Ft void
+.Fo _exit
+.Fa "int status"
+.Fc
+.Sh DESCRIPTION
+The
+.Fn _exit
+function
+terminates a process, with the following consequences:
+.Bl -bullet
+.It
+All of the descriptors that were open in the calling process are closed.
+This may entail delays; for example, waiting for output to drain.
+A process in this state may not be killed, as it is already dying.
+.It
+If the parent process of the calling process has an outstanding
+.Xr wait
+call
+or catches the
+.Dv SIGCHLD
+signal,
+it is notified of the calling process's termination;
+the
+.Em status
+is set as defined by
+.Xr wait 2 .
+.It
+The parent process-ID of all of the calling process's existing child
+processes are set to 1; the initialization process
+(see the DEFINITIONS section of
+.Xr intro 2 )
+inherits each of these processes.
+.It
+If the termination of the process causes any process group
+to become orphaned (usually because the parents of all members
+of the group have now exited; see
+.Dq orphaned process group
+in
+.Xr intro 2 ) ,
+and if any member of the orphaned group is stopped,
+the
+.Dv SIGHUP
+signal and the
+.Dv SIGCONT
+signal are sent to all members of the newly-orphaned process group.
+.It
+If the process is a controlling process (see
+.Xr intro 2 ) ,
+the
+.Dv SIGHUP
+signal is sent to the foreground process group of the controlling terminal.
+All current access to the controlling terminal is revoked.
+.El
+.Pp
+Most C programs call the library routine
+.Xr exit 3 ,
+which flushes buffers, closes streams, unlinks temporary files, etc.,
+before
+calling
+.Fn _exit .
+.Sh RETURN VALUE
+.Fn _exit
+can never return.
+.Sh SEE ALSO
+.Xr fork 2 ,
+.Xr sigaction 2 ,
+.Xr wait 2 ,
+.Xr exit 3
+.Sh STANDARDS
+The
+.Nm _exit
+function is defined by
+.St -p1003.1-88 .

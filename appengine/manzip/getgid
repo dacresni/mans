@@ -1,64 +1,92 @@
-.\" Hey Emacs! This file is -*- nroff -*- source.
+.\"	$NetBSD: getgid.2,v 1.5 1995/02/27 12:32:53 cgd Exp $
 .\"
-.\" Copyright 1993 Rickard E. Faith (faith@cs.unc.edu)
+.\" Copyright (c) 1983, 1991, 1993
+.\"	The Regents of the University of California.  All rights reserved.
 .\"
-.\" Permission is granted to make and distribute verbatim copies of this
-.\" manual provided the copyright notice and this permission notice are
-.\" preserved on all copies.
+.\" Redistribution and use in source and binary forms, with or without
+.\" modification, are permitted provided that the following conditions
+.\" are met:
+.\" 1. Redistributions of source code must retain the above copyright
+.\"    notice, this list of conditions and the following disclaimer.
+.\" 2. Redistributions in binary form must reproduce the above copyright
+.\"    notice, this list of conditions and the following disclaimer in the
+.\"    documentation and/or other materials provided with the distribution.
+.\" 3. All advertising materials mentioning features or use of this software
+.\"    must display the following acknowledgement:
+.\"	This product includes software developed by the University of
+.\"	California, Berkeley and its contributors.
+.\" 4. Neither the name of the University nor the names of its contributors
+.\"    may be used to endorse or promote products derived from this software
+.\"    without specific prior written permission.
 .\"
-.\" Permission is granted to copy and distribute modified versions of this
-.\" manual under the conditions for verbatim copying, provided that the
-.\" entire resulting derived work is distributed under the terms of a
-.\" permission notice identical to this one.
+.\" THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND
+.\" ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+.\" IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+.\" ARE DISCLAIMED.  IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS BE LIABLE
+.\" FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+.\" DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+.\" OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+.\" HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+.\" LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+.\" OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+.\" SUCH DAMAGE.
 .\"
-.\" Since the Linux kernel and libraries are constantly changing, this
-.\" manual page may be incorrect or out-of-date.  The author(s) assume no
-.\" responsibility for errors or omissions, or for damages resulting from
-.\" the use of the information contained herein.  The author(s) may not
-.\" have taken the same level of care in the production of this manual,
-.\" which is licensed free of charge, as they might when working
-.\" professionally.
+.\"     @(#)getgid.2	8.1 (Berkeley) 6/4/93
 .\"
-.\" Formatted or processed versions of this manual, if unaccompanied by
-.\" the source, must acknowledge the copyright and authors of this work.
-.\"
-.TH GETGID 2 1993-07-23 "Linux" "Linux Programmer's Manual"
-.SH NAME
-getgid, getegid \- get group identity
-.SH SYNOPSIS
-.B #include <unistd.h>
-.br
-.B #include <sys/types.h>
-.sp
-.B gid_t getgid(void);
-.br
-.B gid_t getegid(void);
-.SH DESCRIPTION
-.BR getgid ()
-returns the real group ID of the calling process.
-
-.BR getegid ()
+.Dd June 4, 1993
+.Dt GETGID 2
+.Os BSD 4.2
+.Sh NAME
+.Nm getegid ,
+.Nm getgid
+.Nd get group process identification
+.Sh SYNOPSIS
+.Fd #include <unistd.h>
+.Ft gid_t
+.Fo getegid
+.Fa void
+.Fc
+.Ft gid_t
+.Fo getgid
+.Fa void
+.Fc
+.Sh DESCRIPTION
+The
+.Fn getgid
+function returns the real group ID of the calling process,
+.Fn getegid
 returns the effective group ID of the calling process.
-
-When a normal program is executed, the effective and real group ID of
-the process are set to the group ID of the user executing the file.
-When a set ID program is executed the real group ID is set to the
-group of the calling user and the effective user ID corresponds to the
-set group ID bit on the file being executed.
-.SH ERRORS
-These functions are always successful.
-.SH "CONFORMING TO"
-POSIX.1-2001, 4.3BSD.
-.SH "SEE ALSO"
-.BR getresgid (2),
-.BR setgid (2),
-.BR setregid (2),
-.BR credentials (7)
-.SH COLOPHON
-This page is part of release 3.27 of the Linux
-.I man-pages
-project.
-A description of the project,
-and information about reporting bugs,
-can be found at
-http://www.kernel.org/doc/man-pages/.
+.Pp
+The real group ID is specified at login time.
+.Pp
+The real group ID is the group of the user who invoked the program.
+As the effective group ID gives the process additional permissions
+during the execution of
+.Dq Em set-group-ID
+mode processes,
+.Fn getgid
+is used to determine the real-user-id of the calling process.
+.Sh ERRORS
+The
+.Fn getgid
+and
+.Fn getegid
+functions are always successful;
+no return value is reserved to indicate an error.
+.Sh LEGACY SYNOPSIS
+.Fd #include <sys/types.h>
+.Fd #include <unistd.h>
+.Pp
+The include file
+.In sys/types.h
+is necessary.
+.Sh SEE ALSO
+.Xr getuid 2 ,
+.Xr setregid 2 ,
+.Xr setgid 3
+.Sh STANDARDS
+.Fn Getgid
+and
+.Fn getegid
+conform to 
+.St -p1003.1-88 .

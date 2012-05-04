@@ -1,250 +1,179 @@
-.\" Hey Emacs! This file is -*- nroff -*- source.
+.\"	$NetBSD: getrusage.2,v 1.4 1995/02/27 12:33:23 cgd Exp $
 .\"
-.\" Copyright (c) 1992 Drew Eckhardt, March 28, 1992
-.\" and Copyright (c) 2002 Michael Kerrisk
+.\" Copyright (c) 1985, 1991, 1993
+.\"	The Regents of the University of California.  All rights reserved.
 .\"
-.\" Permission is granted to make and distribute verbatim copies of this
-.\" manual provided the copyright notice and this permission notice are
-.\" preserved on all copies.
+.\" Redistribution and use in source and binary forms, with or without
+.\" modification, are permitted provided that the following conditions
+.\" are met:
+.\" 1. Redistributions of source code must retain the above copyright
+.\"    notice, this list of conditions and the following disclaimer.
+.\" 2. Redistributions in binary form must reproduce the above copyright
+.\"    notice, this list of conditions and the following disclaimer in the
+.\"    documentation and/or other materials provided with the distribution.
+.\" 3. All advertising materials mentioning features or use of this software
+.\"    must display the following acknowledgement:
+.\"	This product includes software developed by the University of
+.\"	California, Berkeley and its contributors.
+.\" 4. Neither the name of the University nor the names of its contributors
+.\"    may be used to endorse or promote products derived from this software
+.\"    without specific prior written permission.
 .\"
-.\" Permission is granted to copy and distribute modified versions of this
-.\" manual under the conditions for verbatim copying, provided that the
-.\" entire resulting derived work is distributed under the terms of a
-.\" permission notice identical to this one.
+.\" THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND
+.\" ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+.\" IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+.\" ARE DISCLAIMED.  IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS BE LIABLE
+.\" FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+.\" DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+.\" OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+.\" HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+.\" LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+.\" OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+.\" SUCH DAMAGE.
 .\"
-.\" Since the Linux kernel and libraries are constantly changing, this
-.\" manual page may be incorrect or out-of-date.  The author(s) assume no
-.\" responsibility for errors or omissions, or for damages resulting from
-.\" the use of the information contained herein.  The author(s) may not
-.\" have taken the same level of care in the production of this manual,
-.\" which is licensed free of charge, as they might when working
-.\" professionally.
+.\"     @(#)getrusage.2	8.1 (Berkeley) 6/4/93
 .\"
-.\" Formatted or processed versions of this manual, if unaccompanied by
-.\" the source, must acknowledge the copyright and authors of this work.
-.\"
-.\" 2004-11-16 -- mtk: the getrlimit.2 page, which formerly included
-.\" coverage of getrusage(2), has been split, so that the latter is
-.\" now covered in its own getrusage.2.  For older details of change
-.\" history, etc., see getrlimit.2
-.\"
-.\" Modified 2004-11-16, mtk, Noted that the nonconformance
-.\"	when SIGCHLD is being ignored is fixed in 2.6.9.
-.\" 2008-02-22, Sripathi Kodi <sripathik@in.ibm.com>: Document RUSAGE_THREAD
-.\" 2008-05-25, mtk, clarify RUSAGE_CHILDREN + other clean-ups.
-.\" 2010-05-24, Mark Hills <mark@pogo.org.uk>: Description of fields,
-.\"     document ru_maxrss
-.\" 2010-05-24, mtk, enhanced description of various fields
-.\"
-.TH GETRUSAGE 2 2010-06-14 "Linux" "Linux Programmer's Manual"
-.SH NAME
-getrusage \- get resource usage
-.SH SYNOPSIS
-.B #include <sys/time.h>
-.br
-.B #include <sys/resource.h>
-.sp
-.BI "int getrusage(int " who ", struct rusage *" usage );
-.SH DESCRIPTION
-.PP
-.BR getrusage ()
-returns resource usage measures for
-.IR who ,
-which can be one of the following:
-.TP
-.B RUSAGE_SELF
-Return resource usage statistics for the calling process,
-which is the sum of resources used by all threads in the process.
-.TP
-.B RUSAGE_CHILDREN
-Return resource usage statistics for all children of the
-calling process that have terminated and been waited for.
-These statistics will include the resources used by grandchildren,
-and further removed descendants,
-if all of the intervening descendants waited on their terminated children.
-.TP
-.BR RUSAGE_THREAD " (since Linux 2.6.26)"
-Return resource usage statistics for the calling thread.
-.PP
-The resource usages are returned in the structure pointed to by
-.IR usage ,
-which has the following form:
-.PP
-.in +4n
-.nf
+.Dd June 4, 1993
+.Dt GETRUSAGE 2
+.Os BSD 4
+.Sh NAME
+.Nm getrusage
+.Nd get information about resource utilization
+.Sh SYNOPSIS
+.Fd #include <sys/resource.h>
+.Pp
+.Fd #define	RUSAGE_SELF	 0
+.Fd #define	RUSAGE_CHILDREN	-1
+.Ft int
+.Fo getrusage
+.Fa "int who"
+.Fa "struct rusage *r_usage"
+.Fc
+.Sh DESCRIPTION
+.Fn Getrusage
+returns information describing the resources utilized by the current
+process, or all its terminated child processes.
+The
+.Fa who
+parameter is either
+.Dv RUSAGE_SELF
+or
+.Dv RUSAGE_CHILDREN .
+The buffer to which
+.Fa r_usage
+points will be filled in with
+the following structure:
+.Bd -literal
 struct rusage {
-    struct timeval ru_utime; /* user CPU time used */
-    struct timeval ru_stime; /* system CPU time used */
-    long   ru_maxrss;        /* maximum resident set size */
-    long   ru_ixrss;         /* integral shared memory size */
-    long   ru_idrss;         /* integral unshared data size */
-    long   ru_isrss;         /* integral unshared stack size */
-    long   ru_minflt;        /* page reclaims (soft page faults) */
-    long   ru_majflt;        /* page faults (hard page faults) */
-    long   ru_nswap;         /* swaps */
-    long   ru_inblock;       /* block input operations */
-    long   ru_oublock;       /* block output operations */
-    long   ru_msgsnd;        /* IPC messages sent */
-    long   ru_msgrcv;        /* IPC messages received */
-    long   ru_nsignals;      /* signals received */
-    long   ru_nvcsw;         /* voluntary context switches */
-    long   ru_nivcsw;        /* involuntary context switches */
+        struct timeval ru_utime; /* user time used */
+        struct timeval ru_stime; /* system time used */
+        long ru_maxrss;          /* integral max resident set size */
+        long ru_ixrss;           /* integral shared text memory size */
+        long ru_idrss;           /* integral unshared data size */
+        long ru_isrss;           /* integral unshared stack size */
+        long ru_minflt;          /* page reclaims */
+        long ru_majflt;          /* page faults */
+        long ru_nswap;           /* swaps */
+        long ru_inblock;         /* block input operations */
+        long ru_oublock;         /* block output operations */
+        long ru_msgsnd;          /* messages sent */
+        long ru_msgrcv;          /* messages received */
+        long ru_nsignals;        /* signals received */
+        long ru_nvcsw;           /* voluntary context switches */
+        long ru_nivcsw;          /* involuntary context switches */
 };
-.fi
-.in
-.PP
-Not all fields are completed;
-unmaintained fields are set to zero by the kernel.
-(The unmaintained fields are provided for compatibility with other systems,
-and because they may one day be supported on Linux.)
+.Ed
+.Pp
 The fields are interpreted as follows:
-.TP
-.I ru_utime
-This is the total amount of time spent executing in user mode,
-expressed in a
-.I timeval
-structure (seconds plus microseconds).
-.TP
-.I ru_stime
-This is the total amount of time spent executing in kernel mode,
-expressed in a
-.I timeval
-structure (seconds plus microseconds).
-.TP
-.IR ru_maxrss " (since Linux 2.6.32)"
-This is the maximum resident set size used (in kilobytes). For
-.BR RUSAGE_CHILDREN ,
-this is the resident set size of the largest child, not the maximum
-resident set size of the process tree.
-.TP
-.IR ru_ixrss " (unmaintained)"
-This field is currently unused on Linux.
-.\" On some systems,
-.\" this is the integral of the text segment memory consumption,
-.\" expressed in kilobyte-seconds.
-.TP
-.IR ru_idrss " (unmaintained)"
-This field is currently unused on Linux.
-.\" On some systems, this is the integral of the data segment memory consumption,
-.\" expressed in kilobyte-seconds.
-.TP
-.IR ru_isrss " (unmaintained)"
-This field is currently unused on Linux.
-.\" On some systems, this is the integral of the stack memory consumption,
-.\" expressed in kilobyte-seconds.
-.TP
-.I ru_minflt
-The number of page faults serviced without any I/O activity; here
+.Bl -tag -width ru_minfltaa
+.It Fa ru_utime
+the total amount of time spent executing in user mode.
+.It Fa ru_stime
+the total amount of time spent in the system executing on behalf
+of the process(es).
+.It Fa ru_maxrss
+the maximum resident set size utilized (in kilobytes).
+.It Fa ru_ixrss
+an \*(lqintegral\*(rq value indicating the amount of memory used
+by the text segment
+that was also shared among other processes.  This value is expressed
+in units of kilobytes * ticks-of-execution.
+.It Fa ru_idrss
+an integral value of the amount of unshared memory residing in the
+data segment of a process (expressed in units of
+kilobytes * ticks-of-execution).
+.It Fa ru_isrss
+an integral value of the amount of unshared memory residing in the
+stack segment of a process (expressed in units of
+kilobytes * ticks-of-execution).
+.It Fa ru_minflt
+the number of page faults serviced without any I/O activity; here
 I/O activity is avoided by \*(lqreclaiming\*(rq a page frame from
 the list of pages awaiting reallocation.
-.TP
-.I ru_majflt
-The number of page faults serviced that required I/O activity.
-.TP
-.IR ru_nswap  " (unmaintained)"
-This field is currently unused on Linux.
-.\" On some systems, this is the number of swaps out of physical memory.
-.TP
-.IR ru_inblock " (since Linux 2.6.22)"
-The number of times the file system had to perform input.
-.TP
-.IR ru_oublock " (since Linux 2.6.22)"
-The number of times the file system had to perform output.
-.TP
-.IR ru_msgsnd " (unmaintained)"
-This field is currently unused on Linux.
-.\" On FreeBSD 6.2, this appears to measure messages sent over sockets
-.\" On some systems,
-.\" this field records the number of messages sent over sockets.
-.TP
-.IR ru_msgrcv " (unmaintained)"
-This field is currently unused on Linux.
-.\" On FreeBSD 6.2, this appears to measure messages received over sockets
-.\" On some systems,
-.\" this field records the number of messages received over sockets.
-.TP
-.IR ru_nsignals " (unmaintained)"
-This field is currently unused on Linux.
-.\" On some systems, this field records the number of signals received.
-.TP
-.IR ru_nvcsw " (since Linux 2.6)"
-The number of times a context switch resulted due to a process
+.It Fa ru_majflt
+the number of page faults serviced that required I/O activity.
+.It Fa ru_nswap
+the number of times a process was \*(lqswapped\*(rq out of main
+memory.
+.It Fa ru_inblock
+the number of times the file system had to perform input.
+.It Fa ru_oublock
+the number of times the file system had to perform output.
+.It Fa ru_msgsnd
+the number of IPC messages sent.
+.It Fa ru_msgrcv
+the number of IPC messages received.
+.It Fa ru_nsignals
+the number of signals delivered.
+.It Fa ru_nvcsw
+the number of times a context switch resulted due to a process
 voluntarily giving up the processor before its time slice was
 completed (usually to await availability of a resource).
-.TP
-.IR ru_nivcsw " (since Linux 2.6)"
-The number of times a context switch resulted due to a higher
+.It Fa ru_nivcsw
+the number of times a context switch resulted due to a higher
 priority process becoming runnable or because the current process
 exceeded its time slice.
-.PP
-.SH "RETURN VALUE"
-On success, zero is returned.
-On error, \-1 is returned, and
-.I errno
-is set appropriately.
-.SH ERRORS
-.TP
-.B EFAULT
-.I usage
-points outside the accessible address space.
-.TP
-.B EINVAL
-.I who
-is invalid.
-.SH "CONFORMING TO"
-SVr4, 4.3BSD.
-POSIX.1-2001 specifies
-.BR getrusage (),
-but only specifies the fields
-.I ru_utime
-and
-.IR ru_stime .
-
-.B RUSAGE_THREAD
-is Linux-specific.
-.SH NOTES
-Resource usage metrics are preserved across an
-.BR execve (2).
-
-Including
-.I <sys/time.h>
-is not required these days, but increases portability.
-(Indeed,
-.I struct timeval
-is defined in
-.IR <sys/time.h> .)
-.PP
-In Linux kernel versions before 2.6.9, if the disposition of
-.B SIGCHLD
-is set to
-.B SIG_IGN
-then the resource usages of child processes
-are automatically included in the value returned by
-.BR RUSAGE_CHILDREN ,
-although POSIX.1-2001 explicitly prohibits this.
-This nonconformance is rectified in Linux 2.6.9 and later.
-.\" See the description of getrusage() in XSH.
-.\" A similar statement was also in SUSv2.
-.LP
-The structure definition shown at the start of this page
-was taken from 4.3BSD Reno.
-
-See also the description of
-.IR /proc/PID/stat
-in
-.BR proc (5).
-.SH "SEE ALSO"
-.BR clock_gettime (2),
-.BR getrlimit (2),
-.BR times (2),
-.BR wait (2),
-.BR wait4 (2),
-.BR clock (3)
-.SH COLOPHON
-This page is part of release 3.27 of the Linux
-.I man-pages
-project.
-A description of the project,
-and information about reporting bugs,
-can be found at
-http://www.kernel.org/doc/man-pages/.
+.El
+.Sh NOTES
+The numbers 
+.Fa ru_inblock
+and 
+.Fa ru_oublock
+account only for real
+I/O; data supplied by the caching mechanism is charged only
+to the first process to read or write the data.
+.Sh RETURN VALUES
+.Rv -std getrusage
+.Sh ERRORS
+The
+.Fn getrusage
+system call will fail if:
+.Bl -tag -width Er
+.It Bq Er EFAULT
+The address specified by the
+.Fa r_usage
+parameter is not in a valid part of the process address space.
+.It Bq Er EINVAL
+The
+.Fa who
+parameter is not a valid value.
+.El
+.Sh LEGACY SYNOPSIS
+.Fd #include <sys/time.h>
+.Fd #include <sys/resource.h>
+.Pp
+The include file
+.In sys/time.h
+is necessary.
+.Sh SEE ALSO
+.Xr gettimeofday 2 ,
+.Xr wait 2 ,
+.Xr compat 5
+.Sh BUGS
+There is no way to obtain information about a child process
+that has not yet terminated.
+.Sh HISTORY
+The
+.Fn getrusage
+function call appeared in
+.Bx 4.2 .
