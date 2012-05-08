@@ -8,14 +8,13 @@ def names():
     for page in os.listdir(mandir):
         manname = page.split(".")[0]
         #command = "man 2 %s| col"%(manname) 
-        command = "zcat %s"%("".join([mandir,page]))
+        command = "gzip  -cd %s"%("".join([mandir,page]))
         print command
-        p = Popen(command, shell=True, stdout=PIPE,stderr=STDOUT )
+        p = Popen(command, shell=True, stdout=PIPE, stderr=STDOUT)
         mantext= p.communicate()[0]
         #filenam = "".join([manname, ".txt" ])
         filenam = "manzip/%s"%(manname)
         print filenam 
-
         phage = file(filenam, 'w' )
         phage.write(mantext)
         phage.close()
