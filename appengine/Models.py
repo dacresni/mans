@@ -13,8 +13,12 @@ class Function(db.Model):
     name = db.StringProperty(required=True)
     #params = db.StringProperty()
     #I've been considering the utility of a parameter list for a while
-    headers = db.StringList(required=Ture)
-    manual = db.Reference(Manual)
+    manual = db.ReferenceProperty(Manual,collection_name="functions")
+
+class Header(db.Model):
+    name = db.StringProperty(required = True) 
+    manuals = db.ListProperty(db.Key)
+
 
 
 
