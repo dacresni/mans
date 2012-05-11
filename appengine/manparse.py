@@ -7,41 +7,41 @@ name_pattern=re.compile(r"^.Nm",re.DEBUG)
 date_string=re.compile(r"^.Dd",re.DEBUG)
 headder_pattern=re.compile( r"^.Fd"re.DEBUG)
 function_name_pattern=re.compile(r"^.BR"re.DEBUG)
-patterns = { "name":name_pattern,
-        "date": date_string, 
-        "headder":headder_pattern,
-        "function":function_name_pattern }
 
-docstring=   """ takes a block of text and a dictionary{"name":pattern}  of compiled regex patterns returns a {name:results} dictionary
-def scan(block):
-    """
+
 def scan(file):
-        result = {"name":"",
-                "date","",
-                "headder":[],
-                "function":[]
-                "whatis":""}
-        for line in file:
-            if line.beginswith(".Dd")
-               result["date"]=line
-            if line.beginswith(".Nm")
-               result["name"]=line
-            if line.beginswith(".Nd")
-               result["whatis"]=line
-            if line.beginswith(".Fo")
-               result["function"].append(line)
-            if line.beginswith(".In")
-               result["headder"].append(line)
-
+    man = Manual()
+    funct_list = []
+    header_list = []
+    for line in file:
+        if line.beginswith(".Dd")
+           man.date=line
+        if line.beginswith(".Nm")
+           man.name=line
+        if line.beginswith(".Nd")
+           man.whatis=line
+        if line.beginswith(".Fo")
+           funct_list.append(line)
+        if line.beginswith(".Fd")
+           header_list.append(line.split()[2])
+    mankey = man.put()
+    for f in funct_list:
+        funct = Function(name=f,manual=man).put()
+    for h in header_list :
+        head = Header.gql("WHERE name = :n" n=h)
+        if head:
+            head.append(mankey)
+            head.put()
+        else:
+            head = Header(name=h)
+            head.manuals.append(k)
+            head.put()
 
 def names():
     for page in os.listdir("."):
         manname = page.split(".")[0]
         man = open(manname, 'r')
-        scan(man))
-        #newman = Manual(manname,)
-#action 
-
+        scan(man)
 
 if __name__ == '__main__' :
     names()
