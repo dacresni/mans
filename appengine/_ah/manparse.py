@@ -16,7 +16,7 @@ def scan(file):
     for line in file:
         if line.beginswith(".Dd")
            man.date=line
-        if line.beginswith(".Nm")
+        if line.beginswith(".Dt") #note this is the manual's name, see brk sbrk
            man.name=line
         if line.beginswith(".Nd")
            man.whatis=line
@@ -38,7 +38,6 @@ def scan(file):
             head.put()
 
 def names():
-    for page in os.listdir("."):
         manname = page.split(".")[0]
         man = open(manname, 'r')
         scan(man)

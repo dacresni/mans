@@ -6,15 +6,22 @@ threadsafe: true
 
 
 handlers:
-- url: /.*
-  script: main.py
+- url: / 
+  static_files: index.html
+  upload: index.html
+
+- url: /index.html 
+  static_files: index.html
+  upload: index.html
+
+
 
 - url: /mantext
   static_dir: mantext
 
-- url: /static
+- url: /media/
   static_dir: media
 
 libraries:
 - name: jinja2
-  version: "1.2"
+  version: "2.6"
